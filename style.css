@@ -25,92 +25,29 @@ html {
     overflow-x: hidden;
 }
 
-/* ==================== SVG 圖案背景 ==================== */
+/* ==================== Vanta Fog 背景 ==================== */
 body {
     font-family: 'Noto Sans TC', sans-serif;
     line-height: 1.8;
     color: var(--dark);
     overflow-x: hidden;
-    background-color: var(--light-purple);
-    /* background-image: url("data:image/svg+xml,<svg id='patternId' width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'><defs><pattern id='a' patternUnits='userSpaceOnUse' width='58' height='87' patternTransform='scale(1) rotate(10)'><rect x='0' y='0' width='100%' height='100%' fill='%23ffffff00'/><path d='M43.5 5.829a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25zm-25.057 5.67a2.125 2.125 0 1 0 0 4.251 2.125 2.125 0 0 0 0-4.25zM14.5 49.33a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25zM47.443 55a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25z'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23c5a4f8ff' fill='none'/><path d='M9.75 36.005h-4.5m2.25-2.25v4.5m35.572-12.63h-4.5m2.25-2.25v4.5m-26.75 41.25h-4.5m2.25-2.25v4.5m26.928 8.13h-4.5m2.25-2.25v4.5'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23d4af37ff' fill='none'/><path d='m9.123-3.597-.005.002A5.258 5.258 0 0 0 7.581-7.1a5.283 5.283 0 0 0-7.47 0L0-6.99l-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.002s-.899 5.66 9.112 11.543l.008.008c.001 0 .002 0 .002-.002l.002.002.008-.008C10.022 2.063 9.123-3.597 9.123-3.597zm58 0-.005.002A5.258 5.258 0 0 0 65.582-7.1a5.283 5.283 0 0 0-7.471 0L58-6.99l-.11-.11a5.283 5.283 0 0 0-7.471 0 5.258 5.258 0 0 0-1.537 3.505l-.006-.002s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008C68.02 2.063 67.122-3.597 67.122-3.597zm-29 43.5-.005.002a5.258 5.258 0 0 0-1.536-3.505 5.283 5.283 0 0 0-7.471 0l-.111.11-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.002s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008c10.012-5.883 9.113-11.543 9.113-11.543zm-29 43.5h-.005A5.258 5.258 0 0 0 7.581 79.9a5.283 5.283 0 0 0-7.47 0L0 80.01l-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.001s-.899 5.66 9.112 11.543l.008.008c.001 0 .002 0 .002-.002l.002.002.008-.008c10.013-5.883 9.114-11.543 9.114-11.543zm58 0h-.005a5.258 5.258 0 0 0-1.536-3.504 5.283 5.283 0 0 0-7.471 0l-.111.11-.11-.11a5.283 5.283 0 0 0-7.471 0 5.258 5.258 0 0 0-1.537 3.505l-.006-.001s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008c10.012-5.883 9.113-11.543 9.113-11.543z'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23f4c3e6ff' fill='none'/></pattern></defs><rect width='800%' height='800%' transform='translate(0,0)' fill='url(%23a)'/></svg>"); */
-    background-attachment: fixed;
-    background-image: url('https://www.mightymedia.co.jp/hellokitty.tw/assets/common_imag.png');
-    background-size:50%;
-    z-index:5;
+    background-color: transparent;
 }
 
-/* 固定 SVG 背景層 */
+/* Vanta 固定背景容器 */
+#vanta-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* 固定 SVG 背景層（停用） */
 #svg-bg {
     display: none;
 }
-
-/* ── 圓點：淡入淡出閃爍 ── */
-#svg-bg .dot {
-    animation: dotTwinkle var(--dur, 3s) ease-in-out infinite;
-    animation-delay: var(--delay, 0s);
-    transform-origin: center;
-    transform-box: fill-box;
-}
-
-@keyframes dotTwinkle {
-
-    0%,
-    100% {
-        opacity: 0.35;
-        r: 2.125px;
-    }
-
-    50% {
-        opacity: 1;
-        r: 3px;
-    }
-}
-
-/* ── 十字：緩慢旋轉 ── */
-#svg-bg .cross {
-    animation: crossSpin var(--dur, 8s) linear infinite;
-    animation-delay: var(--delay, 0s);
-    transform-origin: center;
-    transform-box: fill-box;
-}
-
-@keyframes crossSpin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* ── 愛心：跳動縮放 ── */
-#svg-bg .heart {
-    animation: heartPulse var(--dur, 2s) ease-in-out infinite;
-    animation-delay: var(--delay, 0s);
-    transform-origin: center;
-    transform-box: fill-box;
-}
-
-@keyframes heartPulse {
-
-    0%,
-    100% {
-        transform: scale(1);
-        opacity: 0.55;
-    }
-
-    30% {
-        transform: scale(1.25);
-        opacity: 1;
-    }
-
-    60% {
-        transform: scale(0.95);
-        opacity: 0.7;
-    }
-}
-
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -529,122 +466,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
-}
-
-/* 動態背景（保留原有的） */
-.hero-bg-animated {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-}
-
-.gradient-bg {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg,
-            #c5d8f5 0%,
-            #cbbef5 50%,
-            #d4c5f5 100%);
-    animation: gradientShift 15s ease infinite;
-}
-
-@keyframes gradientShift {
-
-    0%,
-    100% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-}
-
-/* 漂浮形狀（保留原有的） */
-.floating-shapes {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-.shape {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0.3;
-    animation: float 20s infinite;
-}
-
-.shape-1 {
-    width: 300px;
-    height: 300px;
-    background: rgba(197, 164, 248, 0.45);
-    top: 10%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.shape-2 {
-    width: 200px;
-    height: 200px;
-    background: rgba(237, 224, 255, 0.45);
-    top: 60%;
-    right: 10%;
-    animation-delay: 2s;
-}
-
-.shape-3 {
-    width: 250px;
-    height: 250px;
-    background: rgba(184, 200, 240, 0.45);
-    bottom: 10%;
-    left: 20%;
-    animation-delay: 4s;
-}
-
-.shape-4 {
-    width: 180px;
-    height: 180px;
-    background: rgba(167, 139, 250, 0.45);
-    top: 30%;
-    right: 30%;
-    animation-delay: 6s;
-}
-
-.shape-5 {
-    width: 220px;
-    height: 220px;
-    background: rgba(143, 168, 216, 0.4);
-    bottom: 30%;
-    right: 20%;
-    animation-delay: 8s;
-}
-
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translate(0, 0) rotate(0deg);
-    }
-
-    25% {
-        transform: translate(50px, 50px) rotate(90deg);
-    }
-
-    50% {
-        transform: translate(0, 100px) rotate(180deg);
-    }
-
-    75% {
-        transform: translate(-50px, 50px) rotate(270deg);
-    }
+    background: transparent;
 }
 
 /* Canva 圖片容器 */
@@ -1101,7 +923,6 @@ a {
 .date-section {
     background: transparent;
     position: relative;
-    overflow: hidden;
 }
 
 .date-content {
@@ -1159,26 +980,6 @@ a {
 .schedule-card::after {
     border-radius: 25px;
     z-index: 2;
-}
-
-/* 角落裝飾（共用） */
-.date-card-inner .corner-tl,
-.date-card-inner .corner-tr,
-.date-card-inner .corner-bl,
-.date-card-inner .corner-br,
-.location-card-inner .corner-tl,
-.location-card-inner .corner-tr,
-.location-card-inner .corner-bl,
-.location-card-inner .corner-br,
-.schedule-card .corner-tl,
-.schedule-card .corner-tr,
-.schedule-card .corner-bl,
-.schedule-card .corner-br {
-    position: absolute;
-    font-size: 1.1rem;
-    color: rgba(212, 175, 55, 0.7);
-    line-height: 1;
-    pointer-events: none;
 }
 
 @keyframes borderShimmer {
@@ -1878,7 +1679,7 @@ a {
 
 .date-card:hover .card-glow,
 .location-card:hover .card-glow {
-    opacity: 0.6;
+    opacity: 0;
 }
 
 @keyframes glowRotate {
@@ -2082,11 +1883,10 @@ section {
 
 /* ==================== 頁尾 ==================== */
 footer {
-    background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
-    color: white;
+    background: transparent;
+    color: var(--dark);
     padding: 80px 20px 40px;
     position: relative;
-    overflow: hidden;
 }
 
 .footer-decoration {
@@ -2131,10 +1931,8 @@ footer {
     font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 700;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, white, var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--dark);
+    -webkit-text-fill-color: unset;
 }
 
 .footer-sub {
@@ -2153,7 +1951,7 @@ footer {
 .footer-divider {
     width: 100px;
     height: 2px;
-    background: linear-gradient(to right, transparent, white, transparent);
+    background: linear-gradient(to right, transparent, var(--primary), transparent);
     margin: 30px auto;
 }
 

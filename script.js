@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     easing: 'ease-out-cubic',
   });
 
+  initVantaBg();
   initLoader();
   initPetals();
   initGallery();
@@ -16,6 +17,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   console.log('💕 電子喜帖載入完成！');
 });
+
+// ==================== Vanta Fog 背景 ====================
+function initVantaBg() {
+  if (typeof VANTA === 'undefined' || typeof VANTA.FOG === 'undefined') return;
+
+  VANTA.FOG({
+    el: '#vanta-bg',
+    mouseControls: true,
+    touchControls: true,
+    gyroControls: false,
+    // 色系：以網頁的紫色、藍紫、玫瑰金為主
+    highlightColor: 0xf0d6ff,   // 淡薰衣草紫（亮部）
+    midtoneColor:   0xc5a4f8,   // 主紫色（中間調）
+    lowlightColor:  0x8fa8d8,   // 藍紫（暗部）
+    baseColor:      0xf5eeff,   // 極淡紫白（底色）
+    blurFactor:     0.62,       // 霧感模糊程度
+    speed:          1.2,        // 流動速度（慢一點更浪漫）
+    zoom:           0.8,        // 縮放（稍微拉遠讓霧更大片）
+  });
+}
 
 // ==================== 載入畫面 ====================
 function initLoader() {
