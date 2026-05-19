@@ -32,12 +32,11 @@ body {
     color: var(--dark);
     overflow-x: hidden;
     background-color: var(--light-purple);
-    /* background-image: url("data:image/svg+xml,...舊版..."); */
-    background-image: url("data:image/svg+xml,<svg id='patternId' width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'><defs><pattern id='a' patternUnits='userSpaceOnUse' width='58' height='87' patternTransform='scale(4) rotate(10)'><rect x='0' y='0' width='100%' height='100%' fill='%23ffffff00'/><path d='M43.5 5.829a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25zm-25.057 5.67a2.125 2.125 0 1 0 0 4.251 2.125 2.125 0 0 0 0-4.25zM14.5 49.33a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25zM47.443 55a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25z'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23c5a4f8ff' fill='none'/><path d='M9.75 36.005h-4.5m2.25-2.25v4.5m35.572-12.63h-4.5m2.25-2.25v4.5m-26.75 41.25h-4.5m2.25-2.25v4.5m26.928 8.13h-4.5m2.25-2.25v4.5'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23d4af37ff' fill='none'/><path d='m9.123-3.597-.005.002A5.258 5.258 0 0 0 7.581-7.1a5.283 5.283 0 0 0-7.47 0L0-6.99l-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.002s-.899 5.66 9.112 11.543l.008.008c.001 0 .002 0 .002-.002l.002.002.008-.008C10.022 2.063 9.123-3.597 9.123-3.597zm58 0-.005.002A5.258 5.258 0 0 0 65.582-7.1a5.283 5.283 0 0 0-7.471 0L58-6.99l-.11-.11a5.283 5.283 0 0 0-7.471 0 5.258 5.258 0 0 0-1.537 3.505l-.006-.002s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008C68.02 2.063 67.122-3.597 67.122-3.597zm-29 43.5-.005.002a5.258 5.258 0 0 0-1.536-3.505 5.283 5.283 0 0 0-7.471 0l-.111.11-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.002s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008c10.012-5.883 9.113-11.543 9.113-11.543zm-29 43.5h-.005A5.258 5.258 0 0 0 7.581 79.9a5.283 5.283 0 0 0-7.47 0L0 80.01l-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.001s-.899 5.66 9.112 11.543l.008.008c.001 0 .002 0 .002-.002l.002.002.008-.008c10.013-5.883 9.114-11.543 9.114-11.543zm58 0h-.005a5.258 5.258 0 0 0-1.536-3.504 5.283 5.283 0 0 0-7.471 0l-.111.11-.11-.11a5.283 5.283 0 0 0-7.471 0 5.258 5.258 0 0 0-1.537 3.505l-.006-.001s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008c10.012-5.883 9.113-11.543 9.113-11.543z'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23f4c3e6ff' fill='none'/></pattern></defs><rect width='800%' height='800%' transform='translate(0,0)' fill='url(%23a)'/></svg>");
+    /* background-image: url("data:image/svg+xml,<svg id='patternId' width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'><defs><pattern id='a' patternUnits='userSpaceOnUse' width='58' height='87' patternTransform='scale(1) rotate(10)'><rect x='0' y='0' width='100%' height='100%' fill='%23ffffff00'/><path d='M43.5 5.829a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25zm-25.057 5.67a2.125 2.125 0 1 0 0 4.251 2.125 2.125 0 0 0 0-4.25zM14.5 49.33a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25zM47.443 55a2.125 2.125 0 1 0 0 4.25 2.125 2.125 0 0 0 0-4.25z'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23c5a4f8ff' fill='none'/><path d='M9.75 36.005h-4.5m2.25-2.25v4.5m35.572-12.63h-4.5m2.25-2.25v4.5m-26.75 41.25h-4.5m2.25-2.25v4.5m26.928 8.13h-4.5m2.25-2.25v4.5'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23d4af37ff' fill='none'/><path d='m9.123-3.597-.005.002A5.258 5.258 0 0 0 7.581-7.1a5.283 5.283 0 0 0-7.47 0L0-6.99l-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.002s-.899 5.66 9.112 11.543l.008.008c.001 0 .002 0 .002-.002l.002.002.008-.008C10.022 2.063 9.123-3.597 9.123-3.597zm58 0-.005.002A5.258 5.258 0 0 0 65.582-7.1a5.283 5.283 0 0 0-7.471 0L58-6.99l-.11-.11a5.283 5.283 0 0 0-7.471 0 5.258 5.258 0 0 0-1.537 3.505l-.006-.002s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008C68.02 2.063 67.122-3.597 67.122-3.597zm-29 43.5-.005.002a5.258 5.258 0 0 0-1.536-3.505 5.283 5.283 0 0 0-7.471 0l-.111.11-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.002s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008c10.012-5.883 9.113-11.543 9.113-11.543zm-29 43.5h-.005A5.258 5.258 0 0 0 7.581 79.9a5.283 5.283 0 0 0-7.47 0L0 80.01l-.11-.11a5.283 5.283 0 0 0-7.472 0 5.258 5.258 0 0 0-1.536 3.505l-.005-.001s-.899 5.66 9.112 11.543l.008.008c.001 0 .002 0 .002-.002l.002.002.008-.008c10.013-5.883 9.114-11.543 9.114-11.543zm58 0h-.005a5.258 5.258 0 0 0-1.536-3.504 5.283 5.283 0 0 0-7.471 0l-.111.11-.11-.11a5.283 5.283 0 0 0-7.471 0 5.258 5.258 0 0 0-1.537 3.505l-.006-.001s-.899 5.66 9.113 11.543l.008.008s.002 0 .002-.002l.002.002.008-.008c10.012-5.883 9.113-11.543 9.113-11.543z'  stroke-linejoin='round' stroke-linecap='round' stroke-width='1.5' stroke='%23f4c3e6ff' fill='none'/></pattern></defs><rect width='800%' height='800%' transform='translate(0,0)' fill='url(%23a)'/></svg>"); */
     background-attachment: fixed;
-    /* background-image: url('https://www.mightymedia.co.jp/hellokitty.tw/assets/common_imag.png');
+    background-image: url('https://www.mightymedia.co.jp/hellokitty.tw/assets/common_imag.png');
     background-size:50%;
-    z-index:5; */
+    z-index:5;
 }
 
 /* 固定 SVG 背景層 */
@@ -1622,6 +1621,7 @@ a {
             var(--secondary) 50%,
             var(--accent) 100%);
     border-radius: 2px;
+    box-shadow: 0 0 12px rgba(197, 164, 248, 0.6), 0 0 24px rgba(197, 164, 248, 0.3);
 }
 
 .schedule-item {
@@ -1652,7 +1652,10 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 10px 30px rgba(197, 164, 248, 0.35);
+    box-shadow:
+        0 10px 30px rgba(197, 164, 248, 0.55),
+        0 0 0 4px rgba(255, 255, 255, 0.7),
+        0 0 0 7px rgba(197, 164, 248, 0.25);
     position: relative;
     z-index: 2;
 }
@@ -1704,7 +1707,9 @@ a {
 }
 
 .schedule-card {
-    background: linear-gradient(135deg, #e0edff, #f0f5ff);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border-radius: 25px;
     padding: 40px 35px;
     position: relative;
@@ -1712,6 +1717,8 @@ a {
     width: 100%;
     overflow: visible;
     isolation: isolate;
+    box-shadow: 0 8px 32px rgba(197, 164, 248, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .schedule-card:hover {
@@ -1910,17 +1917,94 @@ a {
 .section-header {
     text-align: center;
     margin-bottom: 50px;
+    position: relative;
+    padding: 32px 50px 26px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 20px;
+    box-shadow:
+        0 4px 24px rgba(197, 164, 248, 0.18),
+        0 1px 4px rgba(212, 175, 55, 0.12);
+    display: inline-block;
+    width: 100%;
 }
+
+/* 流光漸層邊框 */
+.section-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(
+        135deg,
+        #d4af37 0%,
+        #f5e6a3 18%,
+        #e8b4d8 36%,
+        #c5a4f8 50%,
+        #e8b4d8 64%,
+        #f5e6a3 82%,
+        #d4af37 100%
+    );
+    background-size: 300% 300%;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: borderShimmer 4s ease infinite;
+    pointer-events: none;
+}
+
+/* 四角愛心裝飾 */
+.section-header::after {
+    content: '♥ ✦ ♥';
+    position: absolute;
+    bottom: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 2px 14px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    letter-spacing: 6px;
+    color: #d4af37;
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* 左上角裝飾 */
+.section-header .corner-tl-deco,
+.section-header .corner-tr-deco,
+.section-header .corner-bl-deco,
+.section-header .corner-br-deco {
+    position: absolute;
+    font-size: 1rem;
+    color: rgba(212, 175, 55, 0.75);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.section-header .corner-tl-deco { top: 8px;  left: 14px;  }
+.section-header .corner-tr-deco { top: 8px;  right: 14px; }
+.section-header .corner-bl-deco { bottom: 8px; left: 14px;  }
+.section-header .corner-br-deco { bottom: 8px; right: 14px; }
 
 .section-title {
     font-family: 'Chiron GoRound TC', serif;
     font-size: clamp(1.4rem, 3vw, 2rem);
-    color: var(--dark);
+    color: var(--blue-purple);
     margin-bottom: 6px;
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
-    opacity: 0.5;
+    opacity: 1;
+    text-shadow:
+        0 0 20px rgba(255, 255, 255, 0.9),
+        0 0 40px rgba(255, 255, 255, 0.6);
 }
 
 .section-subtitle {
@@ -1930,6 +2014,10 @@ a {
     margin-bottom: 0;
     letter-spacing: 2px;
     font-weight: 700;
+    text-shadow:
+        0 0 16px rgba(255, 255, 255, 1),
+        0 0 32px rgba(255, 255, 255, 0.8),
+        1px 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .title-decoration {
