@@ -1,0 +1,535 @@
+<!-- 在外部 CSS 載入前就蓋住畫面，防止背景閃爍 -->
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background: #d4af37;
+  }
+
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+
+<!-- 載入畫面：必須在所有外部資源之前，確保第一幀就蓋住畫面 -->
+<div class="loader" id="loader">
+  <div class="loader-content">
+    <div class="heart-loader">
+      <div class="heart-wrapper">
+        <div class="heart"></div>
+      </div>
+      <div class="heart-wrapper">
+        <div class="heart"></div>
+      </div>
+    </div>
+    <p class="loader-text">Loading...</p>
+  </div>
+</div>
+
+<div class="global-petals-container" id="globalPetalsContainer"></div>
+<link rel="stylesheet" href="style.css" />
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+<!-- 引入 Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+  rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+
+<!-- 漢堡選單按鈕 -->
+<button class="menu-toggle" onclick="toggleMenu()" aria-label="開啟選單">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- 側邊導航列 -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3>💕 選單</h3>
+    <button class="close-btn" onclick="toggleMenu()">✕</button>
+  </div>
+  <div class="nav-links">
+    <a href="#home" onclick="toggleMenu()">
+      <span class="icon">🏠</span>
+      <span>首頁</span>
+    </a>
+    <a href="#date" onclick="toggleMenu()">
+      <span class="icon">📅</span>
+      <span>婚宴日期</span>
+    </a>
+    <a href="#location" onclick="toggleMenu()">
+      <span class="icon">📍</span>
+      <span>婚宴地點</span>
+    </a>
+    <a href="#schedule" onclick="toggleMenu()">
+      <span class="icon">⏰</span>
+      <span>婚禮流程</span>
+    </a>
+    <a href="#gallery" onclick="toggleMenu()">
+      <span class="icon">📸</span>
+      <span>相簿</span>
+    </a>
+  </div>
+</nav>
+
+<!-- 遮罩層 -->
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<!-- 音樂控制 -->
+<button class="music-toggle" id="musicToggle" onclick="toggleMusic()">
+  🎵
+</button>
+<audio id="bgMusic" loop>
+  <source src="images/background-music.mp3" type="audio/mpeg" />
+</audio>
+
+<!-- 封面區 -->
+<section id="home" class="hero">
+  <!-- 動態背景 -->
+  <div class="hero-bg-animated">
+    <div class="gradient-bg"></div>
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+      <div class="shape shape-4"></div>
+      <div class="shape shape-5"></div>
+    </div>
+  </div>
+
+  <!-- Canva 動態圖片容器 -->
+  <div class="hero-content">
+    <div class="canva-image-container">
+      <!-- Canva GIF 圖片 -->
+      <img src="images/wedding-invitation.gif" alt="婚禮邀請函" class="canva-gif" loading="eager" />
+
+      <!-- 載入中提示（圖片載入前顯示） -->
+      <div class="image-loading">
+        <div class="loading-spinner"></div>
+        <p>載入中...</p>
+      </div>
+
+      <!-- 載入失敗提示 -->
+      <div class="image-error" style="display: none;">
+        <span class="error-icon">⚠️</span>
+        <p>圖片載入失敗</p>
+        <button class="retry-btn" onclick="retryLoadImage()">重新載入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 滾動指示器 -->
+  <div class="scroll-indicator">
+    <div class="mouse">
+      <div class="wheel"></div>
+    </div>
+    <p>往下滑動探索</p>
+  </div>
+</section>
+
+<!-- 婚宴日期 -->
+<section id="date" class="date-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2 class="section-title">Wedding Date</h2>
+      <p class="section-subtitle">婚宴日期</p>
+    </div>
+
+    <div class="date-content" data-aos="zoom-in" data-aos-duration="1000">
+      <div class="date-card">
+        <div class="card-glow"></div>
+        <div class="date-card-inner">
+          <!-- 角落裝飾 -->
+          <span class="corner-tl" style="top:14px;left:18px;">✦</span>
+          <span class="corner-tr" style="top:14px;right:18px;">✦</span>
+          <span class="corner-bl" style="bottom:14px;left:18px;">✦</span>
+          <span class="corner-br" style="bottom:14px;right:18px;">✦</span>
+          <!-- 日期詳情 -->
+          <div class="date-details">
+            <div class="date-item">
+              <span class="detail-icon">📆</span>
+              <div class="detail-content">
+                <p class="detail-label">日期</p>
+                <p class="detail-value">2026.10.25<br>星期日</p>
+              </div>
+            </div>
+
+            <div class="date-item">
+              <span class="detail-icon">🕐</span>
+              <div class="detail-content">
+                <p class="detail-label">入場時間</p>
+                <p class="detail-value">上午 11:00</p>
+              </div>
+            </div>
+
+            <div class="date-item">
+              <span class="detail-icon">🎊</span>
+              <div class="detail-content">
+                <p class="detail-label">開席時間</p>
+                <p class="detail-value">下午 12:00</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 倒數計時 -->
+          <div class="countdown-wrapper">
+            <p class="countdown-title">距離大喜之日還有</p>
+            <div class="countdown-display">
+              <div class="countdown-item">
+                <span class="countdown-number" id="days2">000</span>
+                <span class="countdown-label">天</span>
+              </div>
+              <div class="countdown-divider">:</div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="hours2">00</span>
+                <span class="countdown-label">時</span>
+              </div>
+              <div class="countdown-divider">:</div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="minutes2">00</span>
+                <span class="countdown-label">分</span>
+              </div>
+              <div class="countdown-divider">:</div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="seconds2">00</span>
+                <span class="countdown-label">秒</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 婚宴地點 -->
+<section id="location" class="location-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2 class="section-title">Wedding Venue</h2>
+      <p class="section-subtitle">婚宴地點</p>
+    </div>
+
+    <div class="location-content">
+      <div class="location-card" data-aos="fade-right" data-aos-duration="1000">
+        <div class="card-glow"></div>
+        <div class="location-card-inner">
+          <!-- 角落裝飾 -->
+          <span class="corner-tl" style="top:14px;left:18px;">✦</span>
+          <span class="corner-tr" style="top:14px;right:18px;">✦</span>
+          <span class="corner-bl" style="bottom:14px;left:18px;">✦</span>
+          <span class="corner-br" style="bottom:14px;right:18px;">✦</span>
+          <!-- 地點資訊 -->
+          <div class="location-info">
+            <h3 class="venue-name">台北君悅大飯店</h3>
+            <p class="venue-hall">3樓 君悅廳</p>
+
+            <div class="location-details">
+              <div class="location-detail-item">
+                <span class="detail-icon">📮</span>
+                <p>台北市信義區松壽路2號</p>
+              </div>
+
+              <div class="location-detail-item">
+                <span class="detail-icon">🚇</span>
+                <p>捷運市政府站 2號出口步行5分鐘</p>
+              </div>
+
+              <div class="location-detail-item">
+                <span class="detail-icon">🚗</span>
+                <p>飯店地下停車場（B3-B5）</p>
+              </div>
+            </div>
+
+            <!-- 地圖按鈕 -->
+            <div class="location-buttons">
+              <button class="location-btn primary-btn" onclick="openMap()">
+                <span class="btn-icon">🗺️</span>
+                <span>Google 地圖</span>
+                <span class="btn-shine"></span>
+              </button>
+              <button class="location-btn secondary-btn" onclick="openStreetView()">
+                <span class="btn-icon">👁️</span>
+                <span>街景檢視</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地圖預覽 -->
+      <div class="map-preview" data-aos="fade-left" data-aos-duration="1000">
+        <div class="map-frame">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.9287473749845!2d121.56347931500658!3d25.03687598396825!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442abb6da9c9e1f%3A0x1206bcf082fd10a6!2z5Y-w5YyX5ZCb5oKF5aSn6aOv5bqX!5e0!3m2!1szh-TW!2stw!4v1234567890123!5m2!1szh-TW!2stw"
+            width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+          <div class="map-overlay" onclick="openMap()">
+            <span class="map-overlay-text">點擊開啟完整地圖</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 婚禮流程 -->
+<section id="schedule" class="schedule-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2 class="section-title">Wedding Schedule</h2>
+      <p class="section-subtitle">婚禮流程</p>
+    </div>
+
+    <div class="schedule-timeline">
+      <!-- 流程項目 1 -->
+      <div class="schedule-item" data-aos="fade-right" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">11:00</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <span class="corner-tl" style="top:10px;left:14px;">✦</span>
+            <span class="corner-tr" style="top:10px;right:14px;">✦</span>
+            <span class="corner-bl" style="bottom:10px;left:14px;">✦</span>
+            <span class="corner-br" style="bottom:10px;right:14px;">✦</span>
+            <h3 class="schedule-title">💒證婚儀式</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 2 -->
+      <div class="schedule-item" data-aos="fade-left" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">12:00</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <span class="corner-tl" style="top:10px;left:14px;">✦</span>
+            <span class="corner-tr" style="top:10px;right:14px;">✦</span>
+            <span class="corner-bl" style="bottom:10px;left:14px;">✦</span>
+            <span class="corner-br" style="bottom:10px;right:14px;">✦</span>
+            <h3 class="schedule-title">🎊婚禮宴客</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 3 -->
+      <div class="schedule-item" data-aos="fade-right" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">13:00</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <span class="corner-tl" style="top:10px;left:14px;">✦</span>
+            <span class="corner-tr" style="top:10px;right:14px;">✦</span>
+            <span class="corner-bl" style="bottom:10px;left:14px;">✦</span>
+            <span class="corner-br" style="bottom:10px;right:14px;">✦</span>
+            <h3 class="schedule-title">🎤敬酒時間</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 4 -->
+      <div class="schedule-item" data-aos="fade-left" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">14:00</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <span class="corner-tl" style="top:10px;left:14px;">✦</span>
+            <span class="corner-tr" style="top:10px;right:14px;">✦</span>
+            <span class="corner-bl" style="bottom:10px;left:14px;">✦</span>
+            <span class="corner-br" style="bottom:10px;right:14px;">✦</span>
+            <h3 class="schedule-title">🎁捧花活動</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 5 -->
+      <div class="schedule-item" data-aos="fade-right" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">14:30</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <span class="corner-tl" style="top:10px;left:14px;">✦</span>
+            <span class="corner-tr" style="top:10px;right:14px;">✦</span>
+            <span class="corner-bl" style="bottom:10px;left:14px;">✦</span>
+            <span class="corner-br" style="bottom:10px;right:14px;">✦</span>
+            <h3 class="schedule-title">📸大合照</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 6 -->
+      <div class="schedule-item last-item" data-aos="fade-left" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">15:00</span>
+          </div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <span class="corner-tl" style="top:10px;left:14px;">✦</span>
+            <span class="corner-tr" style="top:10px;right:14px;">✦</span>
+            <span class="corner-bl" style="bottom:10px;left:14px;">✦</span>
+            <span class="corner-br" style="bottom:10px;right:14px;">✦</span>
+            <h3 class="schedule-title">👋送客</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 溫馨提醒 -->
+    <div class="schedule-note" data-aos="fade-up" data-aos-delay="200">
+      <div class="note-icon">💝</div>
+      <p class="note-text">
+        <strong>溫馨提醒：</strong>
+        以上流程時間僅供參考，實際時間可能依現場狀況調整，敬請見諒。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 相簿區 -->
+<section id="gallery" class="gallery-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2 class="section-title">Our Memories</h2>
+      <p class="section-subtitle">幸福時光</p>
+    </div>
+
+    <!-- 相簿網格 -->
+    <div class="gallery-grid">
+      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="0">
+        <div class="gallery-card">
+          <div class="card-inner">
+            <img src="images/photo1.jpg" alt="照片1" loading="lazy" />
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <span class="zoom-icon">🔍</span>
+                <p>點擊放大</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-frame"></div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="100">
+        <div class="gallery-card">
+          <div class="card-inner">
+            <img src="images/photo2.jpg" alt="照片2" loading="lazy" />
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <span class="zoom-icon">🔍</span>
+                <p>點擊放大</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-frame"></div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="200">
+        <div class="gallery-card">
+          <div class="card-inner">
+            <img src="images/photo3.jpg" alt="照片3" loading="lazy" />
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <span class="zoom-icon">🔍</span>
+                <p>點擊放大</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-frame"></div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="300">
+        <div class="gallery-card">
+          <div class="card-inner">
+            <img src="images/photo4.jpg" alt="照片4" loading="lazy" />
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <span class="zoom-icon">🔍</span>
+                <p>點擊放大</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-frame"></div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="400">
+        <div class="gallery-card">
+          <div class="card-inner">
+            <img src="images/photo5.jpg" alt="照片5" loading="lazy" />
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <span class="zoom-icon">🔍</span>
+                <p>點擊放大</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-frame"></div>
+        </div>
+      </div>
+
+      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="500">
+        <div class="gallery-card">
+          <div class="card-inner">
+            <img src="images/photo6.jpg" alt="照片6" loading="lazy" />
+            <div class="card-overlay">
+              <div class="overlay-content">
+                <span class="zoom-icon">🔍</span>
+                <p>點擊放大</p>
+              </div>
+            </div>
+          </div>
+          <div class="card-frame"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 頁尾 -->
+<footer>
+  <div class="footer-decoration"></div>
+  <div class="footer-content">
+    <p class="footer-main">感謝您的祝福</p>
+    <p class="footer-sub">新郎 & 新娘 敬邀</p>
+    <div class="footer-divider"></div>
+    <p class="footer-copyright">Made with Love ❤️</p>
+  </div>
+</footer>
+
+<!-- 載入動畫庫 -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="script.js"></script>
