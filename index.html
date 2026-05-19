@@ -1,21 +1,39 @@
-<!-- 在外部 CSS 載入前就蓋住畫面，防止背景閃爍 -->
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    background: #d4af37;
-  }
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>婚禮邀請函</title>
 
-  #loader {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-</style>
+  <!-- 在外部 CSS 載入前就蓋住畫面，防止背景閃爍 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #d4af37;
+    }
+
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <!-- 引入 Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+</head>
+<body>
 
 <!-- 載入畫面：必須在所有外部資源之前，確保第一幀就蓋住畫面 -->
 <div class="loader" id="loader">
@@ -33,15 +51,6 @@
 </div>
 
 <div class="global-petals-container" id="globalPetalsContainer"></div>
-<link rel="stylesheet" href="style.css" />
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
-<!-- 引入 Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-  href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
-  rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
 
 <!-- 漢堡選單按鈕 -->
 <button class="menu-toggle" onclick="toggleMenu()" aria-label="開啟選單">
@@ -533,3 +542,5 @@
 <!-- 載入動畫庫 -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="script.js"></script>
+</body>
+</html>
