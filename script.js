@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function initVantaBg() {
   if (typeof VANTA === 'undefined' || typeof VANTA.FOG === 'undefined') return;
 
-  VANTA.FOG({
+  const vantaEffect = VANTA.FOG({
     el: '#vanta-bg',
     mouseControls: true,
     touchControls: true,
@@ -35,6 +35,18 @@ function initVantaBg() {
     blurFactor:     0.62,       // 霧感模糊程度
     speed:          1.2,        // 流動速度（慢一點更浪漫）
     zoom:           0.8,        // 縮放（稍微拉遠讓霧更大片）
+  });
+
+  // 保底：舊裝置不支援 lvh 時，監聽 resize 強制更新 canvas 尺寸
+  // 使用 debounce 避免 resize 觸發過於頻繁
+  let resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      if (vantaEffect && typeof vantaEffect.resize === 'function') {
+        vantaEffect.resize();
+      }
+    }, 150);
   });
 }
 

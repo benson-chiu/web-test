@@ -40,7 +40,10 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    /* fallback：舊瀏覽器 */
+    height: 100vh;
+    /* lvh = Largest Viewport Height，網址列隱藏時的最大高度，避免底部白塊 */
+    height: 100lvh;
     z-index: -1;
 }
 
