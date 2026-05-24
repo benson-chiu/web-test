@@ -2252,16 +2252,55 @@ footer {
 /* ==================== 進場動畫 ==================== */
 .animate-in {
     animation: fadeInUp 0.8s ease-out forwards;
+    /* 強制硬體加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* 優化渲染 */
+    will-change: transform, opacity;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
 }
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(30px) translateZ(0);
+        -webkit-transform: translateY(30px) translateZ(0);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) translateZ(0);
+        -webkit-transform: translateY(0) translateZ(0);
     }
+}
+
+/* 針對需要動畫的元素添加優化 */
+.schedule-item,
+.date-card,
+.location-card {
+    /* 強制硬體加速 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* 優化渲染 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 動畫進行中時的優化 */
+.schedule-item.animate-in,
+.date-card.animate-in,
+.location-card.animate-in {
+    will-change: transform, opacity;
+}
+
+/* 動畫結束後移除 will-change */
+.schedule-item.animation-complete,
+.date-card.animation-complete,
+.location-card.animation-complete {
+    will-change: auto;
 }

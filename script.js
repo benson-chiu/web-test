@@ -422,14 +422,48 @@ function initCountdownDisplay() {
 
 // ==================== 滾動動畫觸發 ====================
 function initScrollAnimations() {
+  // 檢測是否為 iOS Safari
+  const isIOSSafari = /iPhone|iPad|iPod/.test(navigator.userAgent) && 
+                      /Safari/.test(navigator.userAgent) && 
+                      !/Chrome|CriOS|FxiOS/.test(navigator.userAgent);
+
+  // iOS Safari 使用更保守的設定
+  const observerOptions = {
+    threshold: isIOSSafari ? 0.05 : 0.1,
+    rootMargin: isIOSSafari ? '0px 0px -50px 0px' : '0px 0px -100px 0px'
+  };
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) entry.target.classList.add('animate-in');
+      if (entry.isIntersecting) {
+        const target = entry.target;
+        
+        // 使用 requestAnimationFrame 確保渲染完成
+        requestAnimationFrame(() => {
+          // 添加動畫類
+          target.classList.add('animate-in');
+          
+          // 動畫結束後清理 will-change
+          target.addEventListener('animationend', function handleAnimationEnd() {
+            target.classList.add('animation-complete');
+            target.removeEventListener('animationend', handleAnimationEnd);
+          }, { once: true });
+        });
+        
+        // 停止觀察已觸發的元素
+        observer.unobserve(target);
+      }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -100px 0px' });
+  }, observerOptions);
 
+  // 觀察所有需要動畫的元素
   document.querySelectorAll('.schedule-item, .date-card, .location-card')
-    .forEach((el) => observer.observe(el));
+    .forEach((el) => {
+      // 確保元素有初始狀態
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      observer.observe(el);
+    });
 }
 
 // ==================== 滾動提示功能 ====================
