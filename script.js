@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initScrollEffects();
   initCountdownDisplay();
   initScrollAnimations();
+  initScrollHint();
 
   console.log('💕 電子喜帖載入完成！');
 });
@@ -429,6 +430,65 @@ function initScrollAnimations() {
 
   document.querySelectorAll('.schedule-item, .date-card, .location-card')
     .forEach((el) => observer.observe(el));
+}
+
+// ==================== 滾動提示功能 ====================
+function initScrollHint() {
+  const overlay = document.getElementById('scrollHintOverlay');
+  if (!overlay) return;
+
+  let hasScrolled = false;
+  let hintTimer = null;
+
+  // 3秒後顯示提示
+  function showHint() {
+    if (!hasScrolled) {
+      overlay.classList.add('show');
+    }
+  }
+
+  // 隱藏提示
+  function hideHint() {
+    overlay.classList.remove('show');
+    hasScrolled = true;
+    
+    // 清除計時器
+    if (hintTimer) {
+      clearTimeout(hintTimer);
+      hintTimer = null;
+    }
+    
+    // 移除滾動監聽
+    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('wheel', handleScroll);
+    window.removeEventListener('touchmove', handleScroll);
+  }
+
+  // 處理滾動事件
+  function handleScroll() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // 只要滾動超過 50px 就視為已滾動
+    if (scrollTop > 50) {
+      hideHint();
+    }
+  }
+
+  // 載入完成後等待 3 秒
+  window.addEventListener('load', function() {
+    // 確保載入畫面已經消失後才開始計時
+    setTimeout(() => {
+      hintTimer = setTimeout(showHint, 3000);
+    }, 2500); // 配合載入畫面的 2 秒延遲
+  });
+
+  // 監聽滾動事件
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('wheel', handleScroll, { passive: true });
+  window.addEventListener('touchmove', handleScroll, { passive: true });
+
+  // 點擊遮罩也可以關閉（可選）
+  overlay.addEventListener('click', hideHint);
 }
 
 // ==================== 動畫樣式注入 ====================
