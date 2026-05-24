@@ -939,7 +939,7 @@ a {
 }
 
 .date-card-inner {
-    background: #f0f5ff;
+    background: rgba(255, 255, 255, 0.6);
     border-radius: 30px;
     padding: 60px 50px;
     position: relative;
@@ -1054,7 +1054,7 @@ a {
     align-items: center;
     gap: 15px;
     padding: 20px;
-    background: linear-gradient(135deg, #e0edff, #f0f5ff);
+    background: linear-gradient(135deg, var(--accent), #f0f5ff);
     border-radius: 15px;
     transition: all 0.3s ease;
 }
@@ -1075,9 +1075,10 @@ a {
 
 .detail-label {
     font-size: 0.9rem;
-    color: var(--muted);
+    color: var(--primary);
     margin-bottom: 5px;
     letter-spacing: 1px;
+    font-weight: 500;
 }
 
 .detail-value {
@@ -1088,7 +1089,7 @@ a {
 
 /* 倒數計時 */
 .countdown-wrapper {
-    background: linear-gradient(135deg, #e0edff, #f0f5ff);
+    background: linear-gradient(135deg, var(--accent), #f0f5ff);
     border-radius: 20px;
     padding: 40px 30px;
     border: 2px solid rgba(197, 164, 248, 0.25);
@@ -1123,7 +1124,7 @@ a {
 .countdown-number {
     font-size: clamp(1.4rem, 5vw, 3rem);
     font-weight: 700;
-    color: var(--secondary);
+    color: #f6bad8;
     font-family: 'Courier New', monospace;
     line-height: 1;
     text-shadow: 1px 1px 3px rgba(197, 164, 248, 0.25);
@@ -1185,7 +1186,7 @@ a {
 }
 
 .location-card-inner {
-    background: linear-gradient(135deg, #e0edff, #f0f5ff);
+    background: linear-gradient(135deg, var(--accent), #f0f5ff);
     border-radius: 30px;
     padding: 50px 40px;
     position: relative;
@@ -1511,7 +1512,7 @@ a {
 }
 
 .schedule-card {
-    background: rgba(255, 255, 255, 0.75);
+    background: linear-gradient(135deg, #f0f5ff, var(--accent));
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     border-radius: 25px;
@@ -1542,7 +1543,7 @@ a {
     height: 0;
     border-top: 15px solid transparent;
     border-bottom: 15px solid transparent;
-    border-right: 20px solid #d4c8f0;
+    border-right: 20px solid rgba(255, 255, 255, 0.6);
     /* 介於卡片背景(#e0edff)與邊框金紫之間，自然融入 */
     z-index: 1;
 }
