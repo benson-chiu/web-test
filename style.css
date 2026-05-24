@@ -626,14 +626,29 @@ a {
 /* ==================== 滾動提示遮罩 ==================== */
 .scroll-hint-overlay {
   position: fixed;
-  bottom: 80px; /* 距離底部的位置 */
+  bottom: 80px;
   left: 50%;
-  transform: translateX(-50%);
   z-index: 9998;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease, visibility 0.5s ease;
   pointer-events: none;
+  display: inline-flex;
+  border-radius: 30px;
+  
+  /* 強制建立新的渲染層 */
+  transform: translateX(-50%) translateZ(0);
+  -webkit-transform: translateX(-50%) translateZ(0);
+  
+  /* 修復 backdrop-filter 與 border-radius 的衝突 */
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overflow: hidden;
+  
+  /* backdrop-filter 保持在外層 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .scroll-hint-overlay.show {
@@ -643,14 +658,14 @@ a {
 
 .scroll-hint-content {
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-radius: 30px;
   padding: 30px 40px;
   text-align: center;
-  animation: hintPulse 2s ease-in-out infinite;
   box-shadow: 0 10px 40px rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.05);
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .scroll-hint-animation {
@@ -721,15 +736,6 @@ a {
   white-space: nowrap;
 }
 
-@keyframes hintPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
 /* 響應式 */
 @media (max-width: 768px) {
   .scroll-hint-overlay {
@@ -764,9 +770,8 @@ a {
 @media (max-width: 480px) {
   .scroll-hint-overlay {
     bottom: 50px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
+    max-width: calc(100vw - 40px);
+    border-radius: 20px;
   }
 
   .scroll-hint-content {
@@ -800,14 +805,16 @@ a {
   }
 }
 
-/* 超小手機 */
 @media (max-width: 360px) {
   .scroll-hint-overlay {
     bottom: 40px;
+    max-width: calc(100vw - 30px);
+    border-radius: 20px;
   }
 
   .scroll-hint-content {
     padding: 18px 25px;
+    border-radius: 20px;
   }
 
   .scroll-hint-text {
