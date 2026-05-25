@@ -411,40 +411,53 @@
       <p class="section-subtitle">幸福時光</p>
     </div>
 
-    <!-- 相簿網格 -->
-    <div class="photo-grid" id="photoGrid">
-      <!-- 照片會由 JS 動態生成 -->
-    </div>
+    <!-- 大圖輪播容器 -->
+    <div class="slideshow-container" data-aos="zoom-in" data-aos-duration="1000">
+      <!-- 主圖片顯示區 -->
+      <div class="slideshow-main">
+        <img id="slideshowImg" src="" alt="婚禮照片" class="slideshow-image">
+      </div>
 
-    <!-- 載入更多按鈕 -->
-    <div class="pagination">
-      <button class="load-more-btn" id="loadMoreBtn">
-        <span class="btn-icon">📷</span>
-        <span>載入更多照片</span>
-      </button>
+      <!-- 控制列（音樂播放器風格） -->
+      <div class="slideshow-controls">
+        <!-- 左側：播放/暫停 -->
+        <button class="control-btn play-pause-btn" id="playBtn" onclick="toggleAutoPlay()" title="播放/暫停">
+          <span id="playIcon">⏸</span>
+        </button>
+
+        <!-- 中間：切換按鈕 + 計數 -->
+        <div class="control-center">
+          <button class="control-btn nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="上一張">
+            <span>‹</span>
+          </button>
+          
+          <div class="photo-counter" id="slideshowCounter">
+            1 / 15
+          </div>
+          
+          <button class="control-btn nav-btn" id="nextBtn" onclick="changeSlide(1)" title="下一張">
+            <span>›</span>
+          </button>
+        </div>
+
+        <!-- 右側：預留空間（可放其他功能） -->
+        <div class="control-right">
+          <!-- 可以放下載、分享等按鈕 -->
+        </div>
+      </div>
+
+      <!-- 進度條（修正圓角問題） -->
+      <div class="slideshow-progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <!-- 底部縮圖導航 -->
+      <div class="slideshow-thumbnails" id="slideshowThumbnails">
+        <!-- 縮圖會由 JS 動態生成 -->
+      </div>
     </div>
   </div>
 </section>
-
-<!-- Lightbox 燈箱 -->
-<div class="lightbox" id="lightbox">
-  <button class="lightbox-close" id="lightboxClose">✕</button>
-  <button class="lightbox-prev" id="lightboxPrev">‹</button>
-  <button class="lightbox-next" id="lightboxNext">›</button>
-  
-  <div class="lightbox-content">
-    <img class="lightbox-img" id="lightboxImg" src="" alt="">
-  </div>
-  
-  <!-- 底部縮圖導航 (Flickr 風格) -->
-  <div class="thumbnail-nav">
-    <button class="nav-scroll-btn nav-prev" id="navPrev">‹</button>
-    <div class="thumbnail-strip" id="thumbnailStrip">
-      <!-- 縮圖會由 JS 動態生成 -->
-    </div>
-    <button class="nav-scroll-btn nav-next" id="navNext">›</button>
-  </div>
-</div>
 
 <!-- 頁尾 -->
 <footer>

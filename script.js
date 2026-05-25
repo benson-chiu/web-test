@@ -252,153 +252,213 @@ let photos = [
   { url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400', alt: '婚禮照片 13' },
 ];
 
-let currentPhotoIndex = 0;
-let photosPerPage = 6;
-let currentPage = 1;
+let currentSlide = 0;
+let autoPlayInterval = null;
+let isAutoPlaying = true;
+const autoPlayDelay = 5000; // 5秒自動切換
 
 function initGallery() {
-  loadPhotos();
-  setupLoadMore();
-  setupLightbox();
-}
-
-// 載入照片
-function loadPhotos() {
-  const grid = document.getElementById('photoGrid');
-  const start = (currentPage - 1) * photosPerPage;
-  const end = start + photosPerPage;
-  const photosToShow = photos.slice(start, end);
-
-  photosToShow.forEach((photo, index) => {
-    const item = document.createElement('div');
-    item.className = 'photo-item';
-    item.dataset.index = start + index;
-    item.innerHTML = `<img src="${photo.url}" alt="${photo.alt}" loading="lazy">`;
-    item.onclick = () => openLightbox(start + index);
-    grid.appendChild(item);
-  });
-
-  // 如果全部載入完畢，隱藏按鈕
-  const loadMoreBtn = document.getElementById('loadMoreBtn');
-  if (currentPage * photosPerPage >= photos.length) {
-    loadMoreBtn.classList.add('hidden');
-  }
-}
-
-// 載入更多
-function setupLoadMore() {
-  document.getElementById('loadMoreBtn').onclick = () => {
-    currentPage++;
-    loadPhotos();
-  };
-}
-
-// 設定 Lightbox
-function setupLightbox() {
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightboxImg');
-  const closeBtn = document.getElementById('lightboxClose');
-  const prevBtn = document.getElementById('lightboxPrev');
-  const nextBtn = document.getElementById('lightboxNext');
-  const navPrev = document.getElementById('navPrev');
-  const navNext = document.getElementById('navNext');
-
-  // 關閉按鈕
-  closeBtn.onclick = closeLightbox;
-
-  // 點擊背景關閉
-  lightbox.onclick = (e) => {
-    if (e.target === lightbox) closeLightbox();
-  };
-
-  // 上一張/下一張
-  prevBtn.onclick = () => switchPhoto(currentPhotoIndex - 1);
-  nextBtn.onclick = () => switchPhoto(currentPhotoIndex + 1);
-
-  // 縮圖導航滾動
-  navPrev.onclick = () => {
-    document.getElementById('thumbnailStrip').scrollBy({ left: -200, behavior: 'smooth' });
-  };
-  navNext.onclick = () => {
-    document.getElementById('thumbnailStrip').scrollBy({ left: 200, behavior: 'smooth' });
-  };
-
-  // 鍵盤控制
-  document.addEventListener('keydown', (e) => {
-    if (!lightbox.classList.contains('active')) return;
-
-    if (e.key === 'ArrowLeft') switchPhoto(currentPhotoIndex - 1);
-    else if (e.key === 'ArrowRight') switchPhoto(currentPhotoIndex + 1);
-    else if (e.key === 'Escape') closeLightbox();
-  });
-}
-
-// 開啟 Lightbox
-function openLightbox(index) {
-  currentPhotoIndex = index;
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightboxImg');
-
-  lightboxImg.src = photos[index].url;
-  lightboxImg.alt = photos[index].alt;
-  lightbox.classList.add('active');
-  document.body.style.overflow = 'hidden';
-
   generateThumbnails();
+  showSlide(0);
+  startAutoPlay();
+  setupKeyboardControls();
+  
+  console.log('📸 相簿輪播初始化完成');
 }
 
-// 關閉 Lightbox
-function closeLightbox() {
-  const lightbox = document.getElementById('lightbox');
-  lightbox.classList.remove('active');
-  document.body.style.overflow = 'auto';
+// 顯示指定照片（不滾動頁面）
+function showSlide(index) {
+  // 確保索引在有效範圍內
+  if (index >= photos.length) {
+    currentSlide = 0;
+  } else if (index < 0) {
+    currentSlide = photos.length - 1;
+  } else {
+    currentSlide = index;
+  }
+
+  // 更新主圖片
+  const img = document.getElementById('slideshowImg');
+  const counter = document.getElementById('slideshowCounter');
+
+  if (img) {
+    img.src = photos[currentSlide].url;
+    img.alt = photos[currentSlide].alt;
+  }
+
+  if (counter) {
+    counter.textContent = `${currentSlide + 1} / ${photos.length}`;
+  }
+
+  // 更新縮圖狀態（不滾動頁面）
+  updateThumbnails();
+
+  // 重置進度條
+  resetProgressBar();
 }
 
 // 切換照片
-function switchPhoto(index) {
-  if (index < 0 || index >= photos.length) return;
-
-  currentPhotoIndex = index;
-  const lightboxImg = document.getElementById('lightboxImg');
-  lightboxImg.src = photos[index].url;
-  lightboxImg.alt = photos[index].alt;
-
-  updateThumbnails();
-  scrollToActiveThumbnail();
-}
-
-// 生成縮圖導航
-function generateThumbnails() {
-  const strip = document.getElementById('thumbnailStrip');
-  strip.innerHTML = '';
-
-  photos.forEach((photo, index) => {
-    const thumb = document.createElement('img');
-    thumb.src = photo.url;
-    thumb.alt = photo.alt;
-    thumb.onclick = () => switchPhoto(index);
-    if (index === currentPhotoIndex) thumb.classList.add('active');
-    strip.appendChild(thumb);
-  });
-
-  scrollToActiveThumbnail();
-}
-
-// 更新縮圖狀態
-function updateThumbnails() {
-  document.querySelectorAll('.thumbnail-strip img').forEach((img, i) => {
-    img.classList.toggle('active', i === currentPhotoIndex);
-  });
-}
-
-// 滾動到當前縮圖
-function scrollToActiveThumbnail() {
-  const strip = document.getElementById('thumbnailStrip');
-  const active = strip.querySelector('.active');
-  if (active) {
-    active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+function changeSlide(direction) {
+  showSlide(currentSlide + direction);
+  
+  // 手動切換時重啟自動播放
+  if (isAutoPlaying) {
+    restartAutoPlay();
   }
 }
+
+// 跳到指定照片
+function jumpToSlide(index) {
+  showSlide(index);
+  
+  // 手動切換時重啟自動播放
+  if (isAutoPlaying) {
+    restartAutoPlay();
+  }
+}
+
+// 生成縮圖
+function generateThumbnails() {
+  const container = document.getElementById('slideshowThumbnails');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  photos.forEach((photo, index) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'thumbnail-item';
+    thumb.onclick = () => jumpToSlide(index);
+
+    const img = document.createElement('img');
+    img.src = photo.url;
+    img.alt = photo.alt;
+
+    thumb.appendChild(img);
+    container.appendChild(thumb);
+  });
+}
+
+// 更新縮圖狀態（不滾動頁面，只滾動縮圖容器）
+function updateThumbnails() {
+  const thumbnails = document.querySelectorAll('.thumbnail-item');
+  thumbnails.forEach((thumb, index) => {
+    thumb.classList.toggle('active', index === currentSlide);
+  });
+
+  // 只滾動縮圖容器，不滾動整個頁面
+  const container = document.getElementById('slideshowThumbnails');
+  const activeThumb = thumbnails[currentSlide];
+  if (container && activeThumb) {
+    // 使用 scrollIntoView 但限制在容器內
+    const containerRect = container.getBoundingClientRect();
+    const thumbRect = activeThumb.getBoundingClientRect();
+    
+    // 計算需要滾動的距離
+    const scrollLeft = activeThumb.offsetLeft - (container.offsetWidth / 2) + (activeThumb.offsetWidth / 2);
+    
+    // 平滑滾動縮圖容器
+    container.scrollTo({
+      left: scrollLeft,
+      behavior: 'smooth'
+    });
+  }
+}
+
+// 開始自動播放
+function startAutoPlay() {
+  if (autoPlayInterval) return;
+
+  autoPlayInterval = setInterval(() => {
+    changeSlide(1);
+  }, autoPlayDelay);
+
+  animateProgressBar();
+}
+
+// 停止自動播放
+function stopAutoPlay() {
+  if (autoPlayInterval) {
+    clearInterval(autoPlayInterval);
+    autoPlayInterval = null;
+  }
+  resetProgressBar();
+}
+
+// 重啟自動播放
+function restartAutoPlay() {
+  stopAutoPlay();
+  startAutoPlay();
+}
+
+// 切換自動播放
+function toggleAutoPlay() {
+  const playIcon = document.getElementById('playIcon');
+  
+  if (isAutoPlaying) {
+    stopAutoPlay();
+    isAutoPlaying = false;
+    if (playIcon) playIcon.textContent = '▶';
+  } else {
+    startAutoPlay();
+    isAutoPlaying = true;
+    if (playIcon) playIcon.textContent = '⏸';
+  }
+}
+
+// 進度條動畫
+function animateProgressBar() {
+  const progressBar = document.getElementById('progressBar');
+  if (!progressBar) return;
+
+  progressBar.style.transition = 'none';
+  progressBar.style.width = '0%';
+
+  setTimeout(() => {
+    progressBar.style.transition = `width ${autoPlayDelay}ms linear`;
+    progressBar.style.width = '100%';
+  }, 50);
+}
+
+// 重置進度條
+function resetProgressBar() {
+  const progressBar = document.getElementById('progressBar');
+  if (!progressBar) return;
+
+  progressBar.style.transition = 'none';
+  progressBar.style.width = '0%';
+}
+
+// 鍵盤控制
+function setupKeyboardControls() {
+  document.addEventListener('keydown', (e) => {
+    // 只在相簿區域可見時才響應
+    const gallerySection = document.getElementById('gallery');
+    if (!gallerySection) return;
+
+    const rect = gallerySection.getBoundingClientRect();
+    const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+    
+    if (!isVisible) return;
+
+    if (e.key === 'ArrowLeft') {
+      changeSlide(-1);
+    } else if (e.key === 'ArrowRight') {
+      changeSlide(1);
+    } else if (e.key === ' ') {
+      e.preventDefault();
+      toggleAutoPlay();
+    }
+  });
+}
+
+// 頁面離開時停止自動播放
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopAutoPlay();
+  } else if (isAutoPlaying) {
+    startAutoPlay();
+  }
+});
 
 // ==================== 地圖功能 ====================
 function openMap() {
