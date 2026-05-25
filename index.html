@@ -412,99 +412,39 @@
     </div>
 
     <!-- 相簿網格 -->
-    <div class="gallery-grid">
-      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="0">
-        <div class="gallery-card">
-          <div class="card-inner">
-            <img src="images/photo1.jpg" alt="照片1" loading="lazy" />
-            <div class="card-overlay">
-              <div class="overlay-content">
-                <span class="zoom-icon">🔍</span>
-                <p>點擊放大</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-frame"></div>
-        </div>
-      </div>
+    <div class="photo-grid" id="photoGrid">
+      <!-- 照片會由 JS 動態生成 -->
+    </div>
 
-      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="100">
-        <div class="gallery-card">
-          <div class="card-inner">
-            <img src="images/photo2.jpg" alt="照片2" loading="lazy" />
-            <div class="card-overlay">
-              <div class="overlay-content">
-                <span class="zoom-icon">🔍</span>
-                <p>點擊放大</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-frame"></div>
-        </div>
-      </div>
-
-      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="200">
-        <div class="gallery-card">
-          <div class="card-inner">
-            <img src="images/photo3.jpg" alt="照片3" loading="lazy" />
-            <div class="card-overlay">
-              <div class="overlay-content">
-                <span class="zoom-icon">🔍</span>
-                <p>點擊放大</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-frame"></div>
-        </div>
-      </div>
-
-      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="300">
-        <div class="gallery-card">
-          <div class="card-inner">
-            <img src="images/photo4.jpg" alt="照片4" loading="lazy" />
-            <div class="card-overlay">
-              <div class="overlay-content">
-                <span class="zoom-icon">🔍</span>
-                <p>點擊放大</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-frame"></div>
-        </div>
-      </div>
-
-      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="400">
-        <div class="gallery-card">
-          <div class="card-inner">
-            <img src="images/photo5.jpg" alt="照片5" loading="lazy" />
-            <div class="card-overlay">
-              <div class="overlay-content">
-                <span class="zoom-icon">🔍</span>
-                <p>點擊放大</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-frame"></div>
-        </div>
-      </div>
-
-      <div class="gallery-item" data-aos="zoom-in" data-aos-delay="500">
-        <div class="gallery-card">
-          <div class="card-inner">
-            <img src="images/photo6.jpg" alt="照片6" loading="lazy" />
-            <div class="card-overlay">
-              <div class="overlay-content">
-                <span class="zoom-icon">🔍</span>
-                <p>點擊放大</p>
-              </div>
-            </div>
-          </div>
-          <div class="card-frame"></div>
-        </div>
-      </div>
+    <!-- 載入更多按鈕 -->
+    <div class="pagination">
+      <button class="load-more-btn" id="loadMoreBtn">
+        <span class="btn-icon">📷</span>
+        <span>載入更多照片</span>
+      </button>
     </div>
   </div>
 </section>
+
+<!-- Lightbox 燈箱 -->
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">✕</button>
+  <button class="lightbox-prev" id="lightboxPrev">‹</button>
+  <button class="lightbox-next" id="lightboxNext">›</button>
+  
+  <div class="lightbox-content">
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+  </div>
+  
+  <!-- 底部縮圖導航 (Flickr 風格) -->
+  <div class="thumbnail-nav">
+    <button class="nav-scroll-btn nav-prev" id="navPrev">‹</button>
+    <div class="thumbnail-strip" id="thumbnailStrip">
+      <!-- 縮圖會由 JS 動態生成 -->
+    </div>
+    <button class="nav-scroll-btn nav-next" id="navNext">›</button>
+  </div>
+</div>
 
 <!-- 頁尾 -->
 <footer>

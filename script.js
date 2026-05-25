@@ -230,96 +230,174 @@ function retryLoadImage() {
 }
 
 // ==================== 相簿功能 ====================
+let photos = [
+  { url: 'images/photo1.jpg', alt: '照片 1' },
+  { url: 'images/photo2.jpg', alt: '照片 2' },
+  { url: 'images/photo3.jpg', alt: '照片 3' },
+  { url: 'images/photo4.jpg', alt: '照片 4' },
+  { url: 'images/photo5.jpg', alt: '照片 5' },
+  { url: 'images/photo6.jpg', alt: '照片 6' },
+  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400', alt: '婚禮照片 1' },
+  { url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400', alt: '婚禮照片 2' },
+  { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400', alt: '婚禮照片 3' },
+  { url: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400', alt: '婚禮照片 4' },
+  { url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400', alt: '婚禮照片 5' },
+  { url: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400', alt: '婚禮照片 6' },
+  { url: 'https://images.unsplash.com/photo-1529636798458-92182e662485?w=400', alt: '婚禮照片 7' },
+  { url: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=400', alt: '婚禮照片 8' },
+  { url: 'https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=400', alt: '婚禮照片 9' },
+  { url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=400', alt: '婚禮照片 10' },
+  { url: 'https://images.unsplash.com/photo-1522413452208-996ff3f3e740?w=400', alt: '婚禮照片 11' },
+  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400', alt: '婚禮照片 12' },
+  { url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400', alt: '婚禮照片 13' },
+];
+
+let currentPhotoIndex = 0;
+let photosPerPage = 6;
+let currentPage = 1;
+
 function initGallery() {
-  document.querySelectorAll('.gallery-card').forEach((item) => {
-    item.addEventListener('click', function (e) {
-      e.preventDefault();
-      const img = this.querySelector('img');
-      if (img) openImageModal(img);
-    });
+  loadPhotos();
+  setupLoadMore();
+  setupLightbox();
+}
+
+// 載入照片
+function loadPhotos() {
+  const grid = document.getElementById('photoGrid');
+  const start = (currentPage - 1) * photosPerPage;
+  const end = start + photosPerPage;
+  const photosToShow = photos.slice(start, end);
+
+  photosToShow.forEach((photo, index) => {
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    item.dataset.index = start + index;
+    item.innerHTML = `<img src="${photo.url}" alt="${photo.alt}" loading="lazy">`;
+    item.onclick = () => openLightbox(start + index);
+    grid.appendChild(item);
+  });
+
+  // 如果全部載入完畢，隱藏按鈕
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  if (currentPage * photosPerPage >= photos.length) {
+    loadMoreBtn.classList.add('hidden');
+  }
+}
+
+// 載入更多
+function setupLoadMore() {
+  document.getElementById('loadMoreBtn').onclick = () => {
+    currentPage++;
+    loadPhotos();
+  };
+}
+
+// 設定 Lightbox
+function setupLightbox() {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const closeBtn = document.getElementById('lightboxClose');
+  const prevBtn = document.getElementById('lightboxPrev');
+  const nextBtn = document.getElementById('lightboxNext');
+  const navPrev = document.getElementById('navPrev');
+  const navNext = document.getElementById('navNext');
+
+  // 關閉按鈕
+  closeBtn.onclick = closeLightbox;
+
+  // 點擊背景關閉
+  lightbox.onclick = (e) => {
+    if (e.target === lightbox) closeLightbox();
+  };
+
+  // 上一張/下一張
+  prevBtn.onclick = () => switchPhoto(currentPhotoIndex - 1);
+  nextBtn.onclick = () => switchPhoto(currentPhotoIndex + 1);
+
+  // 縮圖導航滾動
+  navPrev.onclick = () => {
+    document.getElementById('thumbnailStrip').scrollBy({ left: -200, behavior: 'smooth' });
+  };
+  navNext.onclick = () => {
+    document.getElementById('thumbnailStrip').scrollBy({ left: 200, behavior: 'smooth' });
+  };
+
+  // 鍵盤控制
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('active')) return;
+
+    if (e.key === 'ArrowLeft') switchPhoto(currentPhotoIndex - 1);
+    else if (e.key === 'ArrowRight') switchPhoto(currentPhotoIndex + 1);
+    else if (e.key === 'Escape') closeLightbox();
   });
 }
 
-function openImageModal(img) {
-  const modal = document.createElement('div');
-  modal.className = 'image-modal';
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.95); display: flex; align-items: center;
-    justify-content: center; z-index: 10000; cursor: pointer; padding: 20px;
-  `;
+// 開啟 Lightbox
+function openLightbox(index) {
+  currentPhotoIndex = index;
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
 
-  const imgContainer = document.createElement('div');
-  imgContainer.style.cssText = `
-    position: relative; max-width: 90%; max-height: 90%;
-    animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  `;
-
-  const modalImg = document.createElement('img');
-  modalImg.src = img.src;
-  modalImg.alt = img.alt;
-  modalImg.style.cssText = `
-    max-width: 100%; max-height: 90vh; object-fit: contain;
-    border-radius: 15px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  `;
-
-  const closeBtn = document.createElement('button');
-  closeBtn.innerHTML = '✕';
-  closeBtn.style.cssText = `
-    position: fixed; top: 30px; right: 30px;
-    background: rgba(255,255,255,0.2); border: none; color: white;
-    font-size: 2.5rem; width: 60px; height: 60px; border-radius: 50%;
-    cursor: pointer; transition: all 0.3s ease;
-    display: flex; align-items: center; justify-content: center; z-index: 10001;
-  `;
-  closeBtn.addEventListener('mouseenter', function () {
-    this.style.background = 'rgba(255,255,255,0.3)';
-    this.style.transform = 'rotate(90deg) scale(1.1)';
-  });
-  closeBtn.addEventListener('mouseleave', function () {
-    this.style.background = 'rgba(255,255,255,0.2)';
-    this.style.transform = 'rotate(0deg) scale(1)';
-  });
-
-  if (img.alt) {
-    const caption = document.createElement('div');
-    caption.textContent = img.alt;
-    caption.style.cssText = `
-      position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-      color: white; font-size: 1.2rem; background: rgba(0,0,0,0.5);
-      padding: 15px 30px; border-radius: 50px; max-width: 80%; text-align: center;
-    `;
-    modal.appendChild(caption);
-  }
-
-  imgContainer.appendChild(modalImg);
-  modal.appendChild(imgContainer);
-  modal.appendChild(closeBtn);
-  document.body.appendChild(modal);
+  lightboxImg.src = photos[index].url;
+  lightboxImg.alt = photos[index].alt;
+  lightbox.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  const closeModal = () => closeImageModal(modal);
-  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-  closeBtn.addEventListener('click', closeModal);
+  generateThumbnails();
+}
 
-  let touchStartY = 0, touchStartX = 0;
-  modal.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-    touchStartX = e.touches[0].clientX;
+// 關閉 Lightbox
+function closeLightbox() {
+  const lightbox = document.getElementById('lightbox');
+  lightbox.classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+// 切換照片
+function switchPhoto(index) {
+  if (index < 0 || index >= photos.length) return;
+
+  currentPhotoIndex = index;
+  const lightboxImg = document.getElementById('lightboxImg');
+  lightboxImg.src = photos[index].url;
+  lightboxImg.alt = photos[index].alt;
+
+  updateThumbnails();
+  scrollToActiveThumbnail();
+}
+
+// 生成縮圖導航
+function generateThumbnails() {
+  const strip = document.getElementById('thumbnailStrip');
+  strip.innerHTML = '';
+
+  photos.forEach((photo, index) => {
+    const thumb = document.createElement('img');
+    thumb.src = photo.url;
+    thumb.alt = photo.alt;
+    thumb.onclick = () => switchPhoto(index);
+    if (index === currentPhotoIndex) thumb.classList.add('active');
+    strip.appendChild(thumb);
   });
-  modal.addEventListener('touchend', (e) => {
-    const diffY = touchStartY - e.changedTouches[0].clientY;
-    const diffX = touchStartX - e.changedTouches[0].clientX;
-    if (Math.abs(diffY) > 100 || Math.abs(diffX) > 100) closeModal();
+
+  scrollToActiveThumbnail();
+}
+
+// 更新縮圖狀態
+function updateThumbnails() {
+  document.querySelectorAll('.thumbnail-strip img').forEach((img, i) => {
+    img.classList.toggle('active', i === currentPhotoIndex);
   });
 }
 
-function closeImageModal(modal) {
-  modal.style.animation = 'fadeOut 0.3s ease';
-  setTimeout(() => {
-    modal.remove();
-    document.body.style.overflow = 'auto';
-  }, 300);
+// 滾動到當前縮圖
+function scrollToActiveThumbnail() {
+  const strip = document.getElementById('thumbnailStrip');
+  const active = strip.querySelector('.active');
+  if (active) {
+    active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
 }
 
 // ==================== 地圖功能 ====================
