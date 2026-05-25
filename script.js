@@ -142,32 +142,6 @@ function toggleMenu() {
   }
 }
 
-// 選單連結點擊 - 關閉選單並平滑滾動
-document.querySelectorAll('.nav-links a').forEach((link) => {
-  link.addEventListener('click', function (e) {
-    e.preventDefault();
-    const targetId = this.getAttribute('href');
-    const targetSection = document.querySelector(targetId);
-
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    if (sidebar && sidebar.classList.contains('active')) {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-      document.body.style.overflow = 'auto';
-    }
-
-    setTimeout(() => {
-      if (targetSection) {
-        window.scrollTo({
-          top: targetSection.offsetTop - 80,
-          behavior: 'smooth',
-        });
-      }
-    }, 300);
-  });
-});
-
 // ESC 鍵關閉選單 / 模態框
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
