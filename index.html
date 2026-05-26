@@ -120,7 +120,7 @@
       <!-- 載入失敗提示 -->
       <div class="image-error" style="display: none;">
         <span class="error-icon">⚠️</span>
-        <p>圖片載入失敗</p>
+        <p>封面載入失敗</p>
         <button class="retry-btn" onclick="retryLoadImage()">重新載入</button>
       </div>
     </div>
@@ -416,6 +416,12 @@
       <!-- 主圖片顯示區 -->
       <div class="slideshow-main">
         <img id="slideshowImg" src="" alt="婚禮照片" class="slideshow-image">
+        <!-- 載入失敗提示 -->
+        <div class="slideshow-error" id="slideshowError" style="display:none;">
+          <span class="error-icon">⚠️</span>
+          <p>照片載入失敗</p>
+          <button class="retry-btn" onclick="retrySlideshowImage()">重新載入</button>
+        </div>
       </div>
 
       <!-- 控制列（音樂播放器風格） -->
@@ -461,7 +467,6 @@
 
 <!-- 頁尾 -->
 <footer>
-  <div class="footer-decoration"></div>
   <div class="footer-content">
     <p class="footer-main">感謝您的祝福</p>
     <p class="footer-sub">新郎 & 新娘 敬邀</p>

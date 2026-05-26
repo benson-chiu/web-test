@@ -280,10 +280,23 @@ function showSlide(index) {
   // 更新主圖片
   const img = document.getElementById('slideshowImg');
   const counter = document.getElementById('slideshowCounter');
+  const slideshowMain = img ? img.closest('.slideshow-main') : null;
+  const errorEl = document.getElementById('slideshowError');
 
   if (img) {
+    // 切換前先清除錯誤狀態
+    if (slideshowMain) slideshowMain.classList.remove('has-error');
+    if (errorEl) errorEl.style.display = 'none';
+    img.style.display = '';
+
     img.src = photos[currentSlide].url;
     img.alt = photos[currentSlide].alt;
+
+    // 載入失敗時顯示錯誤提示
+    img.onerror = function () {
+      if (slideshowMain) slideshowMain.classList.add('has-error');
+      if (errorEl) errorEl.style.display = 'flex';
+    };
   }
 
   if (counter) {
@@ -295,6 +308,29 @@ function showSlide(index) {
 
   // 重置進度條
   resetProgressBar();
+}
+
+// 相簿圖片重新載入
+function retrySlideshowImage() {
+  const img = document.getElementById('slideshowImg');
+  const slideshowMain = img ? img.closest('.slideshow-main') : null;
+  const errorEl = document.getElementById('slideshowError');
+
+  if (!img) return;
+
+  // 清除錯誤狀態
+  if (slideshowMain) slideshowMain.classList.remove('has-error');
+  if (errorEl) errorEl.style.display = 'none';
+  img.style.display = '';
+
+  // 加上時間戳強制重新請求
+  const originalSrc = photos[currentSlide].url.split('?')[0];
+  img.src = originalSrc + '?t=' + Date.now();
+
+  img.onerror = function () {
+    if (slideshowMain) slideshowMain.classList.add('has-error');
+    if (errorEl) errorEl.style.display = 'flex';
+  };
 }
 
 // 切換照片
@@ -332,6 +368,12 @@ function generateThumbnails() {
     const img = document.createElement('img');
     img.src = photo.url;
     img.alt = photo.alt;
+
+    // 載入失敗時隱藏破圖，顯示 ⚠️
+    img.onerror = function () {
+      img.style.display = 'none';
+      thumb.classList.add('thumb-error');
+    };
 
     thumb.appendChild(img);
     container.appendChild(thumb);
