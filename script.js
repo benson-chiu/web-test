@@ -292,7 +292,13 @@ function showSlide(index) {
     img.src = photos[currentSlide].url;
     img.alt = photos[currentSlide].alt;
 
-    // 載入失敗時顯示錯誤提示
+    // 大圖載入成功：若對應縮圖仍顯示錯誤，同步修復
+    img.onload = function () {
+      syncThumbOnSuccess(currentSlide, photos[currentSlide].url);
+      img.onload = null;
+    };
+
+    // 大圖載入失敗：顯示錯誤提示
     img.onerror = function () {
       if (slideshowMain) slideshowMain.classList.add('has-error');
       if (errorEl) errorEl.style.display = 'flex';
@@ -310,6 +316,25 @@ function showSlide(index) {
   resetProgressBar();
 }
 
+// 大圖成功後同步修復對應縮圖
+function syncThumbOnSuccess(index, src) {
+  const thumbs = document.querySelectorAll('.thumbnail-item');
+  const thumb = thumbs[index];
+  if (!thumb || !thumb.classList.contains('thumb-error')) return;
+
+  thumb.classList.remove('thumb-error');
+  const thumbImg = thumb.querySelector('img');
+  if (thumbImg) {
+    thumbImg.src = src;
+    thumbImg.style.display = '';
+    // 縮圖重試失敗則還原錯誤狀態
+    thumbImg.onerror = function () {
+      thumbImg.style.display = 'none';
+      thumb.classList.add('thumb-error');
+    };
+  }
+}
+
 // 相簿圖片重新載入
 function retrySlideshowImage() {
   const img = document.getElementById('slideshowImg');
@@ -318,15 +343,23 @@ function retrySlideshowImage() {
 
   if (!img) return;
 
-  // 清除錯誤狀態
+  // 清除大圖錯誤狀態
   if (slideshowMain) slideshowMain.classList.remove('has-error');
   if (errorEl) errorEl.style.display = 'none';
   img.style.display = '';
 
   // 加上時間戳強制重新請求
   const originalSrc = photos[currentSlide].url.split('?')[0];
-  img.src = originalSrc + '?t=' + Date.now();
+  const newSrc = originalSrc + '?t=' + Date.now();
+  img.src = newSrc;
 
+  // 重試成功：同步恢復縮圖
+  img.onload = function () {
+    syncThumbOnSuccess(currentSlide, newSrc);
+    img.onload = null;
+  };
+
+  // 重試失敗：恢復大圖錯誤狀態
   img.onerror = function () {
     if (slideshowMain) slideshowMain.classList.add('has-error');
     if (errorEl) errorEl.style.display = 'flex';
