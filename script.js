@@ -187,46 +187,59 @@ document.addEventListener('visibilitychange', function () {
   }
 });
 
-// ==================== Canva 圖片載入處理 ====================
+// ==================== Canva 影片載入處理 ====================
 document.addEventListener('DOMContentLoaded', function () {
-  const canvaGif = document.querySelector('.canva-gif');
-  const imageLoading = document.querySelector('.image-loading');
-  const imageError = document.querySelector('.image-error');
+  const video = document.getElementById('canvaVideo');
+  const videoLoading = document.getElementById('videoLoading');
+  const videoError = document.getElementById('videoError');
 
-  if (!canvaGif) return;
+  if (!video) return;
 
-  canvaGif.addEventListener('load', function () {
-    canvaGif.classList.add('loaded');
-    if (imageLoading) imageLoading.style.display = 'none';
+  // 可以開始播放時隱藏載入提示
+  video.addEventListener('canplay', function () {
+    if (videoLoading) videoLoading.style.display = 'none';
   });
 
-  canvaGif.addEventListener('error', function () {
-    if (imageLoading) imageLoading.style.display = 'none';
-    if (imageError) imageError.style.display = 'flex';
+  // <source> 載入失敗
+  video.addEventListener('error', function () {
+    if (videoLoading) videoLoading.style.display = 'none';
+    if (videoError) videoError.style.display = 'flex';
   });
 
-  if (canvaGif.complete) {
-    if (canvaGif.naturalHeight !== 0) {
-      canvaGif.classList.add('loaded');
-      if (imageLoading) imageLoading.style.display = 'none';
-    } else {
-      if (imageLoading) imageLoading.style.display = 'none';
-      if (imageError) imageError.style.display = 'flex';
-    }
+  // 若瀏覽器已快取，readyState >= 3 代表可以播放
+  if (video.readyState >= 3) {
+    if (videoLoading) videoLoading.style.display = 'none';
   }
 });
 
 function retryLoadImage() {
-  const canvaGif = document.querySelector('.canva-gif');
-  const imageError = document.querySelector('.image-error');
-  const imageLoading = document.querySelector('.image-loading');
+  const video = document.getElementById('canvaVideo');
+  const videoError = document.getElementById('videoError');
+  const videoLoading = document.getElementById('videoLoading');
 
-  if (canvaGif && imageError && imageLoading) {
-    imageError.style.display = 'none';
-    imageLoading.style.display = 'flex';
-    const originalSrc = canvaGif.src.split('?')[0];
-    canvaGif.src = originalSrc + '?t=' + new Date().getTime();
+  if (!video) return;
+
+  videoError.style.display = 'none';
+  videoLoading.style.display = 'flex';
+
+  // 加時間戳強制重新請求
+  const source = video.querySelector('source');
+  if (source) {
+    const originalSrc = source.src.split('?')[0];
+    source.src = originalSrc + '?t=' + Date.now();
   }
+  video.load(); // 重新載入影片
+
+  video.addEventListener('canplay', function onCanPlay() {
+    if (videoLoading) videoLoading.style.display = 'none';
+    video.removeEventListener('canplay', onCanPlay);
+  });
+
+  video.addEventListener('error', function onError() {
+    if (videoLoading) videoLoading.style.display = 'none';
+    if (videoError) videoError.style.display = 'flex';
+    video.removeEventListener('error', onError);
+  });
 }
 
 // ==================== 相簿功能 ====================

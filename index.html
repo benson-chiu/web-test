@@ -108,17 +108,27 @@
   <!-- Canva 動態圖片容器 -->
   <div class="hero-content">
     <div class="canva-image-container">
-      <!-- Canva GIF 圖片 -->
-      <img src="images/wedding-invitation.gif" alt="婚禮邀請函" class="canva-gif" loading="eager" />
+      <!-- Canva MP4 影片 -->
+      <video
+        id="canvaVideo"
+        class="canva-mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="auto"
+      >
+        <source src="images/wedding-invitation.mp4" type="video/mp4" />
+      </video>
 
-      <!-- 載入中提示（圖片載入前顯示） -->
-      <div class="image-loading">
+      <!-- 載入中提示（影片載入前顯示） -->
+      <div class="image-loading" id="videoLoading">
         <div class="loading-spinner"></div>
         <p>載入中...</p>
       </div>
 
       <!-- 載入失敗提示 -->
-      <div class="image-error" style="display: none;">
+      <div class="image-error" id="videoError" style="display: none;">
         <span class="error-icon">⚠️</span>
         <p>封面載入失敗</p>
         <button class="retry-btn" onclick="retryLoadImage()">重新載入</button>
