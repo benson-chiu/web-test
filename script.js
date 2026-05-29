@@ -68,7 +68,7 @@ function initPetals() {
   if (!container) return;
 
   const isMobile = window.innerWidth < 768;
-  const maxPetals = isMobile ? 12 : 20;
+  const maxPetals = isMobile ? 15 : 20;
   let petalCount = 0;
 
   const petalColors = [
