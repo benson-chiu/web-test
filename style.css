@@ -284,7 +284,6 @@ a {
     transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
-.menu-toggle:hover,
 .menu-toggle.menu-open {
     transform: scale(1.1) rotate(90deg);
     box-shadow: 0 12px 40px rgba(197, 164, 248, 0.35);
@@ -298,12 +297,19 @@ a {
     transition: all 0.3s ease;
 }
 
-.menu-toggle:hover span:nth-child(1) {
-    transform: translateY(-2px);
-}
+@media (hover: hover) {
+    .menu-toggle:hover {
+        transform: scale(1.1) rotate(90deg);
+        box-shadow: 0 12px 40px rgba(197, 164, 248, 0.35);
+    }
 
-.menu-toggle:hover span:nth-child(3) {
-    transform: translateY(2px);
+    .menu-toggle:hover span:nth-child(1) {
+        transform: translateY(-2px);
+    }
+
+    .menu-toggle:hover span:nth-child(3) {
+        transform: translateY(2px);
+    }
 }
 
 /* ==================== 側邊選單 ==================== */
@@ -353,9 +359,11 @@ a {
     transition: all 0.3s ease;
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
+@media (hover: hover) {
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
 }
 
 .nav-links {
@@ -388,13 +396,15 @@ a {
     transition: width 0.3s ease;
 }
 
-.nav-links a:hover::before {
-    width: 100%;
-}
+@media (hover: hover) {
+    .nav-links a:hover::before {
+        width: 100%;
+    }
 
-.nav-links a:hover {
-    border-left-color: white;
-    padding-left: 50px;
+    .nav-links a:hover {
+        border-left-color: white;
+        padding-left: 50px;
+    }
 }
 
 .nav-links a .icon {
@@ -445,18 +455,20 @@ a {
     justify-content: center;
 }
 
-.music-toggle:hover {
-    transform: scale(1.2);
-    box-shadow: 0 12px 40px rgba(197, 164, 248, 0.35);
+@media (hover: hover) {
+    .music-toggle:hover {
+        transform: scale(1.2);
+        box-shadow: 0 12px 40px rgba(197, 164, 248, 0.35);
+    }
+
+    .music-toggle.playing:hover {
+        animation: none;
+        transform: scale(1.2);
+    }
 }
 
 .music-toggle.playing {
     animation: musicPulse 2s infinite;
-}
-
-.music-toggle.playing:hover {
-    animation: none;
-    transform: scale(1.2);
 }
 
 .menu-toggle.hidden-up {
@@ -624,9 +636,11 @@ a {
     transition: all 0.3s ease;
 }
 
-.retry-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(197, 164, 248, 0.4);
+@media (hover: hover) {
+    .retry-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(197, 164, 248, 0.4);
+    }
 }
 
 /* ==================== 滾動提示遮罩 ==================== */
@@ -1137,9 +1151,11 @@ a {
     object-fit: cover;
 }
 
-.thumbnail-item:hover {
-    opacity: 0.9;
-    transform: translateY(-3px);
+@media (hover: hover) {
+    .thumbnail-item:hover {
+        opacity: 0.9;
+        transform: translateY(-3px);
+    }
 }
 
 .thumbnail-item.active {
@@ -1316,8 +1332,10 @@ a {
     100% { background-position: 0% 50%; }
 }
 
-.date-card:hover .date-card-inner {
-    transform: translateY(-10px);
+@media (hover: hover) {
+    .date-card:hover .date-card-inner {
+        transform: translateY(-10px);
+    }
 }
 
 /* 日期詳情 */
@@ -1338,9 +1356,11 @@ a {
     transition: all 0.3s ease;
 }
 
-.date-item:hover {
-    transform: translateX(10px);
-    box-shadow: 0 10px 30px rgba(197, 164, 248, 0.18);
+@media (hover: hover) {
+    .date-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 10px 30px rgba(197, 164, 248, 0.18);
+    }
 }
 
 .detail-icon {
@@ -1475,8 +1495,10 @@ a {
     isolation: isolate;
 }
 
-.location-card:hover .location-card-inner {
-    transform: translateY(-10px);
+@media (hover: hover) {
+    .location-card:hover .location-card-inner {
+        transform: translateY(-10px);
+    }
 }
 
 /* 地點資訊 */
@@ -1557,21 +1579,23 @@ a {
     box-shadow: 0 8px 25px rgba(197, 164, 248, 0.35);
 }
 
-.primary-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(197, 164, 248, 0.45);
-}
-
 .secondary-btn {
     background: #f0f5ff;
     color: var(--secondary);
     border: 2px solid var(--primary);
 }
 
-.secondary-btn:hover {
-    background: var(--primary);
-    color: #f0f5ff;
-    transform: translateY(-3px);
+@media (hover: hover) {
+    .primary-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(197, 164, 248, 0.45);
+    }
+
+    .secondary-btn:hover {
+        background: var(--primary);
+        color: #f0f5ff;
+        transform: translateY(-3px);
+    }
 }
 
 /* 地圖預覽 */
@@ -1612,8 +1636,10 @@ a {
     cursor: pointer;
 }
 
-.map-frame:hover .map-overlay {
-    opacity: 1;
+@media (hover: hover) {
+    .map-frame:hover .map-overlay {
+        opacity: 1;
+    }
 }
 
 .map-overlay-text {
@@ -1779,10 +1805,12 @@ a {
     border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-.schedule-card:hover,
-.schedule-item:hover .schedule-card {
-    transform: translateX(15px) translateY(-10px);
-    box-shadow: 0 25px 70px rgba(197, 164, 248, 0.22);
+@media (hover: hover) {
+    .schedule-card:hover,
+    .schedule-item:hover .schedule-card {
+        transform: translateX(15px) translateY(-10px);
+        box-shadow: 0 25px 70px rgba(197, 164, 248, 0.22);
+    }
 }
 
 .schedule-card::before {
@@ -1877,6 +1905,13 @@ a {
         /* 圓圈中心(40px) - 箭頭半高(15px) = 25px */
     }
 
+    .schedule-card:hover,
+    .schedule-item:hover .schedule-card {
+        transform: translateX(10px) translateY(-5px);
+    }
+}
+
+@media (hover: hover) and (max-width: 768px) {
     .schedule-card:hover,
     .schedule-item:hover .schedule-card {
         transform: translateX(10px) translateY(-5px);
