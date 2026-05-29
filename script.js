@@ -552,7 +552,7 @@ document.addEventListener('visibilitychange', () => {
 function openMap() {
   const address = '台北君悅大飯店';
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const url = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+  const url = `https://maps.app.goo.gl/g49DDDiGTn2BNqVa9`;
   if (isMobile) {
     window.location.href = url;
   } else {
@@ -564,7 +564,7 @@ function openStreetView() {
   const lat = 25.0368759;
   const lng = 121.5656493;
   window.open(
-    `https://www.google.com/maps/@${lat},${lng},3a,75y,90t/data=!3m6!1e1!3m4!1s${encodeURIComponent('街景ID')}!2e0!7i16384!8i8192`,
+    `https://www.google.com/maps/place/%E7%A6%8F%E7%81%A3%E8%8E%8A%E5%9C%92/@22.4584235,120.4828357,3a,75y,242.24h,93.29t/data=!3m8!1e1!3m6!1sCIHM0ogKEICAgICE4Mma9wE!2e10!3e11!6shttps:%2F%2Flh3.googleusercontent.com%2Fgpms-cs-s%2FABJJf51Qa3a9eGvO0ni4EyKCZjq4qbeLuE4b4P6Oa224j2FlPeKFdcKJoGkf40vOzqAtPZBUAwGtmsPsJJDvtcesMmAMklH-8cecZF5FXAljoafXpcR60Nz78WO0jEQ3-UneiBp4Db5-%3Dw900-h600-k-no-pi-3.2905667757587196-ya225.49568830577712-ro0-fo100!7i13312!8i6656!4m9!3m8!1s0x3471e052a123561d:0x64d700659bdb2a19!5m2!4m1!1i2!8m2!3d22.4578971!4d120.4825316!16s%2Fg%2F1vs1pm2f?entry=tts&g_ep=EgoyMDI2MDUyNi4wIPu8ASoASAFQAw%3D%3D`,
     '_blank'
   );
 }

@@ -1,6 +1,6 @@
 ﻿/* ==================== 基礎設定 ==================== */
 :root {
-    --primary: #c5a4f8;
+    --primary: #bb8eff;
     --secondary: #8fa8d8;
     --accent: #ede0ff;
     --dark: #212529;
@@ -27,7 +27,7 @@ html {
 
 /* ==================== Vanta Fog 背景 ==================== */
 body {
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: 'Chiron GoRound TC', sans-serif;
     line-height: 1.8;
     color: var(--dark);
     overflow-x: hidden;
@@ -1037,7 +1037,7 @@ a {
     font-size: 1rem;
     font-weight: 700;
     color: var(--dark);
-    font-family: 'Courier New', monospace;
+    font-family: 'Chiron GoRound TC', serif;
     padding: 0 10px;
 }
 
@@ -1327,7 +1327,7 @@ a {
 }
 
 .detail-label {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: var(--primary);
     margin-bottom: 5px;
     letter-spacing: 1px;
@@ -1350,7 +1350,7 @@ a {
 
 .countdown-title {
     text-align: center;
-    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    font-size: clamp(1rem, 3vw, 1.3rem);
     color: var(--primary);
     margin-bottom: 20px;
     letter-spacing: 2px;
@@ -1377,15 +1377,15 @@ a {
 .countdown-number {
     font-size: clamp(1.4rem, 5vw, 3rem);
     font-weight: 700;
-    color: #f6bad8;
-    font-family: 'Courier New', monospace;
+    color: #ff80c0;
+    font-family: "Send Flowers", cursive;
     line-height: 1;
     text-shadow: 1px 1px 3px rgba(197, 164, 248, 0.25);
     white-space: nowrap;
 }
 
 .countdown-label {
-    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
     color: var(--dark);
     margin-top: 6px;
     letter-spacing: 1px;
@@ -1717,7 +1717,7 @@ a {
     color: white;
     font-size: 1.5rem;
     font-weight: 700;
-    font-family: 'Courier New', monospace;
+    font-family: 'Chiron GoRound TC', serif;
 }
 
 .time-line {
@@ -2022,13 +2022,12 @@ a {
 .section-header .corner-br-deco { bottom: 8px; right: 14px; }
 
 .section-title {
-    font-family: 'Chiron GoRound TC', serif;
-    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-family: "Send Flowers", cursive;
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
     color: var(--blue-purple);
     margin-bottom: 6px;
     font-weight: 700;
     letter-spacing: 3px;
-    text-transform: uppercase;
     opacity: 1;
     text-shadow:
         0 0 20px rgba(255, 255, 255, 0.9),
