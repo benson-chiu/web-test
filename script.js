@@ -142,14 +142,11 @@ function toggleMenu() {
   }
 }
 
-// ESC 鍵關閉選單 / 模態框
+// ESC 鍵關閉選單
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     const sidebar = document.getElementById('sidebar');
     if (sidebar.classList.contains('active')) toggleMenu();
-
-    const modal = document.querySelector('.image-modal');
-    if (modal) closeImageModal(modal);
   }
 });
 
@@ -158,19 +155,19 @@ let isMusicPlaying = false;
 
 function toggleMusic() {
   const audio = document.getElementById('bgMusic');
-  const musicBtn = document.getElementById('musicToggle');
+  const musicIcon = document.getElementById('musicIcon');
   if (!audio) return;
 
   if (isMusicPlaying) {
     audio.pause();
-    musicBtn.textContent = '🔇';   // 靜音圖示，讓使用者知道目前靜音
-    musicBtn.classList.remove('playing');
+    if (musicIcon) musicIcon.textContent = '🔇';
+    document.getElementById('musicToggle').classList.remove('playing');
     isMusicPlaying = false;
   } else {
     audio.play()
       .then(() => {
-        musicBtn.textContent = '🎶'; // 播放中圖示
-        musicBtn.classList.add('playing');
+        if (musicIcon) musicIcon.textContent = '🎶';
+        document.getElementById('musicToggle').classList.add('playing');
         isMusicPlaying = true;
       })
       .catch((error) => console.log('音樂播放失敗:', error));
@@ -336,15 +333,15 @@ function syncThumbOnSuccess(index, src) {
   if (!thumb || !thumb.classList.contains('thumb-error')) return;
 
   thumb.classList.remove('thumb-error');
+  // 移除錯誤 icon
+  const errorIcon = thumb.querySelector('.thumb-error-icon');
+  if (errorIcon) errorIcon.remove();
+
   const thumbImg = thumb.querySelector('img');
   if (thumbImg) {
     thumbImg.src = src;
     thumbImg.style.display = '';
-    // 縮圖重試失敗則還原錯誤狀態
-    thumbImg.onerror = function () {
-      thumbImg.style.display = 'none';
-      thumb.classList.add('thumb-error');
-    };
+    thumbImg.onerror = function () { setThumbError(thumb, thumbImg); };
   }
 }
 
@@ -399,6 +396,16 @@ function jumpToSlide(index) {
   }
 }
 
+// 設定縮圖錯誤狀態
+function setThumbError(thumb, img) {
+  img.style.display = 'none';
+  thumb.classList.add('thumb-error');
+  const icon = document.createElement('span');
+  icon.className = 'thumb-error-icon';
+  icon.textContent = '⚠️';
+  thumb.appendChild(icon);
+}
+
 // 生成縮圖
 function generateThumbnails() {
   const container = document.getElementById('slideshowThumbnails');
@@ -415,11 +422,7 @@ function generateThumbnails() {
     img.src = photo.url;
     img.alt = photo.alt;
 
-    // 載入失敗時隱藏破圖，顯示 ⚠️
-    img.onerror = function () {
-      img.style.display = 'none';
-      thumb.classList.add('thumb-error');
-    };
+    img.onerror = function () { setThumbError(thumb, img); };
 
     thumb.appendChild(img);
     container.appendChild(thumb);
@@ -437,14 +440,7 @@ function updateThumbnails() {
   const container = document.getElementById('slideshowThumbnails');
   const activeThumb = thumbnails[currentSlide];
   if (container && activeThumb) {
-    // 使用 scrollIntoView 但限制在容器內
-    const containerRect = container.getBoundingClientRect();
-    const thumbRect = activeThumb.getBoundingClientRect();
-    
-    // 計算需要滾動的距離
     const scrollLeft = activeThumb.offsetLeft - (container.offsetWidth / 2) + (activeThumb.offsetWidth / 2);
-    
-    // 平滑滾動縮圖容器
     container.scrollTo({
       left: scrollLeft,
       behavior: 'smooth'
@@ -485,11 +481,11 @@ function toggleAutoPlay() {
   if (isAutoPlaying) {
     stopAutoPlay();
     isAutoPlaying = false;
-    if (playIcon) playIcon.textContent = '▶';
+    if (playIcon) playIcon.textContent = 'play_arrow';
   } else {
     startAutoPlay();
     isAutoPlaying = true;
-    if (playIcon) playIcon.textContent = '⏸';
+    if (playIcon) playIcon.textContent = 'pause';
   }
 }
 
@@ -550,7 +546,6 @@ document.addEventListener('visibilitychange', () => {
 
 // ==================== 地圖功能 ====================
 function openMap() {
-  const address = '台北君悅大飯店';
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const url = `https://maps.app.goo.gl/g49DDDiGTn2BNqVa9`;
   if (isMobile) {
@@ -561,8 +556,6 @@ function openMap() {
 }
 
 function openStreetView() {
-  const lat = 25.0368759;
-  const lng = 121.5656493;
   window.open(
     `https://www.google.com/maps/place/%E7%A6%8F%E7%81%A3%E8%8E%8A%E5%9C%92/@22.4584235,120.4828357,3a,75y,242.24h,93.29t/data=!3m8!1e1!3m6!1sCIHM0ogKEICAgICE4Mma9wE!2e10!3e11!6shttps:%2F%2Flh3.googleusercontent.com%2Fgpms-cs-s%2FABJJf51Qa3a9eGvO0ni4EyKCZjq4qbeLuE4b4P6Oa224j2FlPeKFdcKJoGkf40vOzqAtPZBUAwGtmsPsJJDvtcesMmAMklH-8cecZF5FXAljoafXpcR60Nz78WO0jEQ3-UneiBp4Db5-%3Dw900-h600-k-no-pi-3.2905667757587196-ya225.49568830577712-ro0-fo100!7i13312!8i6656!4m9!3m8!1s0x3471e052a123561d:0x64d700659bdb2a19!5m2!4m1!1i2!8m2!3d22.4578971!4d120.4825316!16s%2Fg%2F1vs1pm2f?entry=tts&g_ep=EgoyMDI2MDUyNi4wIPu8ASoASAFQAw%3D%3D`,
     '_blank'
@@ -725,20 +718,6 @@ function initScrollHint() {
   overlay.addEventListener('click', hideHint);
 }
 
-// ==================== 動畫樣式注入 ====================
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-  @keyframes zoomIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  .image-modal { animation: fadeIn 0.3s ease; }
-  .image-modal img { animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-`;
-document.head.appendChild(style);
-
 // ==================== 視窗 resize 處理 ====================
 let resizeTimer;
 window.addEventListener('resize', function () {
@@ -756,27 +735,6 @@ window.addEventListener('resize', function () {
     AOS.refresh();
   }, 250);
 });
-
-// ==================== 圖片延遲載入 ====================
-if ('IntersectionObserver' in window) {
-  const imageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-        }
-        img.classList.add('loaded');
-        observer.unobserve(img);
-      }
-    });
-  }, { rootMargin: '50px' });
-
-  document.querySelectorAll('img[loading="lazy"]').forEach((img) => {
-    imageObserver.observe(img);
-  });
-}
 
 // ==================== 錯誤處理 ====================
 window.addEventListener('error', function (e) {
