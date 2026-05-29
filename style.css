@@ -1018,11 +1018,14 @@ a {
     flex-shrink: 0;
 }
 
-.control-btn:hover {
-    background: var(--primary);
-    color: white;
-    transform: scale(1.1);
-    box-shadow: 0 5px 15px rgba(197, 164, 248, 0.4);
+/* hover 效果只在有滑鼠的裝置上生效，避免觸控裝置點擊後停留在 hover 狀態 */
+@media (hover: hover) {
+    .control-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(197, 164, 248, 0.4);
+    }
 }
 
 /* 播放/暫停按鈕 */
