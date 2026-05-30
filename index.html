@@ -99,7 +99,7 @@
 <button class="music-toggle" id="musicToggle" onclick="toggleMusic()">
   <span class="noto-emoji" id="musicIcon">🎵</span>
 </button>
-<audio id="bgMusic" loop>
+<audio id="bgMusic" loop autoplay>
   <source src="images/background-music.mp3" type="audio/mpeg" />
 </audio>
 
@@ -197,22 +197,22 @@
             <p class="countdown-title">距離大喜之日還有</p>
             <div class="countdown-display">
               <div class="countdown-item">
-                <span class="countdown-number" id="days2">000</span>
+                <span class="countdown-number" id="days">000</span>
                 <span class="countdown-label">天</span>
               </div>
               <div class="countdown-divider">:</div>
               <div class="countdown-item">
-                <span class="countdown-number" id="hours2">00</span>
+                <span class="countdown-number" id="hours">00</span>
                 <span class="countdown-label">時</span>
               </div>
               <div class="countdown-divider">:</div>
               <div class="countdown-item">
-                <span class="countdown-number" id="minutes2">00</span>
+                <span class="countdown-number" id="minutes">00</span>
                 <span class="countdown-label">分</span>
               </div>
               <div class="countdown-divider">:</div>
               <div class="countdown-item">
-                <span class="countdown-number" id="seconds2">00</span>
+                <span class="countdown-number" id="seconds">00</span>
                 <span class="countdown-label">秒</span>
               </div>
             </div>
@@ -252,9 +252,9 @@
               <div class="location-detail-item">
                 <span class="detail-icon noto-emoji">🚄</span>
                 <p>
-                  高鐵左營站 & 台鐵新左營站
+                  高鐵左營站 & 台鐵新左營站<br>
                   <span class="noto-emoji">➡️</span>
-                  台灣好行9127D公車到"大鵬灣遊客中心"站
+                  搭乘台灣好行9127D公車到"大鵬灣遊客中心"站<br>
                   <span class="noto-emoji">➡️</span>
                   步行約8分鐘
                 </p>
@@ -262,7 +262,10 @@
 
               <div class="location-detail-item">
                 <span class="detail-icon noto-emoji">🚗</span>
-                <p>請點擊地圖直接導航，莊園內有停車場可免費停車</p>
+                <p>
+                  莊園內有停車場可免費停車<br>
+                  請點擊地圖直接導航
+                </p>
               </div>
             </div>
 

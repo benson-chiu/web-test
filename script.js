@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initScrollAnimations();
   initScrollHint();
 
+  autoPlayMusic();
   console.log('💕 電子喜帖載入完成！');
 });
 
@@ -150,8 +151,50 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
+// ==================== 自動播放音樂 ====================
+function autoPlayMusic() {
+  const audio = document.getElementById('bgMusic');
+  const musicIcon = document.getElementById('musicIcon');
+  const musicToggle = document.getElementById('musicToggle');
+  
+  if (!audio) return;
+
+  // 嘗試自動播放
+  audio.play()
+    .then(() => {
+      // 播放成功
+      if (musicIcon) musicIcon.textContent = '🔊';
+      if (musicToggle) musicToggle.classList.add('playing');
+      isMusicPlaying = true;
+      console.log('🎵 音樂自動播放成功');
+    })
+    .catch((error) => {
+      // 播放失敗(通常是瀏覽器政策限制)
+      console.log('⚠️ 音樂自動播放被阻擋:', error.message);
+      if (musicIcon) musicIcon.textContent = '🔈';
+      if (musicToggle) musicToggle.classList.remove('playing');
+      isMusicPlaying = false;
+      
+      // 提示使用者點擊播放
+      showMusicHint();
+    });
+}
+
+// 顯示音樂播放提示(可選)
+function showMusicHint() {
+  const musicToggle = document.getElementById('musicToggle');
+  if (!musicToggle) return;
+  
+  // 添加脈動動畫提示使用者點擊
+  musicToggle.style.animation = 'musicPulse 1s ease-in-out 3';
+  
+  setTimeout(() => {
+    musicToggle.style.animation = '';
+  }, 3000);
+}
+
 // ==================== 音樂控制 ====================
-let isMusicPlaying = false;
+let isMusicPlaying = true;
 
 function toggleMusic() {
   const audio = document.getElementById('bgMusic');
@@ -587,26 +630,26 @@ function initScrollEffects() {
 function initCountdownDisplay() {
   const weddingDate = new Date('2026-10-25T12:00:00').getTime();
 
-  const days2 = document.getElementById('days2');
-  const hours2 = document.getElementById('hours2');
-  const minutes2 = document.getElementById('minutes2');
-  const seconds2 = document.getElementById('seconds2');
+  const days = document.getElementById('days');
+  const hours = document.getElementById('hours');
+  const minutes = document.getElementById('minutes');
+  const seconds = document.getElementById('seconds');
 
   function updateCountdown() {
     const distance = weddingDate - new Date().getTime();
 
     if (distance < 0) {
-      if (days2) days2.textContent = '000';
-      if (hours2) hours2.textContent = '00';
-      if (minutes2) minutes2.textContent = '00';
-      if (seconds2) seconds2.textContent = '00';
+      if (days) days.textContent = '000';
+      if (hours) hours.textContent = '00';
+      if (minutes) minutes.textContent = '00';
+      if (seconds) seconds.textContent = '00';
       return;
     }
 
-    if (days2) days2.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(3, '0');
-    if (hours2) hours2.textContent = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
-    if (minutes2) minutes2.textContent = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
-    if (seconds2) seconds2.textContent = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+    if (days) days.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(3, '0');
+    if (hours) hours.textContent = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+    if (minutes) minutes.textContent = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+    if (seconds) seconds.textContent = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
   }
 
   setInterval(updateCountdown, 1000);
