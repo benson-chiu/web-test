@@ -160,13 +160,13 @@ function toggleMusic() {
 
   if (isMusicPlaying) {
     audio.pause();
-    if (musicIcon) musicIcon.textContent = '🔇';
+    if (musicIcon) musicIcon.textContent = '🔈';
     document.getElementById('musicToggle').classList.remove('playing');
     isMusicPlaying = false;
   } else {
     audio.play()
       .then(() => {
-        if (musicIcon) musicIcon.textContent = '🎶';
+        if (musicIcon) musicIcon.textContent = '🔊';
         document.getElementById('musicToggle').classList.add('playing');
         isMusicPlaying = true;
       })
@@ -547,7 +547,7 @@ document.addEventListener('visibilitychange', () => {
 // ==================== 地圖功能 ====================
 function openMap() {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const url = `https://maps.app.goo.gl/g49DDDiGTn2BNqVa9`;
+  const url = `https://maps.app.goo.gl/Wa4EyWELkW3rkMAs9`;
   if (isMobile) {
     window.location.href = url;
   } else {

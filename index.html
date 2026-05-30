@@ -65,7 +65,7 @@
 <!-- 側邊導航列 -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h3><span class="noto-emoji">💕</span> 選單</h3>
+    <h3><span class="noto-emoji">🎉</span> 選單</h3>
     <button class="close-btn" onclick="toggleMenu()"><span class="material-symbols-outlined">close</span></button>
   </div>
   <div class="nav-links">
@@ -74,20 +74,20 @@
       <span>首頁</span>
     </a>
     <a href="#date" onclick="toggleMenu()">
-      <span class="icon noto-emoji">📅</span>
-      <span>婚宴日期</span>
+      <span class="icon noto-emoji">🗓️</span>
+      <span>婚禮日期</span>
     </a>
     <a href="#location" onclick="toggleMenu()">
       <span class="icon noto-emoji">📍</span>
-      <span>婚宴地點</span>
+      <span>婚禮地點</span>
     </a>
     <a href="#schedule" onclick="toggleMenu()">
       <span class="icon noto-emoji">⏰</span>
       <span>婚禮流程</span>
     </a>
     <a href="#gallery" onclick="toggleMenu()">
-      <span class="icon noto-emoji">📸</span>
-      <span>相簿</span>
+      <span class="icon noto-emoji">💕</span>
+      <span>幸福時光</span>
     </a>
   </div>
 </nav>
@@ -150,7 +150,7 @@
   </div>
 </section>
 
-<!-- 婚宴日期 -->
+<!-- 婚禮日期 -->
 <section id="date" class="date-section">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
@@ -159,7 +159,7 @@
       <span class="corner-bl-deco">✦</span>
       <span class="corner-br-deco">✦</span>
       <h2 class="section-title">Wedding Date</h2>
-      <p class="section-subtitle">婚宴日期</p>
+      <p class="section-subtitle">婚禮日期</p>
     </div>
 
     <div class="date-content" data-aos="zoom-in" data-aos-duration="1000">
@@ -168,7 +168,7 @@
           <!-- 日期詳情 -->
           <div class="date-details">
             <div class="date-item">
-              <span class="detail-icon noto-emoji">📆</span>
+              <span class="detail-icon noto-emoji">🗓️</span>
               <div class="detail-content">
                 <p class="detail-label">日期</p>
                 <p class="detail-value">2026.10.25<br>星期日</p>
@@ -176,9 +176,9 @@
             </div>
 
             <div class="date-item">
-              <span class="detail-icon noto-emoji">🕐</span>
+              <span class="detail-icon noto-emoji">💒</span>
               <div class="detail-content">
-                <p class="detail-label">入場時間</p>
+                <p class="detail-label">證婚入場時間</p>
                 <p class="detail-value">上午 11:00</p>
               </div>
             </div>
@@ -186,7 +186,7 @@
             <div class="date-item">
               <span class="detail-icon noto-emoji">🎊</span>
               <div class="detail-content">
-                <p class="detail-label">開席時間</p>
+                <p class="detail-label">宴客開席時間</p>
                 <p class="detail-value">下午 12:00</p>
               </div>
             </div>
@@ -223,7 +223,7 @@
   </div>
 </section>
 
-<!-- 婚宴地點 -->
+<!-- 婚禮地點 -->
 <section id="location" class="location-section">
   <div class="container">
     <div class="section-header" data-aos="fade-up">
@@ -232,7 +232,7 @@
       <span class="corner-bl-deco">✦</span>
       <span class="corner-br-deco">✦</span>
       <h2 class="section-title">Wedding Venue</h2>
-      <p class="section-subtitle">婚宴地點</p>
+      <p class="section-subtitle">婚禮地點</p>
     </div>
 
     <div class="location-content">
@@ -240,35 +240,41 @@
         <div class="location-card-inner">
           <!-- 地點資訊 -->
           <div class="location-info">
-            <h3 class="venue-name">台北君悅大飯店</h3>
-            <p class="venue-hall">3樓 君悅廳</p>
+            <h3 class="venue-name">福灣莊園</h3>
+            <p class="venue-hall">2樓 宴會廳</p>
 
             <div class="location-details">
               <div class="location-detail-item">
-                <span class="detail-icon noto-emoji">📮</span>
-                <p>台北市信義區松壽路2號</p>
+                <span class="detail-icon noto-emoji">📍</span>
+                <p>屏東縣東港鎮大潭里大鵬路100號</p>
               </div>
 
               <div class="location-detail-item">
-                <span class="detail-icon noto-emoji">🚇</span>
-                <p>捷運市政府站 2號出口步行5分鐘</p>
+                <span class="detail-icon noto-emoji">🚄</span>
+                <p>
+                  高鐵左營站 & 台鐵新左營站
+                  <span class="noto-emoji">➡️</span>
+                  台灣好行9127D公車到"大鵬灣遊客中心"站
+                  <span class="noto-emoji">➡️</span>
+                  步行約8分鐘
+                </p>
               </div>
 
               <div class="location-detail-item">
                 <span class="detail-icon noto-emoji">🚗</span>
-                <p>飯店地下停車場（B3-B5）</p>
+                <p>請點擊地圖直接導航，莊園內有停車場可免費停車</p>
               </div>
             </div>
 
             <!-- 地圖按鈕 -->
             <div class="location-buttons">
               <button class="location-btn primary-btn" onclick="openMap()">
-                <span class="btn-icon noto-emoji">🗺️</span>
+                <span class="btn-icon noto-emoji">🌏</span>
                 <span>Google 地圖</span>
                 <span class="btn-shine"></span>
               </button>
               <button class="location-btn secondary-btn" onclick="openStreetView()">
-                <span class="btn-icon noto-emoji">👁️</span>
+                <span class="btn-icon noto-emoji">🏞️</span>
                 <span>街景檢視</span>
               </button>
             </div>
@@ -284,9 +290,6 @@
             width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
             referrerpolicy="no-referrer-when-downgrade">
           </iframe>
-          <div class="map-overlay" onclick="openMap()">
-            <span class="map-overlay-text">點擊開啟完整地圖</span>
-          </div>
         </div>
       </div>
     </div>
@@ -442,7 +445,7 @@
         <!-- 中間：切換按鈕 + 計數 -->
         <div class="control-center">
           <button class="control-btn nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="上一張">
-            <span class="material-symbols-outlined">navigate_before</span>
+            <span class="material-symbols-outlined">chevron_left</span>
           </button>
           
           <div class="photo-counter" id="slideshowCounter">
@@ -450,7 +453,7 @@
           </div>
           
           <button class="control-btn nav-btn" id="nextBtn" onclick="changeSlide(1)" title="下一張">
-            <span class="material-symbols-outlined">navigate_next</span>
+            <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>
 
