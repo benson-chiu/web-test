@@ -195,16 +195,12 @@ function setupAutoPlayOnInteraction() {
     document.removeEventListener('click', playOnInteraction);
     document.removeEventListener('touchstart', playOnInteraction);
     document.removeEventListener('keydown', playOnInteraction);
-    document.removeEventListener('wheel', playOnInteraction);
-    document.removeEventListener('scroll', playOnInteraction);
   };
   
   // 監聽多種互動方式
   document.addEventListener('click', playOnInteraction);
   document.addEventListener('touchstart', playOnInteraction, { passive: true });
   document.addEventListener('keydown', playOnInteraction);
-  document.addEventListener('wheel', playOnInteraction, { passive: true });
-  document.addEventListener('scroll', playOnInteraction, { passive: true });
   
   console.log('🎵 等待使用者互動以播放音樂...');
 }

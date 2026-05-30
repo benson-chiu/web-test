@@ -1550,6 +1550,28 @@ a {
     line-height: 1.6;
 }
 
+/* 公車URL連結樣式 */
+.bus-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+@media (hover: hover) {
+  .bus-link:hover {
+    color: var(--secondary);
+    border-bottom-color: var(--secondary);
+  }
+}
+
+/* 觸控裝置的點擊效果 */
+.bus-link:active {
+  color: var(--secondary);
+  transform: scale(0.98);
+}
+
 /* 地點按鈕 */
 .location-buttons {
     display: flex;
