@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initScrollAnimations();
   initScrollHint();
 
-  autoPlayMusic();
+  setupAutoPlayOnInteraction();
   console.log('💕 電子喜帖載入完成！');
 });
 
@@ -151,79 +151,102 @@ document.addEventListener('keydown', function (e) {
   }
 });
 
-// ==================== 自動播放音樂 ====================
+// ==================== 音樂控制 ====================
+let isMusicPlaying = false;
+let hasUserInteracted = false; // 追蹤使用者是否已互動
+
+// 自動播放音樂（在使用者互動後）
 function autoPlayMusic() {
   const audio = document.getElementById('bgMusic');
   const musicIcon = document.getElementById('musicIcon');
   const musicToggle = document.getElementById('musicToggle');
   
-  if (!audio) return;
+  if (!audio || hasUserInteracted) return;
 
-  // 嘗試自動播放
   audio.play()
     .then(() => {
       // 播放成功
       if (musicIcon) musicIcon.textContent = '🔊';
       if (musicToggle) musicToggle.classList.add('playing');
       isMusicPlaying = true;
-      console.log('🎵 音樂自動播放成功');
+      hasUserInteracted = true;
+      console.log('🎵 音樂開始播放');
     })
     .catch((error) => {
-      // 播放失敗(通常是瀏覽器政策限制)
-      console.log('⚠️ 音樂自動播放被阻擋:', error.message);
+      // 播放失敗
+      console.log('⚠️ 音樂播放失敗:', error.message);
       if (musicIcon) musicIcon.textContent = '🔈';
       if (musicToggle) musicToggle.classList.remove('playing');
       isMusicPlaying = false;
-      
-      // 提示使用者點擊播放
-      showMusicHint();
     });
 }
 
-// 顯示音樂播放提示(可選)
-function showMusicHint() {
-  const musicToggle = document.getElementById('musicToggle');
-  if (!musicToggle) return;
+// 監聽使用者第一次互動
+function setupAutoPlayOnInteraction() {
+  const playOnInteraction = (e) => {
+    // 排除音樂按鈕本身的點擊（避免重複觸發）
+    if (e.target && e.target.closest && e.target.closest('#musicToggle')) {
+      return;
+    }
+    
+    autoPlayMusic();
+    
+    // 移除所有監聽器，只執行一次
+    document.removeEventListener('click', playOnInteraction);
+    document.removeEventListener('touchstart', playOnInteraction);
+    document.removeEventListener('keydown', playOnInteraction);
+    document.removeEventListener('wheel', playOnInteraction);
+    document.removeEventListener('scroll', playOnInteraction);
+  };
   
-  // 添加脈動動畫提示使用者點擊
-  musicToggle.style.animation = 'musicPulse 1s ease-in-out 3';
+  // 監聽多種互動方式
+  document.addEventListener('click', playOnInteraction);
+  document.addEventListener('touchstart', playOnInteraction, { passive: true });
+  document.addEventListener('keydown', playOnInteraction);
+  document.addEventListener('wheel', playOnInteraction, { passive: true });
+  document.addEventListener('scroll', playOnInteraction, { passive: true });
   
-  setTimeout(() => {
-    musicToggle.style.animation = '';
-  }, 3000);
+  console.log('🎵 等待使用者互動以播放音樂...');
 }
 
-// ==================== 音樂控制 ====================
-let isMusicPlaying = true;
-
+// 切換音樂播放
 function toggleMusic() {
   const audio = document.getElementById('bgMusic');
   const musicIcon = document.getElementById('musicIcon');
+  const musicToggle = document.getElementById('musicToggle');
+  
   if (!audio) return;
 
+  // 標記使用者已互動
+  hasUserInteracted = true;
+
   if (isMusicPlaying) {
+    // 暫停音樂
     audio.pause();
     if (musicIcon) musicIcon.textContent = '🔈';
-    document.getElementById('musicToggle').classList.remove('playing');
+    if (musicToggle) musicToggle.classList.remove('playing');
     isMusicPlaying = false;
   } else {
+    // 播放音樂
     audio.play()
       .then(() => {
         if (musicIcon) musicIcon.textContent = '🔊';
-        document.getElementById('musicToggle').classList.add('playing');
+        if (musicToggle) musicToggle.classList.add('playing');
         isMusicPlaying = true;
       })
       .catch((error) => console.log('音樂播放失敗:', error));
   }
 }
 
+// 頁面可見性變化時的處理
 document.addEventListener('visibilitychange', function () {
   const audio = document.getElementById('bgMusic');
   if (!audio) return;
+  
   if (document.hidden && isMusicPlaying) {
     audio.pause();
   } else if (!document.hidden && isMusicPlaying) {
-    audio.play();
+    audio.play().catch(err => console.log('恢復播放失敗:', err));
   }
 });
 
