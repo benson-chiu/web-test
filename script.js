@@ -128,14 +128,36 @@ function toggleMenu() {
   const overlay = document.getElementById('overlay');
   const menuToggle = document.querySelector('.menu-toggle');
 
+  const isOpening = !sidebar.classList.contains('active');
+
+  if (isOpening) {
+    // 🔒 開啟選單前先鎖定頁面寬度
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.paddingRight = scrollbarWidth + 'px';
+    document.body.style.overflow = 'hidden';
+    
+    // 同時鎖定固定定位元素,避免它們偏移
+    menuToggle.style.marginRight = scrollbarWidth + 'px';
+    const musicToggle = document.querySelector('.music-toggle');
+    if (musicToggle) {
+      musicToggle.style.marginRight = scrollbarWidth + 'px';
+    }
+  } else {
+    // 🔓 關閉選單時恢復
+    document.body.style.paddingRight = '';
+    document.body.style.overflow = '';
+    menuToggle.style.marginRight = '';
+    const musicToggle = document.querySelector('.music-toggle');
+    if (musicToggle) {
+      musicToggle.style.marginRight = '';
+    }
+  }
+
   sidebar.classList.toggle('active');
   overlay.classList.toggle('active');
 
-  const isOpen = sidebar.classList.contains('active');
-  document.body.style.overflow = isOpen ? 'hidden' : 'auto';
-
-  // 選單開啟時維持旋轉狀態，關閉後恢復
-  if (isOpen) {
+  // 選單開啟時維持旋轉狀態,關閉後恢復
+  if (isOpening) {
     menuToggle.classList.add('menu-open');
   } else {
     menuToggle.classList.remove('menu-open');
