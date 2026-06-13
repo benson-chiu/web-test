@@ -730,7 +730,7 @@ function initScrollHint() {
   let hasScrolled = false;
   let hintTimer = null;
 
-  // 3秒後顯示提示
+  // 7秒後顯示提示
   function showHint() {
     if (!hasScrolled) {
       overlay.classList.add('show');
@@ -764,11 +764,11 @@ function initScrollHint() {
     }
   }
 
-  // 載入完成後等待 3 秒
+  // 載入完成後等待 7 秒
   window.addEventListener('load', function() {
     // 確保載入畫面已經消失後才開始計時
     setTimeout(() => {
-      hintTimer = setTimeout(showHint, 3000);
+      hintTimer = setTimeout(showHint, 7000);
     }, 2500); // 配合載入畫面的 2 秒延遲
   });
 
