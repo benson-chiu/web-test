@@ -73,6 +73,10 @@
       <span class="icon noto-emoji">🏠</span>
       <span>首頁</span>
     </a>
+    <a href="#about" onclick="toggleMenu()">
+      <span class="icon noto-emoji">💑</span>
+      <span>關於我們</span>
+    </a>
     <a href="#date" onclick="toggleMenu()">
       <span class="icon noto-emoji">🗓️</span>
       <span>婚禮日期</span>
@@ -146,6 +150,92 @@
         <div class="scroll-arrow">↓</div>
       </div>
       <p class="scroll-hint-text">往下滑動探索</p>
+    </div>
+  </div>
+</section>
+
+<!-- 關於我們 -->
+<section id="about" class="about-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">About Us</h2>
+      <p class="section-subtitle">關於我們</p>
+    </div>
+
+    <div class="about-content">
+      <!-- 新郎方 -->
+      <div class="about-card groom-card" data-aos="fade-right" data-aos-duration="1000">
+        <div class="about-card-inner">
+          <!-- 新郎照片 -->
+          <div class="card-photo">
+            <div class="photo-frame">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" alt="新郎照片"
+                class="person-photo">
+              <div class="photo-loading">
+                <div class="loading-spinner"></div>
+              </div>
+              <div class="photo-error" style="display: none;">
+                <span class="error-icon">⚠️</span>
+                <p>照片載入失敗</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="card-title">新郎</h3>
+          <div class="name-display">
+            <p class="name-text">邱章嘉</p>
+          </div>
+
+          <div class="parents-info">
+            <h3 class="card-title">男方主婚人</h3>
+            <p class="name-text">男方父親 & 男方母親</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新娘方 -->
+      <div class="about-card bride-card" data-aos="fade-left" data-aos-duration="1000">
+        <div class="about-card-inner">
+          <!-- 新娘照片 -->
+          <div class="card-photo">
+            <div class="photo-frame">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" alt="新娘照片"
+                class="person-photo">
+              <div class="photo-loading">
+                <div class="loading-spinner"></div>
+              </div>
+              <div class="photo-error" style="display: none;">
+                <span class="error-icon">⚠️</span>
+                <p>照片載入失敗</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="card-title">新娘</h3>
+          <div class="name-display">
+            <p class="name-text">田伊婷</p>
+          </div>
+          
+          <div class="parents-info">
+            <h3 class="card-title">女方主婚人</h3>
+            <p class="name-text">女方父親 & 女方母親</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 溫馨寄語 -->
+    <div class="about-message" data-aos="fade-up" data-aos-delay="400">
+      <p class="message-text">
+        <span class="noto-emoji">💝</span>
+        我們即將攜手步入人生的新階段 `<br>`
+        誠摯邀請您見證我們的幸福時刻
+        <span class="noto-emoji">💝</span>
+      </p>
     </div>
   </div>
 </section>

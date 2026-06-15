@@ -302,6 +302,36 @@ function retryLoadImage() {
   });
 }
 
+// ==================== 關於我們照片載入處理 ====================
+document.addEventListener('DOMContentLoaded', function () {
+  const personPhotos = document.querySelectorAll('.person-photo');
+
+  personPhotos.forEach(photo => {
+    const photoFrame = photo.closest('.photo-frame');
+    const loadingEl = photoFrame.querySelector('.photo-loading');
+    const errorEl = photoFrame.querySelector('.photo-error');
+
+    // 照片載入成功
+    photo.addEventListener('load', function () {
+      if (loadingEl) loadingEl.style.display = 'none';
+      photo.classList.add('loaded');
+    });
+
+    // 照片載入失敗
+    photo.addEventListener('error', function () {
+      if (loadingEl) loadingEl.style.display = 'none';
+      if (errorEl) errorEl.style.display = 'flex';
+      photo.style.display = 'none';
+    });
+
+    // 若照片已快取，直接隱藏載入提示
+    if (photo.complete) {
+      if (loadingEl) loadingEl.style.display = 'none';
+      photo.classList.add('loaded');
+    }
+  });
+});
+
 // ==================== 相簿功能 ====================
 let photos = [
   { url: 'images/photo1.jpg', alt: '照片 1' },
