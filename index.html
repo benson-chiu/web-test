@@ -228,11 +228,25 @@
 
     <!-- 溫馨寄語 -->
     <div class="about-message" data-aos="fade-up" data-aos-delay="400">
-      <p class="message-text">
-        我們結婚了~<br>
-        在這個意義重大的日子<br>
-        ​由衷希望有您的見證和參與
-      </p>
+      <div class="message-card-container">
+        <img 
+          src="images/wedding-message-card.png" 
+          alt="溫馨寄語" 
+          class="message-card-image"
+          loading="lazy"
+        >
+        <!-- 載入中提示 -->
+        <div class="message-card-loading">
+          <div class="loading-spinner"></div>
+          <p>載入中...</p>
+        </div>
+        <!-- 載入失敗提示 -->
+        <div class="message-card-error" style="display: none;">
+          <span class="error-icon">⚠️</span>
+          <p>字卡載入失敗</p>
+          <button class="retry-btn" onclick="retryMessageCard()">重新載入</button>
+        </div>
+      </div>
     </div>
   </div>
 </section>

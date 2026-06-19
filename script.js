@@ -332,6 +332,68 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
+// ==================== 字卡圖片載入處理 ====================
+document.addEventListener('DOMContentLoaded', function () {
+  const messageCardImg = document.querySelector('.message-card-image');
+  
+  if (!messageCardImg) return;
+
+  const container = messageCardImg.closest('.message-card-container');
+  const loadingEl = container.querySelector('.message-card-loading');
+  const errorEl = container.querySelector('.message-card-error');
+
+  // 字卡載入成功
+  messageCardImg.addEventListener('load', function () {
+    if (loadingEl) loadingEl.style.display = 'none';
+    messageCardImg.classList.add('loaded');
+  });
+
+  // 字卡載入失敗
+  messageCardImg.addEventListener('error', function () {
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'flex';
+    messageCardImg.style.display = 'none';
+  });
+
+  // 若字卡已快取，直接隱藏載入提示
+  if (messageCardImg.complete) {
+    if (loadingEl) loadingEl.style.display = 'none';
+    messageCardImg.classList.add('loaded');
+  }
+});
+
+// 字卡重新載入
+function retryMessageCard() {
+  const messageCardImg = document.querySelector('.message-card-image');
+  const container = messageCardImg.closest('.message-card-container');
+  const loadingEl = container.querySelector('.message-card-loading');
+  const errorEl = container.querySelector('.message-card-error');
+
+  if (!messageCardImg) return;
+
+  // 清除錯誤狀態
+  if (errorEl) errorEl.style.display = 'none';
+  if (loadingEl) loadingEl.style.display = 'flex';
+  messageCardImg.style.display = '';
+
+  // 加上時間戳強制重新請求
+  const originalSrc = messageCardImg.src.split('?')[0];
+  messageCardImg.src = originalSrc + '?t=' + Date.now();
+
+  // 重新綁定事件
+  messageCardImg.onload = function () {
+    if (loadingEl) loadingEl.style.display = 'none';
+    messageCardImg.classList.add('loaded');
+    messageCardImg.onload = null;
+  };
+
+  messageCardImg.onerror = function () {
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (errorEl) errorEl.style.display = 'flex';
+    messageCardImg.style.display = 'none';
+  };
+}
+
 // ==================== 相簿功能 ====================
 let photos = [
   { url: 'images/photo1.jpg', alt: '照片 1' },

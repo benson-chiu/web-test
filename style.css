@@ -1455,26 +1455,97 @@ a {
 .about-message {
     max-width: 800px;
     margin: 60px auto 0;
+    background: transparent;
+    border-radius: 25px;
+    padding: 0;
+    box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15);
+    overflow: hidden;
+}
+
+.message-card-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 8 / 3;
     background: linear-gradient(135deg, #fff9e6, #fff);
     border-radius: 25px;
-    padding: 40px 50px;
+    overflow: hidden;
+}
+
+.message-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: relative;
+    z-index: 2;
+    border-radius: 25px;
+    transition: transform 0.4s ease;
+}
+
+@media (hover: hover) {
+    .message-card-image:hover {
+        transform: scale(1.02);
+    }
+}
+
+/* 字卡載入中 */
+.message-card-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fff9e6, #fff);
+    z-index: 1;
+}
+
+.message-card-loading .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(212, 175, 55, 0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+.message-card-loading p {
+    color: var(--gold);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+/* 字卡載入失敗 */
+.message-card-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fff9e6, #fff);
+    z-index: 3;
     text-align: center;
-    box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15);
-    border: 2px solid rgba(212, 175, 55, 0.2);
+    padding: 40px;
+    border-radius: 25px;
 }
 
-.message-text {
-    font-size: 1.3rem;
+.message-card-error .error-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.message-card-error p {
     color: var(--dark);
-    line-height: 2;
-    margin: 0;
-    font-weight: 500;
-    letter-spacing: 1px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
 }
 
-.message-text .noto-emoji {
-    font-size: 1.5rem;
-    margin: 0 10px;
+/* 字卡成功載入後隱藏載入提示 */
+.message-card-image.loaded ~ .message-card-loading {
+    display: none;
 }
 
 /* 響應式設計 */
@@ -1523,11 +1594,15 @@ a {
     }
 
     .about-message {
-        padding: 30px 35px;
+        margin: 50px auto 0;
     }
 
-    .message-text {
-        font-size: 1.15rem;
+    .message-card-container {
+        border-radius: 20px;
+    }
+
+    .message-card-image {
+        border-radius: 20px;
     }
 }
 
@@ -1552,12 +1627,33 @@ a {
     }
 
     .about-message {
-        padding: 25px 20px;
+        margin: 40px auto 0;
     }
 
-    .message-text {
-        font-size: 1.05rem;
-        line-height: 1.8;
+    .message-card-container {
+        border-radius: 15px;
+    }
+
+    .message-card-image {
+        border-radius: 15px;
+    }
+
+    .message-card-loading .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 3px;
+    }
+
+    .message-card-loading p {
+        font-size: 0.9rem;
+    }
+
+    .message-card-error .error-icon {
+        font-size: 2.5rem;
+    }
+
+    .message-card-error p {
+        font-size: 1rem;
     }
 }
 
