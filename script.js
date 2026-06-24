@@ -700,7 +700,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ==================== 地圖功能 ====================
-function openMap() {
+function openDonggangMap() {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   const url = `https://maps.app.goo.gl/Wa4EyWELkW3rkMAs9`;
   if (isMobile) {
@@ -710,9 +710,26 @@ function openMap() {
   }
 }
 
-function openStreetView() {
+function openDonggangStreetView() {
   window.open(
     `https://www.google.com/maps/place/%E7%A6%8F%E7%81%A3%E8%8E%8A%E5%9C%92/@22.4584235,120.4828357,3a,75y,242.24h,93.29t/data=!3m8!1e1!3m6!1sCIHM0ogKEICAgICE4Mma9wE!2e10!3e11!6shttps:%2F%2Flh3.googleusercontent.com%2Fgpms-cs-s%2FABJJf51Qa3a9eGvO0ni4EyKCZjq4qbeLuE4b4P6Oa224j2FlPeKFdcKJoGkf40vOzqAtPZBUAwGtmsPsJJDvtcesMmAMklH-8cecZF5FXAljoafXpcR60Nz78WO0jEQ3-UneiBp4Db5-%3Dw900-h600-k-no-pi-3.2905667757587196-ya225.49568830577712-ro0-fo100!7i13312!8i6656!4m9!3m8!1s0x3471e052a123561d:0x64d700659bdb2a19!5m2!4m1!1i2!8m2!3d22.4578971!4d120.4825316!16s%2Fg%2F1vs1pm2f?entry=tts&g_ep=EgoyMDI2MDUyNi4wIPu8ASoASAFQAw%3D%3D`,
+    '_blank'
+  );
+}
+
+function openTainanMap() {
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const url = `https://maps.app.goo.gl/auiasnxLaj9V6eUq9`;
+  if (isMobile) {
+    window.location.href = url;
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+function openTainanStreetView() {
+  window.open(
+    `https://www.google.com/maps/@22.9968344,120.214481,3a,90y,186.15h,107.44t/data=!3m7!1e1!3m5!1sfsEHFm8nVM5AWKC18_l6_Q!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D-17.438390237761013%26panoid%3DfsEHFm8nVM5AWKC18_l6_Q%26yaw%3D186.14575567139212!7i16384!8i8192?entry=ttu&g_ep=EgoyMDI2MDYxNi4wIKXMDSoASAFQAw%3D%3D`,
     '_blank'
   );
 }
@@ -743,6 +760,8 @@ function initCountdownDisplay() {
   const weddingDate = new Date('2026-10-25T12:00:00').getTime();
 
   const days = document.getElementById('days');
+  const days_plus = document.getElementById('days_plus');
+
   const hours = document.getElementById('hours');
   const minutes = document.getElementById('minutes');
   const seconds = document.getElementById('seconds');
@@ -752,6 +771,7 @@ function initCountdownDisplay() {
 
     if (distance < 0) {
       if (days) days.textContent = '000';
+      if (days_plus) days.textContent = '000';
       if (hours) hours.textContent = '00';
       if (minutes) minutes.textContent = '00';
       if (seconds) seconds.textContent = '00';
@@ -759,6 +779,7 @@ function initCountdownDisplay() {
     }
 
     if (days) days.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(3, '0');
+    if (days_plus) days_plus.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24)) + 1).padStart(3, '0');
     if (hours) hours.textContent = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
     if (minutes) minutes.textContent = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
     if (seconds) seconds.textContent = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');

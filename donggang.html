@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>婚禮邀請函</title>
+
+  <!-- 在外部 CSS 載入前就蓋住畫面，防止背景閃爍 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <!-- 引入 Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Send+Flowers&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- Vanta Fog 背景容器 -->
+<div id="vanta-bg"></div>
+
+<!-- 載入畫面：必須在所有外部資源之前，確保第一幀就蓋住畫面 -->
+<div class="loader" id="loader">
+  <div class="loader-content">
+    <div class="heart-loader">
+      <div class="heart-wrapper">
+        <div class="heart"></div>
+      </div>
+      <div class="heart-wrapper">
+        <div class="heart"></div>
+      </div>
+    </div>
+    <p class="loader-text">Loading...</p>
+  </div>
+</div>
+
+<div class="global-petals-container" id="globalPetalsContainer"></div>
+
+<!-- 漢堡選單按鈕 -->
+<button class="menu-toggle" onclick="toggleMenu()" aria-label="開啟選單">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- 側邊導航列 -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3><span class="noto-emoji">🎉</span> 選單</h3>
+    <button class="close-btn" onclick="toggleMenu()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="nav-links">
+    <a href="#home" onclick="toggleMenu()">
+      <span class="icon noto-emoji">🏠</span>
+      <span>首頁</span>
+    </a>
+    <a href="#about" onclick="toggleMenu()">
+      <span class="icon noto-emoji">💑</span>
+      <span>關於我們</span>
+    </a>
+    <a href="#date" onclick="toggleMenu()">
+      <span class="icon noto-emoji">🗓️</span>
+      <span>婚禮日期</span>
+    </a>
+    <a href="#location" onclick="toggleMenu()">
+      <span class="icon noto-emoji">📍</span>
+      <span>婚禮地點</span>
+    </a>
+    <a href="#schedule" onclick="toggleMenu()">
+      <span class="icon noto-emoji">⏰</span>
+      <span>婚禮流程</span>
+    </a>
+    <a href="#gallery" onclick="toggleMenu()">
+      <span class="icon noto-emoji">💕</span>
+      <span>幸福時光</span>
+    </a>
+  </div>
+</nav>
+
+<!-- 遮罩層 -->
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<!-- 音樂控制 -->
+<button class="music-toggle" id="musicToggle" onclick="toggleMusic()">
+  <span class="noto-emoji" id="musicIcon">🎵</span>
+</button>
+<audio id="bgMusic" loop>
+  <source src="images/background-music.mp3" type="audio/mpeg" />
+</audio>
+
+<!-- 封面區 -->
+<section id="home" class="hero">
+  <!-- Canva 動態圖片容器 -->
+  <div class="hero-content">
+    <div class="canva-image-container">
+      <!-- Canva MP4 影片 -->
+      <video
+        id="canvaVideo"
+        class="canva-mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="auto"
+      >
+        <source src="images/wedding-invitation.mp4" type="video/mp4" />
+      </video>
+
+      <!-- 載入中提示（影片載入前顯示） -->
+      <div class="image-loading" id="videoLoading">
+        <div class="loading-spinner"></div>
+        <p>載入中...</p>
+      </div>
+
+      <!-- 載入失敗提示 -->
+      <div class="image-error" id="videoError" style="display: none;">
+        <span class="error-icon">⚠️</span>
+        <p>封面載入失敗</p>
+        <button class="retry-btn" onclick="retryLoadImage()">重新載入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 滾動提示遮罩 -->
+  <div class="scroll-hint-overlay" id="scrollHintOverlay">
+    <div class="scroll-hint-content">
+      <div class="scroll-hint-animation">
+        <div class="mouse">
+          <div class="wheel"></div>
+        </div>
+        <div class="scroll-arrow">↓</div>
+      </div>
+      <p class="scroll-hint-text">往下滑動探索</p>
+    </div>
+  </div>
+</section>
+
+<!-- 關於我們 -->
+<section id="about" class="about-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">About Us</h2>
+      <p class="section-subtitle">關於我們</p>
+    </div>
+
+    <div class="about-content">
+      <!-- 新郎方 -->
+      <div class="about-card groom-card" data-aos="fade-right" data-aos-duration="1000">
+        <div class="about-card-inner">
+          <!-- 新郎照片 -->
+          <div class="card-photo">
+            <div class="photo-frame">
+              <img src="images/groom-photo.jpg" alt="新郎照片" class="person-photo">
+              <div class="photo-loading">
+                <div class="loading-spinner"></div>
+              </div>
+              <div class="photo-error" style="display: none;">
+                <span class="error-icon">⚠️</span>
+                <p>照片載入失敗</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="card-title">新郎</h3>
+          <div class="name-display">
+            <p class="name-text">邱章嘉</p>
+          </div>
+
+          <div class="parents-info">
+            <h3 class="card-title">男方主婚人</h3>
+            <p class="name-text">邱文良 & 宋雅鳳</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新娘方 -->
+      <div class="about-card bride-card" data-aos="fade-left" data-aos-duration="1000">
+        <div class="about-card-inner">
+          <!-- 新娘照片 -->
+          <div class="card-photo">
+            <div class="photo-frame">
+              <img src="images/bride-photo.jpg" alt="新娘照片" class="person-photo">
+              <div class="photo-loading">
+                <div class="loading-spinner"></div>
+              </div>
+              <div class="photo-error" style="display: none;">
+                <span class="error-icon">⚠️</span>
+                <p>照片載入失敗</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="card-title">新娘</h3>
+          <div class="name-display">
+            <p class="name-text">田伊婷</p>
+          </div>
+          
+          <div class="parents-info">
+            <h3 class="card-title">女方主婚人</h3>
+            <p class="name-text">田欽仁 & 林淑蓉</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 溫馨寄語 -->
+    <div class="about-message" data-aos="fade-up" data-aos-delay="400">
+      <div class="message-card-container">
+        <img
+          src="images/wedding-message-card.png"
+          alt="溫馨寄語"
+          class="message-card-image"
+          loading="lazy"
+        >
+        <!-- 載入中提示 -->
+        <div class="message-card-loading">
+          <div class="loading-spinner"></div>
+          <p>載入中...</p>
+        </div>
+        <!-- 載入失敗提示 -->
+        <div class="message-card-error" style="display: none;">
+          <span class="error-icon">⚠️</span>
+          <p>字卡載入失敗</p>
+          <button class="retry-btn" onclick="retryMessageCard()">重新載入</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 婚禮日期 -->
+<section id="date" class="date-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Wedding Date</h2>
+      <p class="section-subtitle">婚禮日期</p>
+    </div>
+
+    <div class="date-content" data-aos="zoom-in" data-aos-duration="1000">
+      <div class="date-card">
+        <div class="date-card-inner">
+          <!-- 日期詳情 -->
+          <div class="date-details">
+            <div class="date-item">
+              <span class="detail-icon noto-emoji">🗓️</span>
+              <div class="detail-content">
+                <p class="detail-label">日期</p>
+                <p class="detail-value">2026.10.25<br>星期日</p>
+              </div>
+            </div>
+
+            <div class="date-item">
+              <span class="detail-icon noto-emoji">💒</span>
+              <div class="detail-content">
+                <p class="detail-label">證婚入場時間</p>
+                <p class="detail-value">上午 11:00</p>
+              </div>
+            </div>
+
+            <div class="date-item">
+              <span class="detail-icon noto-emoji">🎊</span>
+              <div class="detail-content">
+                <p class="detail-label">宴客開席時間</p>
+                <p class="detail-value">下午 12:00</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 倒數計時 -->
+          <div class="countdown-wrapper">
+            <p class="countdown-title">距離大喜之日還有</p>
+            <div class="countdown-display">
+              <div class="countdown-item">
+                <span class="countdown-number" id="days">000</span>
+                <span class="countdown-label">天</span>
+              </div>
+              <div class="countdown-divider">:</div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="hours">00</span>
+                <span class="countdown-label">時</span>
+              </div>
+              <div class="countdown-divider">:</div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="minutes">00</span>
+                <span class="countdown-label">分</span>
+              </div>
+              <div class="countdown-divider">:</div>
+              <div class="countdown-item">
+                <span class="countdown-number" id="seconds">00</span>
+                <span class="countdown-label">秒</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 婚禮地點 -->
+<section id="location" class="location-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Wedding Venue</h2>
+      <p class="section-subtitle">婚禮地點</p>
+    </div>
+
+    <div class="location-content">
+      <div class="location-card" data-aos="fade-right" data-aos-duration="1000">
+        <div class="location-card-inner">
+          <!-- 地點資訊 -->
+          <div class="location-info">
+            <h3 class="venue-name">福灣莊園</h3>
+            <p class="venue-hall">2樓 宴會廳</p>
+
+            <div class="location-details">
+              <div class="location-detail-item">
+                <span class="detail-icon noto-emoji">📍</span>
+                <p>屏東縣東港鎮大潭里大鵬路100號</p>
+              </div>
+
+              <div class="location-detail-item">
+                <span class="detail-icon noto-emoji">🚄</span>
+                <p>
+                  高鐵左營站 & 台鐵新左營站<br>
+                  <span class="noto-emoji">➡️</span>
+                  轉乘
+                  <a href="https://www.taiwantrip.com.tw/Frontend/Route/Select_p?RouteID=R0065" target="_blank" rel="noopener noreferrer" class="bus-link">
+                    台灣好行9127D<span class="noto-emoji">🔗</span>
+                  </a>
+                  公車到"大鵬灣遊客中心"站<br>
+                  <span class="noto-emoji">➡️</span>
+                  步行約8分鐘
+                </p>
+              </div>
+
+              <div class="location-detail-item">
+                <span class="detail-icon noto-emoji">🚗</span>
+                <p>
+                  莊園內有停車場可免費停車<br>
+                  請點擊地圖直接導航
+                </p>
+              </div>
+            </div>
+
+            <!-- 地圖按鈕 -->
+            <div class="location-buttons">
+              <button class="location-btn primary-btn" onclick="openDonggangMap()">
+                <span class="btn-icon noto-emoji">🌏</span>
+                <span>Google 地圖</span>
+                <span class="btn-shine"></span>
+              </button>
+              <button class="location-btn secondary-btn" onclick="openDonggangStreetView()">
+                <span class="btn-icon noto-emoji">🏞️</span>
+                <span>街景檢視</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地圖預覽 -->
+      <div class="map-preview" data-aos="fade-left" data-aos-duration="1000">
+        <div class="map-frame">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3687.2004138306397!2d120.4810608442161!3d22.459101826704465!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3471e052a123561d%3A0x64d700659bdb2a19!2z56aP54Gj6I6K5ZyS!5e0!3m2!1szh-TW!2stw!4v1780036855283!5m2!1szh-TW!2stw"
+            width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 婚禮流程 -->
+<section id="schedule" class="schedule-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Wedding Schedule</h2>
+      <p class="section-subtitle">婚禮流程</p>
+    </div>
+
+    <div class="schedule-timeline">
+      <!-- 流程項目 1 -->
+      <div class="schedule-item" data-aos="fade-right" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">11:00</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <h3 class="schedule-title"><span class="noto-emoji">💒</span>證婚儀式入場</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 2 -->
+      <div class="schedule-item" data-aos="fade-left" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">11:30</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <h3 class="schedule-title"><span class="noto-emoji">💒</span>證婚儀式開始</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 3 -->
+      <div class="schedule-item" data-aos="fade-right" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">12:00</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <h3 class="schedule-title"><span class="noto-emoji">🎊</span>婚禮宴客入場</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 4 -->
+      <div class="schedule-item" data-aos="fade-left" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">12:30</span>
+          </div>
+          <div class="time-line"></div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <h3 class="schedule-title"><span class="noto-emoji">🎊</span>婚禮宴客開始</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- 流程項目 5 -->
+      <div class="schedule-item last-item" data-aos="fade-right" data-aos-duration="800">
+        <div class="schedule-time">
+          <div class="time-circle">
+            <span class="time-text">15:00</span>
+          </div>
+        </div>
+        <div class="schedule-content">
+          <div class="schedule-card">
+            <h3 class="schedule-title"><span class="noto-emoji">🍵</span>奉茶儀式</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 溫馨提醒 -->
+    <div class="schedule-note" data-aos="fade-up" data-aos-delay="200">
+      <div class="note-icon"><span class="noto-emoji">💝</span></div>
+      <p class="note-text">
+        <strong>溫馨提醒：</strong>
+        以上流程時間僅供參考，實際時間可能依現場狀況調整，敬請見諒。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 相簿區 -->
+<section id="gallery" class="gallery-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Our Memories</h2>
+      <p class="section-subtitle">幸福時光</p>
+    </div>
+
+    <!-- 大圖輪播容器 -->
+    <div class="slideshow-container" data-aos="zoom-in" data-aos-duration="1000">
+      <!-- 主圖片顯示區 -->
+      <div class="slideshow-main">
+        <img id="slideshowImg" src="" alt="婚禮照片" class="slideshow-image">
+        <!-- 載入失敗提示 -->
+        <div class="slideshow-error" id="slideshowError" style="display:none;">
+          <span class="error-icon">⚠️</span>
+          <p>照片載入失敗</p>
+          <button class="retry-btn" onclick="retrySlideshowImage()">重新載入</button>
+        </div>
+      </div>
+
+      <!-- 控制列（音樂播放器風格） -->
+      <div class="slideshow-controls">
+        <!-- 左側：播放/暫停 -->
+        <button class="control-btn play-pause-btn" id="playBtn" onclick="toggleAutoPlay()" title="播放/暫停">
+          <span class="material-symbols-outlined" id="playIcon">pause</span>
+        </button>
+
+        <!-- 中間：切換按鈕 + 計數 -->
+        <div class="control-center">
+          <button class="control-btn nav-btn" id="prevBtn" onclick="changeSlide(-1)" title="上一張">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          
+          <div class="photo-counter" id="slideshowCounter">
+            1 / 15
+          </div>
+          
+          <button class="control-btn nav-btn" id="nextBtn" onclick="changeSlide(1)" title="下一張">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+
+        <!-- 右側：預留空間（可放其他功能） -->
+        <div class="control-right">
+          <!-- 可以放下載、分享等按鈕 -->
+        </div>
+      </div>
+
+      <!-- 進度條（修正圓角問題） -->
+      <div class="slideshow-progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <!-- 底部縮圖導航 -->
+      <div class="slideshow-thumbnails" id="slideshowThumbnails">
+        <!-- 縮圖會由 JS 動態生成 -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 頁尾 -->
+<footer>
+  <div class="footer-content">
+    <p class="footer-main">期待您的蒞臨❤️</p>
+    <p class="footer-sub">新郎章嘉 & 新娘伊婷 敬邀</p>
+    <div class="footer-divider"></div>
+    <p class="footer-copyright">© 2026 邱章嘉&田伊婷 All Rights Reserved.</p>
+  </div>
+</footer>
+
+<!-- 載入動畫庫 -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<!-- Three.js（Vanta 依賴） -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<!-- Vanta Fog -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
