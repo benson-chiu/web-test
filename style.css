@@ -1735,6 +1735,10 @@ a {
     margin-bottom: 50px;
 }
 
+.date-details.odd-column {
+    grid-template-columns: repeat(3, 1fr);
+}
+
 .date-item {
     display: flex;
     align-items: center;
@@ -1843,6 +1847,10 @@ a {
     .date-details {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    .date-details.odd-column {
+        grid-template-columns: 1fr;
     }
 }
 
