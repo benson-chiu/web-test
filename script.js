@@ -400,21 +400,6 @@ let photos = [
   { url: 'images/photo2.jpg', alt: '照片 2' },
   { url: 'images/photo3.jpg', alt: '照片 3' },
   { url: 'images/photo4.jpg', alt: '照片 4' },
-  { url: 'images/photo5.jpg', alt: '照片 5' },
-  { url: 'images/photo6.jpg', alt: '照片 6' },
-  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400', alt: '婚禮照片 1' },
-  { url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400', alt: '婚禮照片 2' },
-  { url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400', alt: '婚禮照片 3' },
-  { url: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?w=400', alt: '婚禮照片 4' },
-  { url: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=400', alt: '婚禮照片 5' },
-  { url: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400', alt: '婚禮照片 6' },
-  { url: 'https://images.unsplash.com/photo-1529636798458-92182e662485?w=400', alt: '婚禮照片 7' },
-  { url: 'https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=400', alt: '婚禮照片 8' },
-  { url: 'https://images.unsplash.com/photo-1460978812857-470ed1c77af0?w=400', alt: '婚禮照片 9' },
-  { url: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=400', alt: '婚禮照片 10' },
-  { url: 'https://images.unsplash.com/photo-1522413452208-996ff3f3e740?w=400', alt: '婚禮照片 11' },
-  { url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400', alt: '婚禮照片 12' },
-  { url: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400', alt: '婚禮照片 13' },
 ];
 
 let currentSlide = 0;
