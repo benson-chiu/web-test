@@ -537,6 +537,9 @@ a {
     box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
     border: 2px solid rgba(255, 255, 255, 0.3);
     animation: fadeInScale 1s ease-out;
+    transform: translateZ(0);
+    mask-image: radial-gradient(white, black);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 @keyframes fadeInScale {
