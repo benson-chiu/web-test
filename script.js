@@ -396,10 +396,26 @@ function retryMessageCard() {
 
 // ==================== 相簿功能 ====================
 let photos = [
-  { url: 'images/photo1.jpg', alt: '照片 1' },
-  { url: 'images/photo2.jpg', alt: '照片 2' },
-  { url: 'images/photo3.jpg', alt: '照片 3' },
-  { url: 'images/photo4.jpg', alt: '照片 4' },
+  { url: 'images/photo1.jpg',  alt: '照片 1'  },
+  { url: 'images/photo2.jpg',  alt: '照片 2'  },
+  { url: 'images/photo3.jpg',  alt: '照片 3'  },
+  { url: 'images/photo4.jpg',  alt: '照片 4'  },
+  { url: 'images/photo5.jpg',  alt: '照片 5'  },
+  { url: 'images/photo6.jpg',  alt: '照片 6'  },
+  { url: 'images/photo7.jpg',  alt: '照片 7'  },
+  { url: 'images/photo8.jpg',  alt: '照片 8'  },
+  { url: 'images/photo9.jpg',  alt: '照片 9'  },
+  { url: 'images/photo10.jpg', alt: '照片 10' },
+  { url: 'images/photo11.jpg', alt: '照片 11' },
+  { url: 'images/photo12.jpg', alt: '照片 12' },
+  { url: 'images/photo13.jpg', alt: '照片 13' },
+  { url: 'images/photo14.jpg', alt: '照片 14' },
+  { url: 'images/photo15.jpg', alt: '照片 15' },
+  { url: 'images/photo16.jpg', alt: '照片 16' },
+  { url: 'images/photo17.jpg', alt: '照片 17' },
+  { url: 'images/photo18.jpg', alt: '照片 18' },
+  { url: 'images/photo19.jpg', alt: '照片 19' },
+  { url: 'images/photo20.jpg', alt: '照片 20' },
 ];
 
 let currentSlide = 0;
