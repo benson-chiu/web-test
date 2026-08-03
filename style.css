@@ -54,7 +54,7 @@ html {
     user-select: none;
 }
 
-/* ==================== Vanta Fog 背景 ==================== */
+/* ==================== 背景 ==================== */
 body {
     font-family: 'Chiron GoRound TC', sans-serif;
     line-height: 1.8;
@@ -65,7 +65,6 @@ body {
     position: relative
 }
 
-/* Vanta 固定背景容器 */
 #vanta-bg {
     position: fixed;
     top: 0;
@@ -76,11 +75,14 @@ body {
     /* lvh = Largest Viewport Height，網址列隱藏時的最大高度，避免底部白塊 */
     height: 100lvh;
     z-index: -1;
-}
-
-/* 中低階裝置/手機降級：不跑 WebGL，改用純 CSS 靜態漸層，大幅降低 GPU/CPU 占用 */
-#vanta-bg.vanta-bg-static {
-    background: linear-gradient(135deg, #f5eeff 0%, #c5a4f8 50%, #8fa8d8 100%);
+    background-color: #f5eeff;
+    background-image:
+        radial-gradient(ellipse 60% 50% at 18% 25%, rgba(240, 214, 255, 0.65) 0%, rgba(240, 214, 255, 0) 70%),
+        radial-gradient(ellipse 55% 45% at 82% 15%, rgba(197, 164, 248, 0.55) 0%, rgba(197, 164, 248, 0) 70%),
+        radial-gradient(ellipse 65% 55% at 70% 80%, rgba(143, 168, 216, 0.5) 0%, rgba(143, 168, 216, 0) 70%),
+        radial-gradient(ellipse 50% 45% at 12% 82%, rgba(197, 164, 248, 0.4) 0%, rgba(197, 164, 248, 0) 70%),
+        radial-gradient(ellipse 45% 40% at 92% 60%, rgba(240, 214, 255, 0.45) 0%, rgba(240, 214, 255, 0) 70%),
+        radial-gradient(ellipse 70% 60% at 45% 50%, rgba(245, 238, 255, 0.6) 0%, rgba(245, 238, 255, 0) 75%);
 }
 
 .container {

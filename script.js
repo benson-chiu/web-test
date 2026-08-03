@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
     easing: 'ease-out-cubic',
   });
 
-  initVantaBg();
   initLoader();
   initPetals();
   initGallery();
@@ -18,74 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   console.log('💕 電子喜帖載入完成！');
 });
-
-// ==================== Vanta Fog 背景 ====================
-// 動態載入外部腳本的小工具函式
-function loadScript(src) {
-  return new Promise(function (resolve, reject) {
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.body.appendChild(script);
-  });
-}
-
-function initVantaBg() {
-  // 中低階裝置降級：手機或核心數較少的裝置改用純 CSS 靜態漸層，
-  // 完全不下載/執行 Three.js + Vanta（約600KB+），避免 WebGL 常駐渲染
-  // 持續佔用 GPU/CPU 與電力
-  const isMobile = window.innerWidth < 768;
-  const isLowEndDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (isMobile || isLowEndDevice || prefersReducedMotion) {
-    const bg = document.getElementById('vanta-bg');
-    if (bg) bg.classList.add('vanta-bg-static');
-    return;
-  }
-
-  // 僅桌面且效能較好的裝置才動態載入 Three.js + Vanta Fog
-  loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js')
-    .then(function () {
-      return loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js');
-    })
-    .then(function () {
-      if (typeof VANTA === 'undefined' || typeof VANTA.FOG === 'undefined') return;
-
-      const vantaEffect = VANTA.FOG({
-        el: '#vanta-bg',
-        mouseControls: true,
-        touchControls: true,
-        gyroControls: false,
-        // 色系：以網頁的紫色、藍紫、玫瑰金為主
-        highlightColor: 0xf0d6ff,   // 淡薰衣草紫（亮部）
-        midtoneColor:   0xc5a4f8,   // 主紫色（中間調）
-        lowlightColor:  0x8fa8d8,   // 藍紫（暗部）
-        baseColor:      0xf5eeff,   // 極淡紫白（底色）
-        blurFactor:     0.62,       // 霧感模糊程度
-        speed:          1.2,        // 流動速度（慢一點更浪漫）
-        zoom:           0.8,        // 縮放（稍微拉遠讓霧更大片）
-      });
-
-      // 保底：舊裝置不支援 lvh 時，監聽 resize 強制更新 canvas 尺寸
-      // 使用 debounce 避免 resize 觸發過於頻繁
-      let resizeTimer;
-      window.addEventListener('resize', function () {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function () {
-          if (vantaEffect && typeof vantaEffect.resize === 'function') {
-            vantaEffect.resize();
-          }
-        }, 150);
-      });
-    })
-    .catch(function (err) {
-      console.log('Vanta 背景載入失敗，改用靜態背景:', err);
-      const bg = document.getElementById('vanta-bg');
-      if (bg) bg.classList.add('vanta-bg-static');
-    });
-}
 
 // ==================== 載入畫面 ====================
 function initLoader() {
