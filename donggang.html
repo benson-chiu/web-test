@@ -120,7 +120,7 @@
         loop
         muted
         playsinline
-        preload="auto"
+        preload="metadata"
         poster="images/wedding-invitation-poster-donggang.jpg"
       >
         <source src="images/wedding-invitation-donggang.mp4" type="video/mp4" />
@@ -573,10 +573,8 @@
 
 <!-- 載入動畫庫 -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<!-- Three.js（Vanta 依賴） -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<!-- Vanta Fog -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js"></script>
+<!-- Three.js 與 Vanta Fog 改由 script.js 依裝置效能動態載入，
+     手機/中低階裝置不下載這兩個檔案(約600KB+)，降低流量與資源占用 -->
 <script src="script.js"></script>
 </body>
 </html>

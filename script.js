@@ -20,35 +20,71 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ==================== Vanta Fog 背景 ====================
+// 動態載入外部腳本的小工具函式
+function loadScript(src) {
+  return new Promise(function (resolve, reject) {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.body.appendChild(script);
+  });
+}
+
 function initVantaBg() {
-  if (typeof VANTA === 'undefined' || typeof VANTA.FOG === 'undefined') return;
+  // 中低階裝置降級：手機或核心數較少的裝置改用純 CSS 靜態漸層，
+  // 完全不下載/執行 Three.js + Vanta（約600KB+），避免 WebGL 常駐渲染
+  // 持續佔用 GPU/CPU 與電力
+  const isMobile = window.innerWidth < 768;
+  const isLowEndDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const vantaEffect = VANTA.FOG({
-    el: '#vanta-bg',
-    mouseControls: true,
-    touchControls: true,
-    gyroControls: false,
-    // 色系：以網頁的紫色、藍紫、玫瑰金為主
-    highlightColor: 0xf0d6ff,   // 淡薰衣草紫（亮部）
-    midtoneColor:   0xc5a4f8,   // 主紫色（中間調）
-    lowlightColor:  0x8fa8d8,   // 藍紫（暗部）
-    baseColor:      0xf5eeff,   // 極淡紫白（底色）
-    blurFactor:     0.62,       // 霧感模糊程度
-    speed:          1.2,        // 流動速度（慢一點更浪漫）
-    zoom:           0.8,        // 縮放（稍微拉遠讓霧更大片）
-  });
+  if (isMobile || isLowEndDevice || prefersReducedMotion) {
+    const bg = document.getElementById('vanta-bg');
+    if (bg) bg.classList.add('vanta-bg-static');
+    return;
+  }
 
-  // 保底：舊裝置不支援 lvh 時，監聽 resize 強制更新 canvas 尺寸
-  // 使用 debounce 避免 resize 觸發過於頻繁
-  let resizeTimer;
-  window.addEventListener('resize', function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      if (vantaEffect && typeof vantaEffect.resize === 'function') {
-        vantaEffect.resize();
-      }
-    }, 150);
-  });
+  // 僅桌面且效能較好的裝置才動態載入 Three.js + Vanta Fog
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js')
+    .then(function () {
+      return loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js');
+    })
+    .then(function () {
+      if (typeof VANTA === 'undefined' || typeof VANTA.FOG === 'undefined') return;
+
+      const vantaEffect = VANTA.FOG({
+        el: '#vanta-bg',
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        // 色系：以網頁的紫色、藍紫、玫瑰金為主
+        highlightColor: 0xf0d6ff,   // 淡薰衣草紫（亮部）
+        midtoneColor:   0xc5a4f8,   // 主紫色（中間調）
+        lowlightColor:  0x8fa8d8,   // 藍紫（暗部）
+        baseColor:      0xf5eeff,   // 極淡紫白（底色）
+        blurFactor:     0.62,       // 霧感模糊程度
+        speed:          1.2,        // 流動速度（慢一點更浪漫）
+        zoom:           0.8,        // 縮放（稍微拉遠讓霧更大片）
+      });
+
+      // 保底：舊裝置不支援 lvh 時，監聽 resize 強制更新 canvas 尺寸
+      // 使用 debounce 避免 resize 觸發過於頻繁
+      let resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+          if (vantaEffect && typeof vantaEffect.resize === 'function') {
+            vantaEffect.resize();
+          }
+        }, 150);
+      });
+    })
+    .catch(function (err) {
+      console.log('Vanta 背景載入失敗，改用靜態背景:', err);
+      const bg = document.getElementById('vanta-bg');
+      if (bg) bg.classList.add('vanta-bg-static');
+    });
 }
 
 // ==================== 載入畫面 ====================
@@ -395,41 +431,69 @@ function retryMessageCard() {
 }
 
 // ==================== 相簿功能 ====================
+// url: 原始解析度大圖 (images/，已由使用者手動壓縮至約2MB，維持原有畫質)
+// thumb: 縮圖用的小圖 (images/thumbs/，約300x210)，同時也作為大圖切換時的模糊佔位圖
 let photos = [
-  { url: 'images/photo1.jpg',  alt: '照片 1'  },
-  { url: 'images/photo2.jpg',  alt: '照片 2'  },
-  { url: 'images/photo3.jpg',  alt: '照片 3'  },
-  { url: 'images/photo4.jpg',  alt: '照片 4'  },
-  { url: 'images/photo5.jpg',  alt: '照片 5'  },
-  { url: 'images/photo6.jpg',  alt: '照片 6'  },
-  { url: 'images/photo7.jpg',  alt: '照片 7'  },
-  { url: 'images/photo8.jpg',  alt: '照片 8'  },
-  { url: 'images/photo9.jpg',  alt: '照片 9'  },
-  { url: 'images/photo10.jpg', alt: '照片 10' },
-  { url: 'images/photo11.jpg', alt: '照片 11' },
-  { url: 'images/photo12.jpg', alt: '照片 12' },
-  { url: 'images/photo13.jpg', alt: '照片 13' },
-  { url: 'images/photo14.jpg', alt: '照片 14' },
-  { url: 'images/photo15.jpg', alt: '照片 15' },
-  { url: 'images/photo16.jpg', alt: '照片 16' },
-  { url: 'images/photo17.jpg', alt: '照片 17' },
-  { url: 'images/photo18.jpg', alt: '照片 18' },
-  { url: 'images/photo19.jpg', alt: '照片 19' },
-  { url: 'images/photo20.jpg', alt: '照片 20' },
+  { url: 'images/photo1.jpg',  thumb: 'images/thumbs/photo1.jpg',  alt: '照片 1'  },
+  { url: 'images/photo2.jpg',  thumb: 'images/thumbs/photo2.jpg',  alt: '照片 2'  },
+  { url: 'images/photo3.jpg',  thumb: 'images/thumbs/photo3.jpg',  alt: '照片 3'  },
+  { url: 'images/photo4.jpg',  thumb: 'images/thumbs/photo4.jpg',  alt: '照片 4'  },
+  { url: 'images/photo5.jpg',  thumb: 'images/thumbs/photo5.jpg',  alt: '照片 5'  },
+  { url: 'images/photo6.jpg',  thumb: 'images/thumbs/photo6.jpg',  alt: '照片 6'  },
+  { url: 'images/photo7.jpg',  thumb: 'images/thumbs/photo7.jpg',  alt: '照片 7'  },
+  { url: 'images/photo8.jpg',  thumb: 'images/thumbs/photo8.jpg',  alt: '照片 8'  },
+  { url: 'images/photo9.jpg',  thumb: 'images/thumbs/photo9.jpg',  alt: '照片 9'  },
+  { url: 'images/photo10.jpg', thumb: 'images/thumbs/photo10.jpg', alt: '照片 10' },
+  { url: 'images/photo11.jpg', thumb: 'images/thumbs/photo11.jpg', alt: '照片 11' },
+  { url: 'images/photo12.jpg', thumb: 'images/thumbs/photo12.jpg', alt: '照片 12' },
+  { url: 'images/photo13.jpg', thumb: 'images/thumbs/photo13.jpg', alt: '照片 13' },
+  { url: 'images/photo14.jpg', thumb: 'images/thumbs/photo14.jpg', alt: '照片 14' },
+  { url: 'images/photo15.jpg', thumb: 'images/thumbs/photo15.jpg', alt: '照片 15' },
+  { url: 'images/photo16.jpg', thumb: 'images/thumbs/photo16.jpg', alt: '照片 16' },
+  { url: 'images/photo17.jpg', thumb: 'images/thumbs/photo17.jpg', alt: '照片 17' },
+  { url: 'images/photo18.jpg', thumb: 'images/thumbs/photo18.jpg', alt: '照片 18' },
+  { url: 'images/photo19.jpg', thumb: 'images/thumbs/photo19.jpg', alt: '照片 19' },
+  { url: 'images/photo20.jpg', thumb: 'images/thumbs/photo20.jpg', alt: '照片 20' },
 ];
 
 let currentSlide = 0;
 let autoPlayInterval = null;
 let isAutoPlaying = true;
+let galleryStarted = false; // 相簿是否已開始載入(避免尚未捲動到相簿區塊就先下載大圖)
 const autoPlayDelay = 5000; // 5秒自動切換
 
 function initGallery() {
   generateThumbnails();
-  showSlide(0);
-  startAutoPlay();
   setupKeyboardControls();
-  
-  console.log('📸 相簿輪播初始化完成');
+
+  const gallerySection = document.getElementById('gallery');
+
+  // 使用 IntersectionObserver：捲動到相簿區塊附近才開始載入大圖與自動播放，
+  // 避免頁面剛載入就搶頻寬下載本區的大圖，減少裝置資源占用
+  if (gallerySection && 'IntersectionObserver' in window) {
+    const galleryObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (!galleryStarted) {
+            galleryStarted = true;
+            showSlide(0);
+            console.log('📸 相簿輪播初始化完成');
+          }
+          if (isAutoPlaying) startAutoPlay();
+        } else {
+          stopAutoPlay();
+        }
+      });
+    }, { rootMargin: '300px 0px 300px 0px', threshold: 0.01 });
+
+    galleryObserver.observe(gallerySection);
+  } else {
+    // 不支援 IntersectionObserver 的舊瀏覽器：維持原本行為
+    galleryStarted = true;
+    showSlide(0);
+    startAutoPlay();
+    console.log('📸 相簿輪播初始化完成');
+  }
 }
 
 // 顯示指定照片（不滾動頁面）
@@ -450,24 +514,40 @@ function showSlide(index) {
   const errorEl = document.getElementById('slideshowError');
 
   if (img) {
+    const photo = photos[currentSlide];
+
     // 切換前先清除錯誤狀態
     if (slideshowMain) slideshowMain.classList.remove('has-error');
     if (errorEl) errorEl.style.display = 'none';
     img.style.display = '';
+    img.alt = photo.alt;
 
-    img.src = photos[currentSlide].url;
-    img.alt = photos[currentSlide].alt;
+    // 先顯示已快取的小縮圖當作模糊佔位圖（幾KB，瞬間顯示），
+    // 避免切換到下一張時畫面停在上一張的空窗期
+    img.classList.add('is-loading-full');
+    img.src = photo.thumb;
 
-    // 大圖載入成功：若對應縮圖仍顯示錯誤，同步修復
-    img.onload = function () {
-      syncThumbOnSuccess(currentSlide, photos[currentSlide].url);
-      img.onload = null;
+    // 背景預先載入原始大圖，載入完成後才換上，避免大圖解碼卡住主執行緒導致的「卡頓感」
+    const fullImg = new Image();
+    fullImg.src = photo.url;
+
+    fullImg.onload = function () {
+      // 確認使用者沒有在載入期間又切換到別張照片
+      if (currentSlide === photos.indexOf(photo)) {
+        img.src = photo.url;
+        img.classList.remove('is-loading-full');
+      }
+      syncThumbOnSuccess(currentSlide, photo.thumb);
+      fullImg.onload = null;
     };
 
-    // 大圖載入失敗：顯示錯誤提示
-    img.onerror = function () {
-      if (slideshowMain) slideshowMain.classList.add('has-error');
-      if (errorEl) errorEl.style.display = 'flex';
+    // 大圖載入失敗：顯示錯誤提示（縮圖仍保留顯示，不會整個空白）
+    fullImg.onerror = function () {
+      if (currentSlide === photos.indexOf(photo)) {
+        if (slideshowMain) slideshowMain.classList.add('has-error');
+        if (errorEl) errorEl.style.display = 'flex';
+      }
+      fullImg.onerror = null;
     };
   }
 
@@ -480,6 +560,17 @@ function showSlide(index) {
 
   // 重置進度條
   resetProgressBar();
+
+  // 預先載入下一張大圖，讓切換時不需等待解碼下載
+  preloadNextSlide();
+}
+
+// 預先載入下一張照片的大圖，減少切換時的等待
+function preloadNextSlide() {
+  const nextIndex = (currentSlide + 1) % photos.length;
+  const nextUrl = photos[nextIndex].url;
+  const preloadImg = new Image();
+  preloadImg.src = nextUrl;
 }
 
 // 大圖成功後同步修復對應縮圖
@@ -521,7 +612,7 @@ function retrySlideshowImage() {
 
   // 重試成功：同步恢復縮圖
   img.onload = function () {
-    syncThumbOnSuccess(currentSlide, newSrc);
+    syncThumbOnSuccess(currentSlide, photos[currentSlide].thumb);
     img.onload = null;
   };
 
@@ -575,10 +666,20 @@ function generateThumbnails() {
     thumb.onclick = () => jumpToSlide(index);
 
     const img = document.createElement('img');
-    img.src = photo.url;
+    img.src = photo.thumb;
     img.alt = photo.alt;
+    img.loading = 'lazy';
+    img.decoding = 'async';
 
-    img.onerror = function () { setThumbError(thumb, img); };
+    // 縮圖載入失敗時，改試原始圖片，仍失敗才顯示錯誤圖示
+    img.onerror = function () {
+      if (img.src.indexOf(photo.original) === -1) {
+        img.onerror = function () { setThumbError(thumb, img); };
+        img.src = photo.original;
+        return;
+      }
+      setThumbError(thumb, img);
+    };
 
     thumb.appendChild(img);
     container.appendChild(thumb);

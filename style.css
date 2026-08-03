@@ -78,6 +78,11 @@ body {
     z-index: -1;
 }
 
+/* 中低階裝置/手機降級：不跑 WebGL，改用純 CSS 靜態漸層，大幅降低 GPU/CPU 占用 */
+#vanta-bg.vanta-bg-static {
+    background: linear-gradient(135deg, #f5eeff 0%, #c5a4f8 50%, #8fa8d8 100%);
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -1003,11 +1008,18 @@ a {
     border-radius: 20px;  /* ✅ 照片本身有圓角 */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);  /* ✅ 加上陰影讓照片更立體 */
     animation: fadeIn 0.5s ease;
+    transition: filter 0.3s ease;
 }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
+}
+
+/* 切換照片時，原尺寸大圖尚未載入完成前，先顯示縮圖並加上模糊效果，
+   避免縮圖已切換、大圖卻停在上一張的空窗期 */
+.slideshow-image.is-loading-full {
+    filter: blur(8px);
 }
 
 /* 控制列（音樂播放器風格） */
