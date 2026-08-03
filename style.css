@@ -981,6 +981,33 @@ a {
     justify-content: center;
 }
 
+/* 載入中提示：小型 spinner，只在切換時大圖尚未預載完成才會出現在角落 */
+.slide-loading-indicator {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    z-index: 4;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.slide-loading-indicator.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mini-spinner {
+    width: 26px;
+    height: 26px;
+    border: 3px solid rgba(197, 164, 248, 0.25);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    background: rgba(255, 255, 255, 0.6);
+}
+
 /* 相簿載入失敗提示 */
 .slideshow-error {
     position: absolute;
@@ -1001,7 +1028,12 @@ a {
     display: none;
 }
 
+/* 雙層 img 交叉淡化(crossfade)：兩張圖疊在同一位置，只靠 opacity 切換可見度 */
 .slideshow-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     max-width: 100%;
     max-height: 100%;
     width: auto;
@@ -1009,19 +1041,14 @@ a {
     object-fit: contain;
     border-radius: 20px;  /* ✅ 照片本身有圓角 */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);  /* ✅ 加上陰影讓照片更立體 */
-    animation: fadeIn 0.5s ease;
-    transition: filter 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    z-index: 1;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-/* 切換照片時，原尺寸大圖尚未載入完成前，先顯示縮圖並加上模糊效果，
-   避免縮圖已切換、大圖卻停在上一張的空窗期 */
-.slideshow-image.is-loading-full {
-    filter: blur(8px);
+.slideshow-image.active {
+    opacity: 1;
+    z-index: 2;
 }
 
 /* 控制列（音樂播放器風格） */

@@ -363,7 +363,7 @@ function retryMessageCard() {
 
 // ==================== 相簿功能 ====================
 // url: 原始解析度大圖 (images/，已由使用者手動壓縮至約2MB，維持原有畫質)
-// thumb: 縮圖用的小圖 (images/thumbs/，約300x210)，同時也作為大圖切換時的模糊佔位圖
+// thumb: 縮圖用的小圖 (images/thumbs/，約300x210)，用於底部縮圖列表
 let photos = [
   { url: 'images/photo1.jpg',  thumb: 'images/thumbs/photo1.jpg',  alt: '照片 1'  },
   { url: 'images/photo2.jpg',  thumb: 'images/thumbs/photo2.jpg',  alt: '照片 2'  },
@@ -393,9 +393,21 @@ let isAutoPlaying = true;
 let galleryStarted = false; // 相簿是否已開始載入(避免尚未捲動到相簿區塊就先下載大圖)
 const autoPlayDelay = 5000; // 5秒自動切換
 
+// 每張照片的載入狀態快取：'loading' | 'loaded' | 'error'，避免重複下載同一張圖
+const photoLoadState = {};
+// 已建立的 Image() 物件快取，載入完成後可直接從瀏覽器快取取得，不會重新發請求
+const photoImageCache = {};
+
+// 交叉淡化用的兩個 img 元素，輪流擔任「顯示中」與「下一張淡入」的角色
+let activeImgEl = null;
+let inactiveImgEl = null;
+
 function initGallery() {
   generateThumbnails();
   setupKeyboardControls();
+
+  activeImgEl = document.getElementById('slideshowImgA');
+  inactiveImgEl = document.getElementById('slideshowImgB');
 
   const gallerySection = document.getElementById('gallery');
 
@@ -408,6 +420,7 @@ function initGallery() {
           if (!galleryStarted) {
             galleryStarted = true;
             showSlide(0);
+            preloadAllPhotos(); // 進入相簿區後，背景依序預載全部大圖
             console.log('📸 相簿輪播初始化完成');
           }
           if (isAutoPlaying) startAutoPlay();
@@ -423,11 +436,61 @@ function initGallery() {
     galleryStarted = true;
     showSlide(0);
     startAutoPlay();
+    preloadAllPhotos();
     console.log('📸 相簿輪播初始化完成');
   }
 }
 
-// 顯示指定照片（不滾動頁面）
+// 取得(或建立)某張照片的預載 Image 物件，並回傳其載入狀態
+function loadPhoto(index) {
+  const photo = photos[index];
+  if (!photo) return null;
+
+  if (!photoImageCache[index]) {
+    const imageObj = new Image();
+    photoLoadState[index] = 'loading';
+
+    imageObj.onload = function () {
+      photoLoadState[index] = 'loaded';
+    };
+    imageObj.onerror = function () {
+      photoLoadState[index] = 'error';
+    };
+
+    imageObj.src = photo.url;
+    photoImageCache[index] = imageObj;
+  }
+
+  return photoImageCache[index];
+}
+
+// 背景依序（低優先序、限制併發）預載全部照片，讓切換時大多能直接命中快取
+function preloadAllPhotos() {
+  const concurrency = 3; // 同時最多3張，避免瞬間塞爆頻寬
+  let nextIndex = 0;
+
+  function loadNext() {
+    if (nextIndex >= photos.length) return;
+    const index = nextIndex++;
+    const imageObj = loadPhoto(index);
+
+    if (!imageObj) { loadNext(); return; }
+
+    if (photoLoadState[index] === 'loaded' || photoLoadState[index] === 'error') {
+      loadNext();
+      return;
+    }
+
+    imageObj.addEventListener('load', loadNext, { once: true });
+    imageObj.addEventListener('error', loadNext, { once: true });
+  }
+
+  for (let i = 0; i < concurrency; i++) {
+    loadNext();
+  }
+}
+
+// 顯示指定照片（不滾動頁面）：雙層 img 交叉淡化，全程保持清晰畫面
 function showSlide(index) {
   // 確保索引在有效範圍內
   if (index >= photos.length) {
@@ -438,48 +501,74 @@ function showSlide(index) {
     currentSlide = index;
   }
 
-  // 更新主圖片
-  const img = document.getElementById('slideshowImg');
-  const counter = document.getElementById('slideshowCounter');
-  const slideshowMain = img ? img.closest('.slideshow-main') : null;
+  const targetIndex = currentSlide;
+  const photo = photos[targetIndex];
+  const slideshowMain = activeImgEl ? activeImgEl.closest('.slideshow-main') : null;
   const errorEl = document.getElementById('slideshowError');
+  const loadingIndicator = document.getElementById('slideLoadingIndicator');
+  const counter = document.getElementById('slideshowCounter');
 
-  if (img) {
-    const photo = photos[currentSlide];
-
+  if (activeImgEl && inactiveImgEl && photo) {
     // 切換前先清除錯誤狀態
     if (slideshowMain) slideshowMain.classList.remove('has-error');
     if (errorEl) errorEl.style.display = 'none';
-    img.style.display = '';
-    img.alt = photo.alt;
 
-    // 先顯示已快取的小縮圖當作模糊佔位圖（幾KB，瞬間顯示），
-    // 避免切換到下一張時畫面停在上一張的空窗期
-    img.classList.add('is-loading-full');
-    img.src = photo.thumb;
+    const imageObj = loadPhoto(targetIndex);
+    const state = photoLoadState[targetIndex];
 
-    // 背景預先載入原始大圖，載入完成後才換上，避免大圖解碼卡住主執行緒導致的「卡頓感」
-    const fullImg = new Image();
-    fullImg.src = photo.url;
+    // 顯示 loading 提示的計時器：只有載入超過 200ms 才顯示，避免快取命中時的閃爍
+    let loadingTimer = null;
+    if (loadingIndicator) {
+      loadingTimer = setTimeout(() => {
+        loadingIndicator.classList.add('show');
+      }, 200);
+    }
 
-    fullImg.onload = function () {
-      // 確認使用者沒有在載入期間又切換到別張照片
-      if (currentSlide === photos.indexOf(photo)) {
-        img.src = photo.url;
-        img.classList.remove('is-loading-full');
-      }
-      syncThumbOnSuccess(currentSlide, photo.thumb);
-      fullImg.onload = null;
-    };
+    function swapToInactive() {
+      inactiveImgEl.src = photo.url;
+      inactiveImgEl.alt = photo.alt;
 
-    // 大圖載入失敗：顯示錯誤提示（縮圖仍保留顯示，不會整個空白）
-    fullImg.onerror = function () {
-      if (currentSlide === photos.indexOf(photo)) {
-        if (slideshowMain) slideshowMain.classList.add('has-error');
-        if (errorEl) errorEl.style.display = 'flex';
-      }
-      fullImg.onerror = null;
-    };
+      // 下一輪畫面更新時才切換 class，確保瀏覽器已完成新圖的繪製再開始淡入淡出
+      requestAnimationFrame(() => {
+        inactiveImgEl.classList.add('active');
+        activeImgEl.classList.remove('active');
+        // 交換兩者角色，下一次切換時對調
+        const temp = activeImgEl;
+        activeImgEl = inactiveImgEl;
+        inactiveImgEl = temp;
+      });
+
+      if (loadingTimer) clearTimeout(loadingTimer);
+      if (loadingIndicator) loadingIndicator.classList.remove('show');
+
+      // 大圖成功後，若對應縮圖仍顯示錯誤圖示，同步修復
+      syncThumbOnSuccess(targetIndex, photo.url);
+    }
+
+    if (state === 'loaded') {
+      // 已經預載完成（多數情況）：幾乎瞬間交叉淡化
+      swapToInactive();
+    } else if (state === 'error') {
+      if (loadingTimer) clearTimeout(loadingTimer);
+      if (loadingIndicator) loadingIndicator.classList.remove('show');
+      if (slideshowMain) slideshowMain.classList.add('has-error');
+      if (errorEl) errorEl.style.display = 'flex';
+    } else {
+      // 尚未載入完成：等待載入完成後才交叉淡化，全程不出現半清晰的過渡畫面
+      imageObj.addEventListener('load', function onLoad() {
+        if (currentSlide === targetIndex) swapToInactive();
+        imageObj.removeEventListener('load', onLoad);
+      });
+      imageObj.addEventListener('error', function onError() {
+        if (currentSlide === targetIndex) {
+          if (loadingTimer) clearTimeout(loadingTimer);
+          if (loadingIndicator) loadingIndicator.classList.remove('show');
+          if (slideshowMain) slideshowMain.classList.add('has-error');
+          if (errorEl) errorEl.style.display = 'flex';
+        }
+        imageObj.removeEventListener('error', onError);
+      });
+    }
   }
 
   if (counter) {
@@ -492,26 +581,18 @@ function showSlide(index) {
   // 重置進度條
   resetProgressBar();
 
-  // 預先載入下一張大圖，讓切換時不需等待解碼下載
-  preloadNextSlide();
+  // 確保下一張與上一張也已預載，切換時能立即命中快取
+  loadPhoto((currentSlide + 1) % photos.length);
+  loadPhoto((currentSlide - 1 + photos.length) % photos.length);
 }
 
-// 預先載入下一張照片的大圖，減少切換時的等待
-function preloadNextSlide() {
-  const nextIndex = (currentSlide + 1) % photos.length;
-  const nextUrl = photos[nextIndex].url;
-  const preloadImg = new Image();
-  preloadImg.src = nextUrl;
-}
-
-// 大圖成功後同步修復對應縮圖
+// 大圖成功後同步修復對應縮圖（若之前縮圖載入失敗顯示了錯誤圖示）
 function syncThumbOnSuccess(index, src) {
   const thumbs = document.querySelectorAll('.thumbnail-item');
   const thumb = thumbs[index];
   if (!thumb || !thumb.classList.contains('thumb-error')) return;
 
   thumb.classList.remove('thumb-error');
-  // 移除錯誤 icon
   const errorIcon = thumb.querySelector('.thumb-error-icon');
   if (errorIcon) errorIcon.remove();
 
@@ -523,35 +604,38 @@ function syncThumbOnSuccess(index, src) {
   }
 }
 
-// 相簿圖片重新載入
+// 相簿圖片重新載入（大圖載入失敗時的手動重試）
 function retrySlideshowImage() {
-  const img = document.getElementById('slideshowImg');
-  const slideshowMain = img ? img.closest('.slideshow-main') : null;
+  const slideshowMain = activeImgEl ? activeImgEl.closest('.slideshow-main') : null;
   const errorEl = document.getElementById('slideshowError');
 
-  if (!img) return;
+  if (!activeImgEl) return;
+
+  const photo = photos[currentSlide];
 
   // 清除大圖錯誤狀態
   if (slideshowMain) slideshowMain.classList.remove('has-error');
   if (errorEl) errorEl.style.display = 'none';
-  img.style.display = '';
 
-  // 加上時間戳強制重新請求
-  const originalSrc = photos[currentSlide].url.split('?')[0];
+  // 加上時間戳強制重新請求，並清除快取狀態
+  const originalSrc = photo.url.split('?')[0];
   const newSrc = originalSrc + '?t=' + Date.now();
-  img.src = newSrc;
 
-  // 重試成功：同步恢復縮圖
-  img.onload = function () {
-    syncThumbOnSuccess(currentSlide, photos[currentSlide].thumb);
-    img.onload = null;
+  const retryImg = new Image();
+  retryImg.onload = function () {
+    photoLoadState[currentSlide] = 'loaded';
+    photoImageCache[currentSlide] = retryImg;
+    activeImgEl.src = newSrc;
+    activeImgEl.alt = photo.alt;
+    activeImgEl.classList.add('active');
+    syncThumbOnSuccess(currentSlide, newSrc);
   };
-
-  // 重試失敗：恢復大圖錯誤狀態
-  img.onerror = function () {
+  retryImg.onerror = function () {
+    photoLoadState[currentSlide] = 'error';
     if (slideshowMain) slideshowMain.classList.add('has-error');
     if (errorEl) errorEl.style.display = 'flex';
   };
+  retryImg.src = newSrc;
 }
 
 // 切換照片
@@ -602,11 +686,11 @@ function generateThumbnails() {
     img.loading = 'lazy';
     img.decoding = 'async';
 
-    // 縮圖載入失敗時，改試原始圖片，仍失敗才顯示錯誤圖示
+    // 縮圖載入失敗時，改試大圖(photo.url)，仍失敗才顯示錯誤圖示
     img.onerror = function () {
-      if (img.src.indexOf(photo.original) === -1) {
+      if (img.src.indexOf(photo.url) === -1) {
         img.onerror = function () { setThumbError(thumb, img); };
-        img.src = photo.original;
+        img.src = photo.url;
         return;
       }
       setThumbError(thumb, img);
