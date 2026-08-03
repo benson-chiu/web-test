@@ -362,29 +362,29 @@ function retryMessageCard() {
 }
 
 // ==================== 相簿功能 ====================
-// url: 原始解析度大圖 (images/，已由使用者手動壓縮至約2MB，維持原有畫質)
-// thumb: 縮圖用的小圖 (images/thumbs/，約300x210)，用於底部縮圖列表
+// url: 原始解析度大圖 (album/，已由使用者手動壓縮至約2MB，維持原有畫質)
+// thumb: 縮圖用的小圖 (album/thumbs/，約300x210)，用於底部縮圖列表
 let photos = [
-  { url: 'images/photo1.jpg',  thumb: 'images/thumbs/photo1.jpg',  alt: '照片 1'  },
-  { url: 'images/photo2.jpg',  thumb: 'images/thumbs/photo2.jpg',  alt: '照片 2'  },
-  { url: 'images/photo3.jpg',  thumb: 'images/thumbs/photo3.jpg',  alt: '照片 3'  },
-  { url: 'images/photo4.jpg',  thumb: 'images/thumbs/photo4.jpg',  alt: '照片 4'  },
-  { url: 'images/photo5.jpg',  thumb: 'images/thumbs/photo5.jpg',  alt: '照片 5'  },
-  { url: 'images/photo6.jpg',  thumb: 'images/thumbs/photo6.jpg',  alt: '照片 6'  },
-  { url: 'images/photo7.jpg',  thumb: 'images/thumbs/photo7.jpg',  alt: '照片 7'  },
-  { url: 'images/photo8.jpg',  thumb: 'images/thumbs/photo8.jpg',  alt: '照片 8'  },
-  { url: 'images/photo9.jpg',  thumb: 'images/thumbs/photo9.jpg',  alt: '照片 9'  },
-  { url: 'images/photo10.jpg', thumb: 'images/thumbs/photo10.jpg', alt: '照片 10' },
-  { url: 'images/photo11.jpg', thumb: 'images/thumbs/photo11.jpg', alt: '照片 11' },
-  { url: 'images/photo12.jpg', thumb: 'images/thumbs/photo12.jpg', alt: '照片 12' },
-  { url: 'images/photo13.jpg', thumb: 'images/thumbs/photo13.jpg', alt: '照片 13' },
-  { url: 'images/photo14.jpg', thumb: 'images/thumbs/photo14.jpg', alt: '照片 14' },
-  { url: 'images/photo15.jpg', thumb: 'images/thumbs/photo15.jpg', alt: '照片 15' },
-  { url: 'images/photo16.jpg', thumb: 'images/thumbs/photo16.jpg', alt: '照片 16' },
-  { url: 'images/photo17.jpg', thumb: 'images/thumbs/photo17.jpg', alt: '照片 17' },
-  { url: 'images/photo18.jpg', thumb: 'images/thumbs/photo18.jpg', alt: '照片 18' },
-  { url: 'images/photo19.jpg', thumb: 'images/thumbs/photo19.jpg', alt: '照片 19' },
-  { url: 'images/photo20.jpg', thumb: 'images/thumbs/photo20.jpg', alt: '照片 20' },
+  { url: 'album/photo1.jpg',  thumb: 'album/thumbs/photo1.jpg',  alt: '照片 1'  },
+  { url: 'album/photo2.jpg',  thumb: 'album/thumbs/photo2.jpg',  alt: '照片 2'  },
+  { url: 'album/photo3.jpg',  thumb: 'album/thumbs/photo3.jpg',  alt: '照片 3'  },
+  { url: 'album/photo4.jpg',  thumb: 'album/thumbs/photo4.jpg',  alt: '照片 4'  },
+  { url: 'album/photo5.jpg',  thumb: 'album/thumbs/photo5.jpg',  alt: '照片 5'  },
+  { url: 'album/photo6.jpg',  thumb: 'album/thumbs/photo6.jpg',  alt: '照片 6'  },
+  { url: 'album/photo7.jpg',  thumb: 'album/thumbs/photo7.jpg',  alt: '照片 7'  },
+  { url: 'album/photo8.jpg',  thumb: 'album/thumbs/photo8.jpg',  alt: '照片 8'  },
+  { url: 'album/photo9.jpg',  thumb: 'album/thumbs/photo9.jpg',  alt: '照片 9'  },
+  { url: 'album/photo10.jpg', thumb: 'album/thumbs/photo10.jpg', alt: '照片 10' },
+  { url: 'album/photo11.jpg', thumb: 'album/thumbs/photo11.jpg', alt: '照片 11' },
+  { url: 'album/photo12.jpg', thumb: 'album/thumbs/photo12.jpg', alt: '照片 12' },
+  { url: 'album/photo13.jpg', thumb: 'album/thumbs/photo13.jpg', alt: '照片 13' },
+  { url: 'album/photo14.jpg', thumb: 'album/thumbs/photo14.jpg', alt: '照片 14' },
+  { url: 'album/photo15.jpg', thumb: 'album/thumbs/photo15.jpg', alt: '照片 15' },
+  { url: 'album/photo16.jpg', thumb: 'album/thumbs/photo16.jpg', alt: '照片 16' },
+  { url: 'album/photo17.jpg', thumb: 'album/thumbs/photo17.jpg', alt: '照片 17' },
+  { url: 'album/photo18.jpg', thumb: 'album/thumbs/photo18.jpg', alt: '照片 18' },
+  { url: 'album/photo19.jpg', thumb: 'album/thumbs/photo19.jpg', alt: '照片 19' },
+  { url: 'album/photo20.jpg', thumb: 'album/thumbs/photo20.jpg', alt: '照片 20' },
 ];
 
 let currentSlide = 0;
@@ -887,16 +887,16 @@ function initCountdownDisplay() {
     const distance = weddingDate - new Date().getTime();
 
     if (distance < 0) {
-      if (days) days.textContent = '000';
-      if (days_plus) days.textContent = '000';
+      if (days) days.textContent = '00';
+      if (days_plus) days.textContent = '00';
       if (hours) hours.textContent = '00';
       if (minutes) minutes.textContent = '00';
       if (seconds) seconds.textContent = '00';
       return;
     }
 
-    if (days) days.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(3, '0');
-    if (days_plus) days_plus.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24)) + 1).padStart(3, '0');
+    if (days) days.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
+    if (days_plus) days_plus.textContent = String(Math.floor(distance / (1000 * 60 * 60 * 24)) + 1).padStart(2, '0');
     if (hours) hours.textContent = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
     if (minutes) minutes.textContent = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
     if (seconds) seconds.textContent = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
