@@ -1947,9 +1947,17 @@ a {
     text-align: center;
 }
 
-.venue-name {
+.venue-name-donggang {
     font-family: 'Chiron GoRound TC', serif;
     font-size: clamp(2rem, 4vw, 2.8rem);
+    color: var(--dark);
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.venue-name-tainan {
+    font-family: 'Chiron GoRound TC', serif;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
     color: var(--dark);
     margin-bottom: 10px;
     font-weight: 700;
