@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>婚禮回顧</title>
+
+  <!-- SEO 基本描述 -->
+  <meta name="description" content="邱章嘉 & 田伊婷 婚禮回顧 - 10/25 東港場、10/26 台南場的相片與影片，敬請期待" />
+
+  <!-- Open Graph（LINE / Facebook 預覽用） -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:title"       content="📸 邱章嘉 & 田伊婷 婚禮回顧" />
+  <meta property="og:description" content="敬請期待！" />
+  <meta property="og:url"         content="https://www.ch-s.com.tw/wedding/throwback.html" />
+  <meta property="og:locale"      content="zh_TW" />
+  <meta property="og:site_name"   content="邱章嘉 & 田伊婷 婚禮" />
+
+  <!-- LINE 額外支援（Twitter Card） -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="📸 邱章嘉 & 田伊婷 婚禮回顧" />
+  <meta name="twitter:description" content="敬請期待！" />
+
+  <!-- 在外部 CSS 載入前就蓋住畫面，防止背景閃爍 -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #c5d8f5 0%, #d4c5f5 100%);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <!-- 引入 Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Send+Flowers&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- 靜態霧感背景 -->
+<div id="vanta-bg"></div>
+
+<!-- 載入畫面：必須在所有外部資源之前，確保第一幀就蓋住畫面 -->
+<div class="loader" id="loader">
+  <div class="loader-content">
+    <div class="heart-loader">
+      <div class="heart-wrapper">
+        <div class="heart"></div>
+      </div>
+      <div class="heart-wrapper">
+        <div class="heart"></div>
+      </div>
+    </div>
+    <p class="loader-text">Loading...</p>
+  </div>
+</div>
+
+<div class="global-petals-container" id="globalPetalsContainer"></div>
+
+<!-- 音樂控制 -->
+<button class="music-toggle" id="musicToggle" onclick="toggleMusic()">
+  <span class="noto-emoji" id="musicIcon">🎵</span>
+</button>
+<audio id="bgMusic" loop>
+  <source src="music/background-music.mp3" type="audio/mpeg" />
+</audio>
+
+<!-- 封面區 -->
+<section id="home" class="hero">
+  <div class="hero-content">
+    <div class="tb-cover">
+      <div class="tb-cover-inner">
+        <span class="corner-tl-deco">✦</span>
+        <span class="corner-tr-deco">✦</span>
+        <span class="corner-bl-deco">✦</span>
+        <span class="corner-br-deco">✦</span>
+
+        <p class="tb-date-badge">2026.10.25<span class="tb-badge-dot">·</span>26</p>
+
+        <div class="tb-cover-icon">
+          <span class="noto-emoji">📸</span>
+        </div>
+
+        <h1 class="tb-coming-soon">Coming Soon</h1>
+        <p class="tb-cover-title">婚禮回顧</p>
+
+        <div class="tb-cover-divider"></div>
+
+        <p class="tb-cover-note">
+          敬請期待
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 頁尾 -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-divider"></div>
+    <p class="footer-copyright">© 2026 邱章嘉&田伊婷 All Rights Reserved.</p>
+  </div>
+</footer>
+
+<!-- 載入動畫庫 -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

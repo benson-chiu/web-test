@@ -131,11 +131,11 @@ function toggleMenu() {
   }
 }
 
-// ESC 鍵關閉選單
+// ESC 鍵關閉選單（沒有選單的頁面如 throwback.html 直接略過）
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     const sidebar = document.getElementById('sidebar');
-    if (sidebar.classList.contains('active')) toggleMenu();
+    if (sidebar && sidebar.classList.contains('active')) toggleMenu();
   }
 });
 
@@ -391,6 +391,7 @@ let currentSlide = 0;
 let autoPlayInterval = null;
 let isAutoPlaying = true;
 let galleryStarted = false; // 相簿是否已開始載入(避免尚未捲動到相簿區塊就先下載大圖)
+let galleryEnabled = false; // 本頁是否有相簿輪播(throwback.html 沒有，需避免誤觸自動播放)
 const autoPlayDelay = 5000; // 5秒自動切換
 
 // 每張照片的載入狀態快取：'loading' | 'loaded' | 'error'，避免重複下載同一張圖
@@ -403,6 +404,11 @@ let activeImgEl = null;
 let inactiveImgEl = null;
 
 function initGallery() {
+  // 沒有輪播容器的頁面（例如 throwback.html）直接略過，
+  // 避免無謂地預載 album/ 底下的大圖
+  if (!document.getElementById('slideshowImgA')) return;
+  galleryEnabled = true;
+
   generateThumbnails();
   setupKeyboardControls();
 
@@ -722,6 +728,8 @@ function updateThumbnails() {
 
 // 開始自動播放
 function startAutoPlay() {
+  // 本頁沒有相簿輪播時不啟動計時器（例如 throwback.html 由 visibilitychange 觸發的情況）
+  if (!galleryEnabled) return;
   if (autoPlayInterval) return;
 
   autoPlayInterval = setInterval(() => {
@@ -857,15 +865,19 @@ function initScrollEffects() {
   const menuToggle = document.querySelector('.menu-toggle');
   const musicToggle = document.querySelector('.music-toggle');
 
+  // 兩顆浮動按鈕都不存在時就不必監聽捲動
+  // （throwback.html 沒有選單按鈕，只有音樂按鈕）
+  if (!menuToggle && !musicToggle) return;
+
   window.addEventListener('scroll', function () {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
     if (scrollTop > lastScrollTop && scrollTop > 100) {
-      menuToggle.classList.add('hidden-up');
-      musicToggle.classList.add('hidden-down');
+      if (menuToggle) menuToggle.classList.add('hidden-up');
+      if (musicToggle) musicToggle.classList.add('hidden-down');
     } else {
-      menuToggle.classList.remove('hidden-up');
-      musicToggle.classList.remove('hidden-down');
+      if (menuToggle) menuToggle.classList.remove('hidden-up');
+      if (musicToggle) musicToggle.classList.remove('hidden-down');
     }
 
     lastScrollTop = scrollTop;
@@ -882,6 +894,9 @@ function initCountdownDisplay() {
   const hours = document.getElementById('hours');
   const minutes = document.getElementById('minutes');
   const seconds = document.getElementById('seconds');
+
+  // 沒有婚禮倒數欄位的頁面（例如 throwback.html）不需要啟動計時器
+  if (!days && !days_plus && !hours && !minutes && !seconds) return;
 
   function updateCountdown() {
     const distance = weddingDate - new Date().getTime();
@@ -1019,9 +1034,9 @@ window.addEventListener('resize', function () {
     if (window.innerWidth > 768) {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('overlay');
-      if (sidebar.classList.contains('active')) {
+      if (sidebar && sidebar.classList.contains('active')) {
         sidebar.classList.remove('active');
-        overlay.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
         document.body.style.overflow = 'auto';
       }
     }
