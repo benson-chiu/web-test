@@ -2917,11 +2917,6 @@ footer {
         0 12px 35px rgba(197, 164, 248, 0.28);
 }
 
-/* 自架 MP4：若影片比例不是 16:9，以留黑邊方式完整顯示，不裁切也不變形 */
-.tb-video-file {
-    object-fit: contain;
-}
-
 /* ---------- 影片區響應式 ---------- */
 @media (max-width: 768px) {
     .tb-video-list {
@@ -2954,5 +2949,124 @@ footer {
 
     .tb-video-embed {
         border-radius: 14px;
+    }
+}
+
+/* ---------- 影片封面卡（共用外觀）---------- */
+/* 兩種用途共用這組樣式：
+   .tb-video-facade → 按下後在原地載入 iframe（可內嵌的影片）
+   .tb-video-link   → 按下後開新視窗到 YouTube（被版權方封鎖內嵌的影片） */
+.tb-video-poster {
+    position: relative;
+    display: block;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    background: #000;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* 封面縮圖：填滿 16:9 外框 */
+.tb-facade-thumb {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+/* 壓一層極淡的暗角，讓中央播放鈕更清楚 */
+.tb-video-poster::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.26));
+    pointer-events: none;
+}
+
+/* 中央播放鈕：沿用全站的紫藍漸層，而非 YouTube 紅 */
+.tb-facade-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: clamp(54px, 12vw, 76px);
+    height: clamp(54px, 12vw, 76px);
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    pointer-events: none;
+}
+
+/* 白色三角形（純 CSS，不需要圖檔或字型） */
+.tb-facade-play::before {
+    content: '';
+    border-style: solid;
+    border-width: clamp(9px, 2.2vw, 12px) 0 clamp(9px, 2.2vw, 12px) clamp(15px, 3.8vw, 20px);
+    border-color: transparent transparent transparent #fff;
+    margin-left: clamp(4px, 1vw, 6px);
+}
+
+@media (hover: hover) {
+    .tb-video-poster:hover .tb-facade-play {
+        transform: translate(-50%, -50%) scale(1.12);
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+    }
+}
+
+.tb-video-poster:active .tb-facade-play {
+    transform: translate(-50%, -50%) scale(0.96);
+}
+
+/* 鍵盤操作時的焦點框 */
+.tb-video-poster:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* ---------- 外連 YouTube 的變體 ---------- */
+/* 右下角標示「在 YouTube 上觀看」，讓賓客知道會離開本頁 */
+.tb-facade-note {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border-radius: 50px;
+    background: rgba(0, 0, 0, 0.62);
+    color: #fff;
+    font-size: clamp(0.78rem, 2.4vw, 0.9rem);
+    font-weight: 600;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* 外部連結箭頭（純 CSS） */
+.tb-facade-note::after {
+    content: '↗';
+    font-size: 1.05em;
+    line-height: 1;
+}
+
+@media (max-width: 480px) {
+    .tb-facade-note {
+        right: 9px;
+        bottom: 9px;
+        padding: 5px 11px;
+        letter-spacing: 0;
     }
 }

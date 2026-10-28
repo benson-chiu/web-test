@@ -11,7 +11,7 @@
   <!-- Open Graph（LINE / Facebook 預覽用） -->
   <meta property="og:type"        content="website" />
   <meta property="og:title"       content="📸 邱章嘉 & 田伊婷 婚禮回顧" />
-  <meta property="og:description" content="敬請期待！" />
+  <meta property="og:description" content="重溫婚禮兩天的回憶～" />
   <meta property="og:url"         content="https://www.ch-s.com.tw/wedding/throwback.html" />
   <meta property="og:locale"      content="zh_TW" />
   <meta property="og:site_name"   content="邱章嘉 & 田伊婷 婚禮" />
@@ -19,7 +19,7 @@
   <!-- LINE 額外支援（Twitter Card） -->
   <meta name="twitter:card"        content="summary_large_image" />
   <meta name="twitter:title"       content="📸 邱章嘉 & 田伊婷 婚禮回顧" />
-  <meta name="twitter:description" content="敬請期待！" />
+  <meta name="twitter:description" content="重溫婚禮兩天的回憶～" />
 
   <!-- 在外部 CSS 載入前就蓋住畫面，防止背景閃爍 -->
   <style>
@@ -88,7 +88,7 @@
           <span class="noto-emoji">📸</span>
         </div>
 
-        <h1 class="tb-coming-soon">Coming Soon</h1>
+        <h1 class="tb-coming-soon">Wedding Memories</h1>
         <p class="tb-cover-title">婚禮回顧</p>
 
         <div class="tb-cover-divider"></div>
@@ -118,47 +118,67 @@
       <div class="tb-video-card" data-aos="fade-up" data-aos-duration="1000">
         <div class="tb-video-card-inner">
           <h3 class="tb-video-title">婚禮成長影片</h3>
-          <video
-            class="tb-video-embed tb-video-file"
-            controls
-            preload="none"
-            playsinline
-            controlslist="nodownload"
-            poster="images/wedding-childhood-montage-poster.jpg"
+          <a
+            class="tb-video-embed tb-video-poster tb-video-link"
+            href="https://www.youtube.com/watch?v=XS8xWNiirLo"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="在 YouTube 上觀看：婚禮成長影片（會開啟新視窗）"
           >
-            <source src="video/wedding-childhood-montage.mp4" type="video/mp4" />
-            您的瀏覽器不支援影片播放，請改用其他瀏覽器觀看。
-          </video>
+            <img
+              class="tb-facade-thumb"
+              src="https://i.ytimg.com/vi/XS8xWNiirLo/maxresdefault.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="tb-facade-play" aria-hidden="true"></span>
+            <span class="tb-facade-note">在 YouTube 上觀看</span>
+          </a>
         </div>
       </div>
 
       <div class="tb-video-card" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">
         <div class="tb-video-card-inner">
           <h3 class="tb-video-title">愛情故事訪談影片</h3>
-          <iframe
-            class="tb-video-embed"
-            src="https://www.youtube.com/embed/d4ZZT9mmccA"
-            title="愛情故事訪談影片"
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-          ></iframe>
+          <button
+            class="tb-video-embed tb-video-poster tb-video-facade"
+            type="button"
+            data-youtube-id="d4ZZT9mmccA"
+            data-video-title="愛情故事訪談影片"
+            aria-label="播放影片：愛情故事訪談影片"
+          >
+            <img
+              class="tb-facade-thumb"
+              src="https://i.ytimg.com/vi/d4ZZT9mmccA/maxresdefault.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="tb-facade-play" aria-hidden="true"></span>
+          </button>
         </div>
       </div>
 
       <div class="tb-video-card" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="200">
         <div class="tb-video-card-inner">
           <h3 class="tb-video-title">婚紗輪播影片</h3>
-          <iframe
-            class="tb-video-embed"
-            src="https://www.youtube.com/embed/Xd8V-oV7pXk"
-            title="婚紗輪播影片"
-            loading="lazy"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-          ></iframe>
+          <button
+            class="tb-video-embed tb-video-poster tb-video-facade"
+            type="button"
+            data-youtube-id="Xd8V-oV7pXk"
+            data-video-title="婚紗輪播影片"
+            aria-label="播放影片：婚紗輪播影片"
+          >
+            <img
+              class="tb-facade-thumb"
+              src="https://i.ytimg.com/vi/Xd8V-oV7pXk/maxresdefault.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="tb-facade-play" aria-hidden="true"></span>
+          </button>
         </div>
       </div>
 

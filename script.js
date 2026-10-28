@@ -1010,17 +1010,29 @@ window.addEventListener('resize', function () {
   }, 250);
 });
 
-// ==================== 自架影片播放處理 ====================
-// 自架 MP4（.tb-video-file）本身有聲音，同一時間只允許播放一部，避免多個音源重疊。
+// ==================== YouTube 封面替身（facade）====================
+// 頁面載入時只放一張封面圖，使用者按下才建立 iframe。
 document.addEventListener('DOMContentLoaded', function () {
-  const localVideos = document.querySelectorAll('.tb-video-file');
-  if (localVideos.length < 2) return;
+  const facades = document.querySelectorAll('.tb-video-facade');
+  if (!facades.length) return;
 
-  localVideos.forEach(function (video) {
-    video.addEventListener('play', function () {
-      localVideos.forEach(function (other) {
-        if (other !== video) other.pause();
-      });
+  facades.forEach(function (facade) {
+    facade.addEventListener('click', function () {
+      const videoId = facade.dataset.youtubeId;
+      if (!videoId) return;
+
+      const iframe = document.createElement('iframe');
+      // autoplay=1 在此是安全的：建立 iframe 的動作源自使用者點擊，
+      // 符合瀏覽器的自動播放政策，所以按一次就會直接開始播放
+      iframe.src = 'https://www.youtube.com/embed/' +
+        encodeURIComponent(videoId) + '?autoplay=1&rel=0';
+      iframe.className = 'tb-video-embed';
+      iframe.title = facade.dataset.videoTitle || '婚禮影片';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+
+      facade.replaceWith(iframe);
     });
   });
 });
