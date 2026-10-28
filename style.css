@@ -1730,7 +1730,7 @@ a {
 
 /* ==================== 婚禮主題共用邊框 ==================== */
 /* 套用對象：date-card-inner、location-card-inner、schedule-card、
-   slideshow-container、tb-cover-inner、tb-video-card-inner */
+   slideshow-container、tb-cover-inner、tb-video-card-inner、tb-news-board-inner */
 
 /* 外層金紫漸層邊框（共用） */
 .date-card-inner::before,
@@ -1738,7 +1738,8 @@ a {
 .schedule-card::after,
 .slideshow-container::before,
 .tb-cover-inner::before,
-.tb-video-card-inner::before {
+.tb-video-card-inner::before,
+.tb-news-board-inner::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -2671,7 +2672,7 @@ footer {
 
 /* ==================== 婚禮回顧頁（throwback.html） ==================== */
 
-/* ---------- 封面：Coming Soon ---------- */
+/* ---------- 封面區 ---------- */
 .tb-cover {
     position: relative;
     width: 100%;
@@ -2752,8 +2753,8 @@ footer {
     50%      { transform: translateY(-10px); }
 }
 
-/* Coming Soon 標題（流光文字） */
-.tb-coming-soon {
+/* 封面主標題（流光文字） */
+.tb-cover-main {
     font-family: "Send Flowers", cursive;
     font-size: clamp(2.4rem, 9vw, 4rem);
     font-weight: 700;
@@ -3068,5 +3069,160 @@ footer {
         bottom: 9px;
         padding: 5px 11px;
         letter-spacing: 0;
+    }
+}
+
+/* ---------- 最新消息（佈告欄）---------- */
+.tb-news-section {
+    background: transparent;
+    position: relative;
+}
+
+.tb-news-board {
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* 佈告欄本體：與其他卡片相同的霧面玻璃 + 金紫流光邊框 */
+.tb-news-board-inner {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 18px 38px 26px;
+    box-shadow: 0 20px 60px rgba(197, 164, 248, 0.3);
+}
+
+/* 單則公告：以虛線分隔，像佈告欄上一張張貼紙 */
+.tb-news-item {
+    position: relative;
+    padding: 26px 0 26px 22px;
+    border-bottom: 1px dashed rgba(197, 164, 248, 0.45);
+}
+
+.tb-news-item:last-child {
+    border-bottom: 0;
+    padding-bottom: 10px;
+}
+
+/* 左側彩色短條，模擬圖釘標記 */
+.tb-news-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 31px;
+    width: 5px;
+    height: 22px;
+    border-radius: 3px;
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+}
+
+/* 日期 + 標籤 */
+.tb-news-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.tb-news-date {
+    font-size: clamp(0.88rem, 2.6vw, 0.98rem);
+    font-weight: 700;
+    color: var(--mid);
+    letter-spacing: 1px;
+}
+
+.tb-news-tag {
+    display: inline-block;
+    padding: 3px 14px;
+    border-radius: 50px;
+    font-size: clamp(0.74rem, 2.2vw, 0.84rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    color: #fff;
+}
+
+.tag-update  { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+.tag-preview { background: linear-gradient(135deg, #f2a9ae, #e8b4d8); }
+.tag-notice  { background: linear-gradient(135deg, #d4af37, #e8c766); }
+
+/* 公告標題與內文 */
+.tb-news-heading {
+    font-family: 'Chiron GoRound TC', serif;
+    font-size: clamp(1.05rem, 3.4vw, 1.3rem);
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: 1px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.tb-news-text {
+    font-size: clamp(0.92rem, 2.8vw, 1.02rem);
+    color: var(--mid);
+    line-height: 1.9;
+    letter-spacing: 0.5px;
+}
+
+/* 最新一則的 NEW 標記（純 CSS，不佔用額外元素） */
+.tb-news-item.is-new .tb-news-heading::after {
+    content: 'NEW';
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 9px;
+    border-radius: 5px;
+    background: #ff5c8a;
+    color: #fff;
+    font-size: 0.62em;
+    font-weight: 700;
+    letter-spacing: 1px;
+    vertical-align: middle;
+    animation: tbNewBlink 2.2s ease-in-out infinite;
+}
+
+@keyframes tbNewBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+}
+
+/* 動畫敏感的使用者不閃爍 */
+@media (prefers-reduced-motion: reduce) {
+    .tb-news-item.is-new .tb-news-heading::after {
+        animation: none;
+    }
+}
+
+/* ---------- 最新消息響應式 ---------- */
+@media (max-width: 768px) {
+    .tb-news-board-inner {
+        padding: 14px 24px 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tb-news-board-inner {
+        padding: 10px 18px 18px;
+    }
+
+    .tb-news-item {
+        padding: 20px 0 20px 16px;
+    }
+
+    .tb-news-item::before {
+        top: 25px;
+        width: 4px;
+        height: 18px;
+    }
+
+    .tb-news-meta {
+        gap: 9px;
+        margin-bottom: 8px;
     }
 }

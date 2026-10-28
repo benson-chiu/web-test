@@ -6,7 +6,7 @@
   <title>婚禮回顧</title>
 
   <!-- SEO 基本描述 -->
-  <meta name="description" content="邱章嘉 & 田伊婷 婚禮回顧 - 10/25 東港場、10/26 台南場的相片與影片，敬請期待" />
+  <meta name="description" content="邱章嘉 & 田伊婷 婚禮回顧 - 10/25 東港場、10/26 台南場的婚禮影片與相片紀錄" />
 
   <!-- Open Graph（LINE / Facebook 預覽用） -->
   <meta property="og:type"        content="website" />
@@ -71,6 +71,37 @@
 
 <div class="global-petals-container" id="globalPetalsContainer"></div>
 
+<!-- 漢堡選單按鈕 -->
+<button class="menu-toggle" onclick="toggleMenu()" aria-label="開啟選單">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- 側邊導航列 -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3><span class="noto-emoji">🎉</span> 選單</h3>
+    <button class="close-btn" onclick="toggleMenu()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div class="nav-links">
+    <a href="#home" onclick="toggleMenu()">
+      <span class="icon noto-emoji">🏠</span>
+      <span>首頁</span>
+    </a>
+    <a href="#news" onclick="toggleMenu()">
+      <span class="icon noto-emoji">📣</span>
+      <span>最新消息</span>
+    </a>
+    <a href="#video" onclick="toggleMenu()">
+      <span class="icon noto-emoji">🎬</span>
+      <span>婚禮影片</span>
+    </a>
+  </div>
+</nav>
+
+<!-- 遮罩層 -->
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <!-- 封面區 -->
 <section id="home" class="hero">
@@ -88,15 +119,83 @@
           <span class="noto-emoji">📸</span>
         </div>
 
-        <h1 class="tb-coming-soon">Wedding Memories</h1>
+        <h1 class="tb-cover-main">Wedding Memories</h1>
         <p class="tb-cover-title">婚禮回顧</p>
 
         <div class="tb-cover-divider"></div>
 
         <p class="tb-cover-note">
-          新郎官正在努力整理照片和影片中<br>
-          預計10月底陸續更新網頁，敬請期待！
+          用相片&影片來留住這兩天的幸福回憶<br>
+          更新進度請見下方「最新消息」
         </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 最新消息區 -->
+<section id="news" class="tb-news-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Latest News</h2>
+      <p class="section-subtitle">最新消息</p>
+    </div>
+
+    <div class="tb-news-board" data-aos="fade-up" data-aos-duration="1000">
+      <div class="tb-news-board-inner">
+
+        <!--
+          ▼ 新增一則公告：複製下面整個 <article> 區塊，貼到這個註解下方（最新的放最上面）
+
+          標籤樣式三選一：
+            tag-update   更新（紫藍）─ 網頁已經更新了什麼
+            tag-preview  預告（粉紅）─ 接下來打算更新什麼
+            tag-notice   公告（金色）─ 一般性通知
+
+          最新那一則的 <article> 加上 is-new，標題後面就會出現閃爍的 NEW 標記；
+          發佈下一則時記得把舊的 is-new 移除。
+        -->
+        <article class="tb-news-item is-new">
+          <div class="tb-news-meta">
+            <time class="tb-news-date" datetime="2026-10-28">2026.10.28</time>
+            <span class="tb-news-tag tag-update">更新</span>
+          </div>
+          <h3 class="tb-news-heading">婚禮影片區已上線</h3>
+          <p class="tb-news-text">
+            三部影片已經可以觀看了：婚禮成長影片、愛情故事訪談影片、婚紗輪播影片。<br>
+            其中婚禮成長影片因配樂版權限制，點擊後會開新視窗至 YouTube 播放。
+          </p>
+        </article>
+
+        <article class="tb-news-item is-new">
+          <div class="tb-news-meta">
+            <time class="tb-news-date" datetime="2026-10-28">2026.10.28</time>
+            <span class="tb-news-tag tag-preview">預告</span>
+          </div>
+          <h3 class="tb-news-heading">相片&影片區新郎官正在設計中</h3>
+          <p class="tb-news-text">
+            兩場婚宴的相片和MV，需等待婚宴攝影和錄影老師交付成品，<br>
+            目前成品要多久時間完成還未知，因此目前會先陸續放上親友拍攝的相片和影片。<br>
+            新郎官會盡量趕工這個網頁設計，預計11/1前完成(大概吧😅)。
+          </p>
+        </article>
+
+        <article class="tb-news-item">
+          <div class="tb-news-meta">
+            <time class="tb-news-date" datetime="2026-10-26">2026.10.26</time>
+            <span class="tb-news-tag tag-notice">公告</span>
+          </div>
+          <h3 class="tb-news-heading">兩場婚宴圓滿結束</h3>
+          <p class="tb-news-text">
+            感謝所有遠道而來的親友，陪我們一起度過東港與台南這兩天的婚禮。<br>
+            這個頁面會陸續更新相片與影片紀錄，歡迎隨時回來看看~
+          </p>
+        </article>
+
       </div>
     </div>
   </div>

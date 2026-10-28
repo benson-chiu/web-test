@@ -832,7 +832,7 @@ function initScrollEffects() {
   const musicToggle = document.querySelector('.music-toggle');
 
   // 兩顆浮動按鈕都不存在時就不必監聽捲動
-  // （throwback.html 既沒有選單按鈕、也沒有音樂按鈕，會在此直接返回）
+  // （throwback.html 有選單按鈕但沒有音樂按鈕，下面每一處都已個別做 null 檢查）
   if (!menuToggle && !musicToggle) return;
 
   window.addEventListener('scroll', function () {
