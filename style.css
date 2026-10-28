@@ -1730,14 +1730,15 @@ a {
 
 /* ==================== 婚禮主題共用邊框 ==================== */
 /* 套用對象：date-card-inner、location-card-inner、schedule-card、
-   slideshow-container、tb-cover-inner */
+   slideshow-container、tb-cover-inner、tb-video-card-inner */
 
 /* 外層金紫漸層邊框（共用） */
 .date-card-inner::before,
 .location-card-inner::before,
 .schedule-card::after,
 .slideshow-container::before,
-.tb-cover-inner::before {
+.tb-cover-inner::before,
+.tb-video-card-inner::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -2826,5 +2827,132 @@ footer {
 
     .tb-cover-divider {
         margin: 20px auto;
+    }
+}
+
+/* ---------- 影片區 ---------- */
+.tb-video-section {
+    background: transparent;
+    position: relative;
+}
+
+.tb-video-list {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 55px;
+}
+
+.tb-video-card {
+    position: relative;
+}
+
+/* 卡片本體：與 date-card-inner / tb-cover-inner 相同的霧面玻璃 + 金紫流光邊框 */
+.tb-video-card-inner {
+    position: relative;
+    z-index: 1;
+    isolation: isolate;
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 30px;
+    padding: 38px 38px 34px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(197, 164, 248, 0.3);
+    transition: transform 0.4s ease;
+}
+
+@media (hover: hover) {
+    .tb-video-card:hover .tb-video-card-inner {
+        transform: translateY(-10px);
+    }
+}
+
+/* 影片標題 */
+.tb-video-title {
+    position: relative;
+    font-family: 'Chiron GoRound TC', serif;
+    font-size: clamp(1.15rem, 4vw, 1.55rem);
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: 3px;
+    line-height: 1.5;
+    padding-bottom: 18px;
+    margin-bottom: 26px;
+    text-shadow:
+        0 0 16px rgba(255, 255, 255, 1),
+        0 0 32px rgba(255, 255, 255, 0.8);
+}
+
+.tb-video-title .noto-emoji {
+    margin-right: 10px;
+    font-size: 0.95em;
+}
+
+/* 標題下方漸層細線（純 CSS 裝飾，不佔用額外元素） */
+.tb-video-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--primary), transparent);
+}
+
+/* 影片畫面：同時套用於 YouTube 的 <iframe> 與自架 MP4 的 <video>
+   aspect-ratio 自動維持 16:9，無需額外包裝容器 */
+.tb-video-embed {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: 20px;
+    background: #000;
+    box-shadow:
+        0 0 0 2px rgba(197, 164, 248, 0.3),
+        0 12px 35px rgba(197, 164, 248, 0.28);
+}
+
+/* 自架 MP4：若影片比例不是 16:9，以留黑邊方式完整顯示，不裁切也不變形 */
+.tb-video-file {
+    object-fit: contain;
+}
+
+/* ---------- 影片區響應式 ---------- */
+@media (max-width: 768px) {
+    .tb-video-list {
+        gap: 42px;
+    }
+
+    .tb-video-card-inner {
+        padding: 30px 22px 26px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tb-video-list {
+        gap: 34px;
+    }
+
+    .tb-video-card-inner {
+        padding: 24px 16px 22px;
+    }
+
+    .tb-video-title {
+        letter-spacing: 2px;
+        padding-bottom: 14px;
+        margin-bottom: 20px;
+    }
+
+    .tb-video-title::after {
+        width: 90px;
+    }
+
+    .tb-video-embed {
+        border-radius: 14px;
     }
 }

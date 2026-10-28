@@ -142,47 +142,13 @@ document.addEventListener('keydown', function (e) {
 // ==================== 音樂控制 ====================
 let isMusicPlaying = false;
 
-function toggleMusic() {
-  const audio = document.getElementById('bgMusic');
-  const musicIcon = document.getElementById('musicIcon');
-  if (!audio) return;
-
-  if (isMusicPlaying) {
-    audio.pause();
-    if (musicIcon) musicIcon.textContent = '🔈';
-    document.getElementById('musicToggle').classList.remove('playing');
-    isMusicPlaying = false;
-  } else {
-    audio.play()
-      .then(() => {
-        if (musicIcon) musicIcon.textContent = '🔊';
-        document.getElementById('musicToggle').classList.add('playing');
-        isMusicPlaying = true;
-      })
-      .catch((error) => console.log('音樂播放失敗:', error));
-  }
-}
-
-document.addEventListener('visibilitychange', function () {
-  const audio = document.getElementById('bgMusic');
-  if (!audio) return;
-  if (document.hidden && isMusicPlaying) {
-    audio.pause();
-  } else if (!document.hidden && isMusicPlaying) {
-    audio.play();
-  }
-});
-
 // 切換音樂播放
 function toggleMusic() {
   const audio = document.getElementById('bgMusic');
   const musicIcon = document.getElementById('musicIcon');
   const musicToggle = document.getElementById('musicToggle');
-  
-  if (!audio) return;
 
-  // 標記使用者已互動
-  hasUserInteracted = true;
+  if (!audio) return;
 
   if (isMusicPlaying) {
     // 暫停音樂
@@ -202,15 +168,15 @@ function toggleMusic() {
   }
 }
 
-// 頁面可見性變化時的處理
+// 頁面切到背景時暫停音樂，切回前景時恢復
 document.addEventListener('visibilitychange', function () {
   const audio = document.getElementById('bgMusic');
   if (!audio) return;
-  
+
   if (document.hidden && isMusicPlaying) {
     audio.pause();
   } else if (!document.hidden && isMusicPlaying) {
-    audio.play().catch(err => console.log('恢復播放失敗:', err));
+    audio.play().catch((err) => console.log('恢復播放失敗:', err));
   }
 });
 
@@ -866,7 +832,7 @@ function initScrollEffects() {
   const musicToggle = document.querySelector('.music-toggle');
 
   // 兩顆浮動按鈕都不存在時就不必監聽捲動
-  // （throwback.html 沒有選單按鈕，只有音樂按鈕）
+  // （throwback.html 既沒有選單按鈕、也沒有音樂按鈕，會在此直接返回）
   if (!menuToggle && !musicToggle) return;
 
   window.addEventListener('scroll', function () {
@@ -1042,6 +1008,21 @@ window.addEventListener('resize', function () {
     }
     AOS.refresh();
   }, 250);
+});
+
+// ==================== 自架影片播放處理 ====================
+// 自架 MP4（.tb-video-file）本身有聲音，同一時間只允許播放一部，避免多個音源重疊。
+document.addEventListener('DOMContentLoaded', function () {
+  const localVideos = document.querySelectorAll('.tb-video-file');
+  if (localVideos.length < 2) return;
+
+  localVideos.forEach(function (video) {
+    video.addEventListener('play', function () {
+      localVideos.forEach(function (other) {
+        if (other !== video) other.pause();
+      });
+    });
+  });
 });
 
 // ==================== 錯誤處理 ====================
