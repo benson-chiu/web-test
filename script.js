@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initCountdownDisplay();
   initScrollAnimations();
   initScrollHint();
+  initPhotoGallery();
 
   console.log('💕 電子喜帖載入完成！');
 });
@@ -1036,6 +1037,365 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
+
+// ==================== 相片區（throwback.html） ====================
+// 設計重點：絕不預載大圖。
+// 網格只載縮圖（約 12 KB），大圖（約 160 KB）只在使用者點開燈箱時抓那一張。
+// 這是刻意不沿用上方相簿輪播 preloadAllPhotos() 的原因 —— 幾百張相片若全預載會吃掉大量流量。
+
+const PHOTO_BATCH = 150; // 每次渲染的格數，避免一次塞進上千個 DOM 節點
+
+// 燈箱狀態
+let lbGroup = 0;
+let lbIndex = 0;
+let lbOpen = false;
+
+// 讓 AOS 重新掃描 DOM。
+// 相片區的分組是 JS 動態產生的，而 AOS.init() 在那之前就跑完了，
+// 新元素不在它的清單裡。而 aos.css 的 [data-aos^=fade] 預設是 opacity:0，
+// 要等 AOS 加上 .aos-animate 才顯示 —— 所以少了這一步，相片區會整塊隱形。
+// refresh() 只重算既有元素的位置，必須用 refreshHard() 才會重新查詢 [data-aos]。
+function refreshScrollAnimations() {
+  if (typeof AOS !== 'undefined' && typeof AOS.refreshHard === 'function') {
+    AOS.refreshHard();
+  }
+}
+
+function photoThumbUrl(group, id) {
+  return group.base + '/thumbs/' + id + '.webp?v=' + PHOTO_VERSION;
+}
+
+function photoFullUrl(group, id) {
+  return group.base + '/full/' + id + '.webp?v=' + PHOTO_VERSION;
+}
+
+function initPhotoGallery() {
+  const host = document.getElementById('galleryGroups');
+  if (!host) return;
+
+  // 還沒有相片時顯示整理中提示，而不是留一塊空白。
+  // 必須逐組檢查 photos 長度 —— 只看 PHOTO_GROUPS.length 不夠，
+  // 因為清單可能有分組但每組都是空的，那樣會兩邊都不顯示。
+  const hasAnyPhoto = typeof PHOTO_GROUPS !== 'undefined' &&
+    PHOTO_GROUPS.some(function (g) { return g && g.photos && g.photos.length; });
+
+  if (!hasAnyPhoto) {
+    host.innerHTML =
+      '<div class="tb-gallery-empty" data-aos="fade-up" data-aos-duration="1000">' +
+      '<div class="tb-gallery-empty-icon noto-emoji">📷</div>' +
+      '<p>相片正在挑選與整理中<br>完成後會在「最新消息」公告</p>' +
+      '</div>';
+    refreshScrollAnimations();
+    return;
+  }
+
+  PHOTO_GROUPS.forEach(function (group, gi) {
+    const total = group.photos.length;
+    if (!total) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'tb-photo-group';
+    // 進場動畫：與影片卡、佈告欄一致，分組之間錯開 100ms
+    wrap.setAttribute('data-aos', 'fade-up');
+    wrap.setAttribute('data-aos-duration', '1000');
+    if (gi > 0) wrap.setAttribute('data-aos-delay', String(gi * 100));
+
+    const gridId = 'photoGrid-' + group.id;
+
+    // --- 分組標題（可折疊） ---
+    const header = document.createElement('button');
+    header.type = 'button';
+    header.className = 'tb-group-header';
+    header.setAttribute('aria-expanded', 'true');
+    header.setAttribute('aria-controls', gridId);
+    header.innerHTML =
+      '<span class="tb-group-title">' + group.title + '</span>' +
+      '<span class="tb-group-date">' + (group.date || '') + '</span>' +
+      '<span class="tb-group-count">' + total + ' 張</span>' +
+      '<span class="tb-group-caret material-symbols-outlined">expand_more</span>';
+
+    // --- 縮圖網格 ---
+    const grid = document.createElement('div');
+    grid.className = 'tb-photo-grid';
+    grid.id = gridId;
+
+    // --- 載入更多 ---
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'tb-load-more';
+
+    let rendered = 0;
+
+    function renderBatch() {
+      const end = Math.min(rendered + PHOTO_BATCH, total);
+      const frag = document.createDocumentFragment();
+
+      for (let i = rendered; i < end; i++) {
+        const id = group.photos[i][0];
+
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'tb-photo-cell';
+        cell.dataset.g = String(gi);
+        cell.dataset.i = String(i);
+        cell.setAttribute('aria-label', group.title + ' 第 ' + (i + 1) + ' 張，點擊放大');
+
+        const img = document.createElement('img');
+        img.src = photoThumbUrl(group, id);
+        img.alt = '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.addEventListener('load', function () { img.classList.add('loaded'); }, { once: true });
+        img.addEventListener('error', function () { cell.classList.add('cell-error'); }, { once: true });
+
+        cell.appendChild(img);
+        frag.appendChild(cell);
+      }
+
+      grid.appendChild(frag);
+      rendered = end;
+
+      // 文字無條件寫入，這樣即使日後樣式又把 hidden 蓋掉，也不會出現空白按鈕
+      const remaining = total - rendered;
+      more.textContent = '載入更多（還有 ' + remaining + ' 張）';
+      more.hidden = (remaining <= 0);
+    }
+
+    more.addEventListener('click', renderBatch);
+
+    header.addEventListener('click', function () {
+      const expanded = header.getAttribute('aria-expanded') === 'true';
+      header.setAttribute('aria-expanded', String(!expanded));
+      grid.hidden = expanded;
+      more.hidden = expanded || rendered >= total;
+    });
+
+    renderBatch();
+
+    wrap.appendChild(header);
+    wrap.appendChild(grid);
+    wrap.appendChild(more);
+    host.appendChild(wrap);
+  });
+
+  // 事件委派：不必為每一格各綁一個監聽
+  host.addEventListener('click', function (e) {
+    const cell = e.target.closest('.tb-photo-cell');
+    if (!cell) return;
+    openLightbox(parseInt(cell.dataset.g, 10), parseInt(cell.dataset.i, 10));
+  });
+
+  initLightbox();
+
+  // 分組都加好之後才讓 AOS 重新掃描，否則新元素會卡在 opacity:0
+  refreshScrollAnimations();
+
+  console.log('📷 相片區初始化完成');
+}
+
+// ==================== 燈箱 ====================
+function initLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (!lb) return;
+
+  lb.querySelectorAll('[data-lb-close]').forEach(function (el) {
+    el.addEventListener('click', closeLightbox);
+  });
+
+  document.getElementById('lightboxPrev').addEventListener('click', function () { stepLightbox(-1); });
+  document.getElementById('lightboxNext').addEventListener('click', function () { stepLightbox(1); });
+  document.getElementById('lightboxDownload').addEventListener('click', downloadCurrentPhoto);
+
+  document.addEventListener('keydown', function (e) {
+    if (!lbOpen) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowLeft') stepLightbox(-1);
+    else if (e.key === 'ArrowRight') stepLightbox(1);
+  });
+
+  // 手機滑動切換
+  let touchX = 0;
+  const stage = document.getElementById('lightboxStage');
+  lb.addEventListener('touchstart', function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', function (e) {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 50) stepLightbox(dx > 0 ? -1 : 1);
+  }, { passive: true });
+  if (stage) stage.style.touchAction = 'pan-y';
+}
+
+function openLightbox(gi, idx) {
+  const lb = document.getElementById('lightbox');
+  if (!lb) return;
+
+  lbGroup = gi;
+  lbIndex = idx;
+  lbOpen = true;
+
+  // 鎖住頁面捲動，並補上捲軸寬度避免版面位移（與 toggleMenu 相同做法）
+  const sbw = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.paddingRight = sbw + 'px';
+  document.body.style.overflow = 'hidden';
+
+  lb.hidden = false;
+  requestAnimationFrame(function () { lb.classList.add('show'); });
+
+  showLightboxPhoto();
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox');
+  if (!lb) return;
+
+  lbOpen = false;
+  lb.classList.remove('show');
+  document.body.style.paddingRight = '';
+  document.body.style.overflow = '';
+
+  setTimeout(function () {
+    if (!lbOpen) {
+      lb.hidden = true;
+      const img = document.getElementById('lightboxImg');
+      img.src = '';          // 釋放記憶體，避免累積大圖
+      img.classList.remove('loaded');
+    }
+  }, 250);
+}
+
+function stepLightbox(delta) {
+  const group = PHOTO_GROUPS[lbGroup];
+  if (!group) return;
+  const next = lbIndex + delta;
+  if (next < 0 || next >= group.photos.length) return;
+  lbIndex = next;
+  showLightboxPhoto();
+}
+
+function showLightboxPhoto() {
+  const group = PHOTO_GROUPS[lbGroup];
+  if (!group) return;
+
+  const entry = group.photos[lbIndex];
+  const id = entry[0];
+  const w = entry[1];
+  const h = entry[2];
+
+  const img     = document.getElementById('lightboxImg');
+  const spinner = document.getElementById('lightboxSpinner');
+  const errorEl = document.getElementById('lightboxError');
+  const caption = document.getElementById('lightboxCaption');
+  const stage   = document.getElementById('lightboxStage');
+
+  caption.textContent = group.title + '　' + (lbIndex + 1) + ' / ' + group.photos.length;
+
+  // 用縮圖的長寬比先把版面撐住，大圖載入時畫面才不會跳動
+  if (w && h) stage.style.aspectRatio = w + ' / ' + h;
+
+  img.classList.remove('loaded');
+  errorEl.hidden = true;
+  spinner.hidden = false;
+
+  img.onload = function () {
+    spinner.hidden = true;
+    img.classList.add('loaded');
+    stage.style.aspectRatio = '';   // 載入完成後交給圖片自己的尺寸
+  };
+  img.onerror = function () {
+    spinner.hidden = true;
+    errorEl.hidden = false;
+  };
+
+  img.src = photoFullUrl(group, id);
+  img.alt = group.title + ' 第 ' + (lbIndex + 1) + ' 張';
+
+  // 只預載前後各一張，不是全部
+  [lbIndex - 1, lbIndex + 1].forEach(function (i) {
+    if (i >= 0 && i < group.photos.length) {
+      const pre = new Image();
+      pre.src = photoFullUrl(group, group.photos[i][0]);
+    }
+  });
+
+  document.getElementById('lightboxPrev').disabled = (lbIndex === 0);
+  document.getElementById('lightboxNext').disabled = (lbIndex === group.photos.length - 1);
+}
+
+// ==================== 下載 ====================
+// 兩種格式都不需要在伺服器上多存一份檔案：
+//   webp -> 直接把原檔抓下來
+//   jpg  -> 抓同一個原檔，在瀏覽器端用 Canvas 轉檔
+// 因此不論選哪種，網路傳輸量都只有那一張 WebP（約 160 KB），且來自 Cloudflare。
+
+function photoFileName(group, id, ext) {
+  return '邱章嘉田伊婷_' + group.title + '_' + id.replace(/^[a-z]+/i, '') + '.' + ext;
+}
+
+function saveBlob(blob, name) {
+  const objUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objUrl;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // 延後釋放，避免部分瀏覽器還沒開始寫檔就被撤銷
+  setTimeout(function () { URL.revokeObjectURL(objUrl); }, 10000);
+}
+
+// 把圖片轉成指定格式。必須在設定 src 之前先設 crossOrigin，
+// 否則 canvas 會被標記為 tainted，toBlob 會丟 SecurityError。
+function convertPhoto(url, mime, quality) {
+  return new Promise(function (resolve, reject) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width  = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        // JPG 沒有透明通道，先鋪白底，避免透明區域轉出來變黑
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(function (blob) {
+          if (blob) resolve(blob); else reject(new Error('toBlob 回傳空值'));
+        }, mime, quality);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    img.onerror = function () { reject(new Error('圖片載入失敗（可能是 CORS 未開啟）')); };
+    img.src = url;
+  });
+}
+
+async function downloadCurrentPhoto() {
+  const group = PHOTO_GROUPS[lbGroup];
+  if (!group) return;
+
+  const id  = group.photos[lbIndex][0];
+  const url = photoFullUrl(group, id);
+  const btn = document.getElementById('lightboxDownload');
+  const label = btn.querySelector('span:last-child');
+  const original = label.textContent;
+
+  btn.disabled = true;
+  label.textContent = '處理中…';
+
+  try {
+    // 統一轉存為 JPG：相容性最好，而且不必在伺服器上多存一份檔案
+    const blob = await convertPhoto(url, 'image/jpeg', 0.92);
+    saveBlob(blob, photoFileName(group, id, 'jpg'));
+  } catch (err) {
+    // 轉檔或網路失敗時退回開新視窗，使用者仍可長按另存
+    console.log('下載失敗，改為開新視窗:', err);
+    window.open(url, '_blank', 'noopener');
+  } finally {
+    label.textContent = original;
+    btn.disabled = false;
+  }
+}
 
 // ==================== 錯誤處理 ====================
 window.addEventListener('error', function (e) {

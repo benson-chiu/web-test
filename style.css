@@ -2753,6 +2753,13 @@ footer {
     50%      { transform: translateY(-10px); }
 }
 
+/* 系統開啟「減少動態效果」時不浮動 */
+@media (prefers-reduced-motion: reduce) {
+    .tb-cover-icon {
+        animation: none;
+    }
+}
+
 /* 封面主標題（流光文字） */
 .tb-cover-main {
     font-family: "Send Flowers", cursive;
@@ -2786,6 +2793,24 @@ footer {
     text-shadow:
         0 0 16px rgba(255, 255, 255, 1),
         0 0 32px rgba(255, 255, 255, 0.8);
+}
+
+/* 封面副標題
+   字形與大小沿用 tb-cover-note（font-family 由 body 繼承，兩者一致），
+   但文字改以紫色漸層填入 —— 漸層與 tb-cover-note 的底色相同。
+   刻意不加 text-shadow：文字是透明的、靠 background-clip 顯色，
+   加陰影會從字體缺口透出來，看起來很髒。 */
+.tb-cover-subtitle {
+    margin-top: 10px;
+    font-size: clamp(0.95rem, 3vw, 1.1rem);
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.7;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .tb-cover-divider {
@@ -3098,6 +3123,48 @@ footer {
     box-shadow: 0 20px 60px rgba(197, 164, 248, 0.3);
 }
 
+/* 捲動容器：高度固定，公告變多時只在框內捲動，不會把整頁拉長。
+   刻意獨立成一層而不是讓 .tb-news-board-inner 自己捲動 ——
+   因為金紫邊框是 inner 的 ::before（absolute inset:0），
+   若 inner 變成捲動容器，邊框會隨內容一起捲走。 */
+.tb-news-scroll {
+    max-height: 420px;
+    overflow-y: auto;
+    /* 捲到頂/底時不要連帶捲動整個頁面 */
+    overscroll-behavior: contain;
+    /* Firefox 捲軸 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(187, 142, 255, 0.65) rgba(197, 164, 248, 0.16);
+}
+
+/* WebKit / Chromium 捲軸 */
+.tb-news-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tb-news-scroll::-webkit-scrollbar-track {
+    background: rgba(197, 164, 248, 0.16);
+    border-radius: 10px;
+}
+
+.tb-news-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    border-radius: 10px;
+}
+
+@media (hover: hover) {
+    .tb-news-scroll::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, #a97bff, #7d97cc);
+    }
+}
+
+/* 可捲動區域要能用鍵盤聚焦捲動，因此需要焦點樣式 */
+.tb-news-scroll:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+    border-radius: 12px;
+}
+
 /* 單則公告：以虛線分隔，像佈告欄上一張張貼紙 */
 .tb-news-item {
     position: relative;
@@ -3204,6 +3271,10 @@ footer {
     .tb-news-board-inner {
         padding: 14px 24px 22px;
     }
+
+    .tb-news-scroll {
+        max-height: 360px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -3224,5 +3295,480 @@ footer {
     .tb-news-meta {
         gap: 9px;
         margin-bottom: 8px;
+    }
+
+    .tb-news-scroll {
+        max-height: 320px;
+    }
+
+    .tb-news-scroll::-webkit-scrollbar {
+        width: 6px;
+    }
+}
+
+/* ---------- 相片區 ---------- */
+.tb-gallery-section {
+    background: transparent;
+    position: relative;
+}
+
+.tb-gallery-groups {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+/* isolation 很重要：相片格是 <button>，而全站規則給了 button z-index:1001，
+   若不隔離，選單開啟時相片會蓋在深色遮罩之上 */
+.tb-photo-group {
+    position: relative;
+    isolation: isolate;
+}
+
+/* 分組標題（可折疊） */
+.tb-group-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 26px;
+    border: 0;
+    border-radius: 50px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 8px 28px rgba(197, 164, 248, 0.22);
+    text-align: left;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+@media (hover: hover) {
+    .tb-group-header:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 34px rgba(197, 164, 248, 0.32);
+    }
+}
+
+.tb-group-header:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+}
+
+.tb-group-title {
+    font-family: 'Chiron GoRound TC', serif;
+    font-size: clamp(1.15rem, 3.6vw, 1.45rem);
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: 2px;
+}
+
+.tb-group-date {
+    font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+    font-weight: 700;
+    color: var(--mid);
+    letter-spacing: 1px;
+}
+
+.tb-group-count {
+    margin-left: auto;
+    padding: 3px 13px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    font-size: clamp(0.74rem, 2.2vw, 0.84rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.tb-group-caret {
+    color: var(--primary);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.tb-group-header[aria-expanded="false"] .tb-group-caret {
+    transform: rotate(-90deg);
+}
+
+/* 縮圖網格 */
+.tb-photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.tb-photo-grid[hidden] {
+    display: none;
+}
+
+.tb-photo-cell {
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    background: rgba(197, 164, 248, 0.16);
+    box-shadow: 0 4px 14px rgba(197, 164, 248, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* 讓瀏覽器跳過畫面外格子的繪製，長網格才不會拖累捲動 */
+    content-visibility: auto;
+    contain-intrinsic-size: 170px;
+}
+
+.tb-photo-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.tb-photo-cell img.loaded {
+    opacity: 1;
+}
+
+@media (hover: hover) {
+    .tb-photo-cell:hover {
+        transform: scale(1.04);
+        box-shadow: 0 10px 26px rgba(197, 164, 248, 0.4);
+        z-index: 2;
+    }
+}
+
+.tb-photo-cell:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* 載入更多 */
+/* 注意：因為下面設了 display:block，必須另外補這條 [hidden] 規則。
+   瀏覽器預設的 [hidden]{display:none} 優先序低於作者樣式，會被蓋掉。 */
+.tb-load-more[hidden] {
+    display: none;
+}
+
+.tb-load-more {
+    display: block;
+    margin: 20px auto 0;
+    padding: 12px 32px;
+    border: 2px solid var(--primary);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--primary);
+    font-family: 'Chiron GoRound TC', sans-serif;
+    font-size: clamp(0.9rem, 2.8vw, 1rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+@media (hover: hover) {
+    .tb-load-more:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+}
+
+/* 相片尚未上線時的提示 */
+.tb-gallery-empty {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 46px 30px;
+    border-radius: 30px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(197, 164, 248, 0.3);
+}
+
+.tb-gallery-empty-icon {
+    font-size: 2.8rem;
+    margin-bottom: 14px;
+}
+
+.tb-gallery-empty p {
+    font-size: clamp(0.95rem, 3vw, 1.08rem);
+    color: var(--mid);
+    line-height: 1.9;
+    letter-spacing: 1px;
+}
+
+/* ---------- 燈箱 ---------- */
+.tb-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.tb-lightbox[hidden] {
+    display: none;
+}
+
+.tb-lightbox.show {
+    opacity: 1;
+}
+
+.tb-lightbox-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(14, 8, 26, 0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.tb-lightbox-stage {
+    position: relative;
+    z-index: 1;
+    width: min(94vw, 1400px);
+    height: min(76vh, 1000px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.tb-lightbox-img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tb-lightbox-img.loaded {
+    opacity: 1;
+}
+
+.tb-lightbox-spinner {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    border: 4px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+.tb-lightbox-spinner[hidden] {
+    display: none;
+}
+
+.tb-lightbox-error {
+    position: absolute;
+    text-align: center;
+    color: #fff;
+}
+
+.tb-lightbox-error[hidden] {
+    display: none;
+}
+
+/* 上下工具列 */
+.tb-lightbox-top,
+.tb-lightbox-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 20px;
+}
+
+.tb-lightbox-top {
+    top: 0;
+    height: 68px;
+}
+
+.tb-lightbox-bottom {
+    bottom: 0;
+    height: 86px;
+    justify-content: center;
+}
+
+.tb-lightbox-caption {
+    color: rgba(255, 255, 255, 0.92);
+    font-size: clamp(0.85rem, 2.6vw, 1rem);
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.tb-lightbox-icon {
+    margin-left: auto;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.tb-lightbox-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 26px;
+    border: 0;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: #fff;
+    font-family: 'Chiron GoRound TC', sans-serif;
+    font-size: clamp(0.88rem, 2.6vw, 0.98rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    transition: transform 0.3s ease;
+}
+
+.tb-lightbox-btn[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}
+
+@media (hover: hover) {
+    .tb-lightbox-icon:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .tb-lightbox-btn:not([disabled]):hover {
+        transform: translateY(-3px);
+    }
+}
+
+/* 左右切換 */
+.tb-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 52px;
+    height: 52px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.tb-lightbox-nav.prev { left: 16px; }
+.tb-lightbox-nav.next { right: 16px; }
+
+.tb-lightbox-nav[disabled] {
+    opacity: 0.25;
+    cursor: default;
+}
+
+@media (hover: hover) {
+    .tb-lightbox-nav:not([disabled]):hover {
+        background: rgba(255, 255, 255, 0.32);
+    }
+}
+
+.tb-lightbox-icon:focus-visible,
+.tb-lightbox-btn:focus-visible,
+.tb-lightbox-nav:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* ---------- 相片區響應式 ---------- */
+@media (max-width: 768px) {
+    .tb-photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+        gap: 8px;
+    }
+
+    .tb-photo-cell {
+        contain-intrinsic-size: 130px;
+    }
+
+    .tb-group-header {
+        padding: 15px 20px;
+        gap: 10px;
+    }
+
+    .tb-lightbox-stage {
+        height: min(70vh, 900px);
+    }
+}
+
+@media (max-width: 480px) {
+    .tb-gallery-groups {
+        gap: 28px;
+    }
+
+    .tb-photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 6px;
+        margin-top: 14px;
+    }
+
+    .tb-photo-cell {
+        border-radius: 10px;
+        contain-intrinsic-size: 110px;
+    }
+
+    .tb-group-header {
+        flex-wrap: wrap;
+        border-radius: 24px;
+        padding: 14px 18px;
+    }
+
+    .tb-group-count {
+        margin-left: 0;
+    }
+
+    .tb-group-caret {
+        margin-left: auto;
+    }
+
+    .tb-lightbox-nav {
+        width: 42px;
+        height: 42px;
+    }
+
+    .tb-lightbox-nav.prev { left: 8px; }
+    .tb-lightbox-nav.next { right: 8px; }
+
+    /* 兩顆下載鈕在窄螢幕要縮小才排得下 */
+    .tb-lightbox-bottom {
+        height: 78px;
+        gap: 8px;
+        padding: 0 10px;
+    }
+
+    .tb-lightbox-btn {
+        padding: 10px 15px;
+        gap: 6px;
+        font-size: 0.84rem;
+        letter-spacing: 0;
     }
 }

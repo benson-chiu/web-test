@@ -97,6 +97,10 @@
       <span class="icon noto-emoji">🎬</span>
       <span>婚禮影片</span>
     </a>
+    <a href="#gallery" onclick="toggleMenu()">
+      <span class="icon noto-emoji">📷</span>
+      <span>婚禮相片</span>
+    </a>
   </div>
 </nav>
 
@@ -116,18 +120,16 @@
         <p class="tb-date-badge">2026.10.25<span class="tb-badge-dot">·</span>26</p>
 
         <div class="tb-cover-icon">
-          <span class="noto-emoji">📸</span>
+          <span class="noto-emoji">💒</span>
         </div>
 
         <h1 class="tb-cover-main">Wedding Memories</h1>
         <p class="tb-cover-title">婚禮回顧</p>
+        <p class="tb-cover-subtitle">用相片&amp;影片來留住這兩天的幸福回憶</p>
 
         <div class="tb-cover-divider"></div>
 
-        <p class="tb-cover-note">
-          用相片&影片來留住這兩天的幸福回憶<br>
-          更新進度請見下方「最新消息」
-        </p>
+        <p class="tb-cover-note">更新進度請見下方「最新消息」</p>
       </div>
     </div>
   </div>
@@ -147,7 +149,6 @@
 
     <div class="tb-news-board" data-aos="fade-up" data-aos-duration="1000">
       <div class="tb-news-board-inner">
-
         <!--
           ▼ 新增一則公告：複製下面整個 <article> 區塊，貼到這個註解下方（最新的放最上面）
 
@@ -156,46 +157,63 @@
             tag-preview  預告（粉紅）─ 接下來打算更新什麼
             tag-notice   公告（金色）─ 一般性通知
 
-          最新那一則的 <article> 加上 is-new，標題後面就會出現閃爍的 NEW 標記；
-          發佈下一則時記得把舊的 is-new 移除。
+          只有最新那一則的 <article> 該加 is-new（標題後會出現閃爍的 NEW）；
+          發佈新公告時記得把舊的 is-new 移除，否則會同時閃好幾個。
+
+          區塊高度固定，公告變多時只會在框內捲動，不會把整頁拉長。
         -->
-        <article class="tb-news-item is-new">
-          <div class="tb-news-meta">
-            <time class="tb-news-date" datetime="2026-10-28">2026.10.28</time>
-            <span class="tb-news-tag tag-update">更新</span>
-          </div>
-          <h3 class="tb-news-heading">婚禮影片區已上線</h3>
-          <p class="tb-news-text">
-            三部影片已經可以觀看了：婚禮成長影片、愛情故事訪談影片、婚紗輪播影片。<br>
-            其中婚禮成長影片因配樂版權限制，點擊後會開新視窗至 YouTube 播放。
-          </p>
-        </article>
+        <div class="tb-news-scroll" tabindex="0" role="region" aria-label="最新消息列表，可捲動">
 
-        <article class="tb-news-item is-new">
-          <div class="tb-news-meta">
-            <time class="tb-news-date" datetime="2026-10-28">2026.10.28</time>
-            <span class="tb-news-tag tag-preview">預告</span>
-          </div>
-          <h3 class="tb-news-heading">相片&影片區新郎官正在設計中</h3>
-          <p class="tb-news-text">
-            兩場婚宴的相片和MV，需等待婚宴攝影和錄影老師交付成品，<br>
-            目前成品要多久時間完成還未知，因此目前會先陸續放上親友拍攝的相片和影片。<br>
-            新郎官會盡量趕工這個網頁設計，預計11/1前完成(大概吧😅)。
-          </p>
-        </article>
+          <article class="tb-news-item is-new">
+            <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-10-29">2026.10.29</time>
+              <span class="tb-news-tag tag-update">更新</span>
+            </div>
+            <h3 class="tb-news-heading">相片區初步設計已完成</h3>
+            <p class="tb-news-text">
+              相片區的版面與瀏覽功能已經做好了，支援分場次瀏覽、點擊放大與下載照片<br>
+              接下來預計10/31開始將會陸續放上親友拍攝的相片。
+            </p>
+          </article>
 
-        <article class="tb-news-item">
-          <div class="tb-news-meta">
-            <time class="tb-news-date" datetime="2026-10-26">2026.10.26</time>
-            <span class="tb-news-tag tag-notice">公告</span>
-          </div>
-          <h3 class="tb-news-heading">兩場婚宴圓滿結束</h3>
-          <p class="tb-news-text">
-            感謝所有遠道而來的親友，陪我們一起度過東港與台南這兩天的婚禮。<br>
-            這個頁面會陸續更新相片與影片紀錄，歡迎隨時回來看看~
-          </p>
-        </article>
+          <article class="tb-news-item">
+            <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-10-28">2026.10.28</time>
+              <span class="tb-news-tag tag-update">更新</span>
+            </div>
+            <h3 class="tb-news-heading">婚禮影片區已上線</h3>
+            <p class="tb-news-text">
+              三部影片已經可以觀看了：婚禮成長影片、愛情故事訪談影片、婚紗輪播影片<br>
+              其中婚禮成長影片因配樂版權限制，點擊後會開新視窗至YouTube播放。
+            </p>
+          </article>
 
+          <article class="tb-news-item">
+            <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-10-28">2026.10.28</time>
+              <span class="tb-news-tag tag-preview">預告</span>
+            </div>
+            <h3 class="tb-news-heading">相片&amp;影片區新郎官正在設計中</h3>
+            <p class="tb-news-text">
+              兩場婚宴的相片和MV，需等待婚宴攝影&錄影老師交付成品<br>
+              目前暫定11/7後會陸續收到成品，因此現階段會先陸續放上親友拍攝的相片和影片<br>
+              新郎官會盡量趕工這個網頁設計，預計11/1前完成(大概吧😅)。
+            </p>
+          </article>
+
+          <article class="tb-news-item">
+            <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-10-26">2026.10.26</time>
+              <span class="tb-news-tag tag-notice">公告</span>
+            </div>
+            <h3 class="tb-news-heading">兩場婚宴圓滿結束</h3>
+            <p class="tb-news-text">
+              感謝所有遠道而來的親友，陪我們一起度過東港與台南這兩天的婚禮。<br>
+              這個頁面會陸續更新相片與影片紀錄，歡迎隨時回來看看~
+            </p>
+          </article>
+
+        </div>
       </div>
     </div>
   </div>
@@ -285,6 +303,58 @@
   </div>
 </section>
 
+<!-- 相片區 -->
+<section id="gallery" class="tb-gallery-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Photo Album</h2>
+      <p class="section-subtitle">婚禮相片</p>
+    </div>
+
+    <!-- 分組與縮圖網格由 script.js 依 photos.js 的內容動態產生 -->
+    <div class="tb-gallery-groups" id="galleryGroups"></div>
+  </div>
+</section>
+
+<!-- 燈箱（點縮圖才載入大圖） -->
+<div class="tb-lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="相片檢視" hidden>
+  <div class="tb-lightbox-backdrop" data-lb-close></div>
+
+  <div class="tb-lightbox-top">
+    <span class="tb-lightbox-caption" id="lightboxCaption"></span>
+    <button class="tb-lightbox-icon" type="button" data-lb-close aria-label="關閉">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="tb-lightbox-stage" id="lightboxStage">
+    <div class="tb-lightbox-spinner" id="lightboxSpinner"></div>
+    <img class="tb-lightbox-img" id="lightboxImg" alt="">
+    <div class="tb-lightbox-error" id="lightboxError" hidden>
+      <span class="error-icon">⚠️</span>
+      <p>相片載入失敗</p>
+    </div>
+  </div>
+
+  <button class="tb-lightbox-nav prev" type="button" id="lightboxPrev" aria-label="上一張">
+    <span class="material-symbols-outlined">chevron_left</span>
+  </button>
+  <button class="tb-lightbox-nav next" type="button" id="lightboxNext" aria-label="下一張">
+    <span class="material-symbols-outlined">chevron_right</span>
+  </button>
+
+  <div class="tb-lightbox-bottom">
+    <button class="tb-lightbox-btn" type="button" id="lightboxDownload">
+      <span class="material-symbols-outlined">download</span>
+      <span>下載照片</span>
+    </button>
+  </div>
+</div>
+
 <!-- 頁尾 -->
 <footer>
   <div class="footer-content">
@@ -295,6 +365,8 @@
 
 <!-- 載入動畫庫 -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<!-- 相片清單：必須在 script.js 之前載入 -->
+<script src="photos.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

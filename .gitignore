@@ -1,0 +1,15 @@
+# ---- 相片輸出（衍生檔案，不進版控）----
+# photos/ 由 tools/build-photos.ps1 從原始相片產生，用 FTP 部署，
+# 不需要也不適合進 git（1000 張約 166 MB，而且 WebP 無法有效 delta 壓縮）。
+# 原始相片請保存在專案之外。
+photos/
+
+# ---- 工具產生的暫存 ----
+_phototest/
+_backup/
+.wrangler/
+
+# ---- 系統 / 編輯器 ----
+Thumbs.db
+desktop.ini
+.DS_Store
