@@ -1321,13 +1321,13 @@ function showLightboxPhoto() {
 }
 
 // ==================== 下載 ====================
-// 兩種格式都不需要在伺服器上多存一份檔案：
-//   webp -> 直接把原檔抓下來
-//   jpg  -> 抓同一個原檔，在瀏覽器端用 Canvas 轉檔
-// 因此不論選哪種，網路傳輸量都只有那一張 WebP（約 160 KB），且來自 Cloudflare。
+// 不需要在伺服器上多存一份檔案：
+// webp 會轉換成 jpg
+// 抓同一個原檔，在瀏覽器端用 Canvas 轉檔
+// 網路傳輸量都只有那一張 WebP（約 160 KB）。
 
 function photoFileName(group, id, ext) {
-  return '邱章嘉田伊婷_' + group.title + '_' + id.replace(/^[a-z]+/i, '') + '.' + ext;
+  return '婚禮回顧_' + group.title + '_' + id.replace(/^[a-z]+/i, '') + '.' + ext;
 }
 
 function saveBlob(blob, name) {

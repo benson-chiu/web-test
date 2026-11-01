@@ -32,6 +32,10 @@ param(
     # 相片在網站上的根路徑（相對於 throwback.html）
     [string] $WebRoot      = 'photos',
 
+    # 編號對照表：記錄「原始檔名 -> 編號」，確保日後補照片時既有編號不變。
+    # 這個檔案很重要，請一併納入版控、不要刪除。
+    [string] $IdMap        = (Join-Path $PSScriptRoot 'photo-ids.json'),
+
     [int]    $FullSize     = 2048,
     [int]    $FullQuality  = 80,
     [int]    $ThumbSize    = 400,
@@ -44,8 +48,8 @@ $ErrorActionPreference = 'Stop'
 # ---------- 分組設定 ----------
 # Prefix 會成為檔名前綴，一旦上線就不要再改，否則既有網址會失效。
 $GroupMeta = @{
-    'donggang' = @{ Title = '東港場'; Date = '2026.10.25'; Venue = '福灣莊園'; Prefix = 'dg' }
-    'tainan'   = @{ Title = '台南場'; Date = '2026.10.26'; Venue = '雅悅會館'; Prefix = 'tn' }
+    'donggang' = @{ Title = '東港婚宴'; Date = '2026.10.25'; Venue = '福灣莊園'; Prefix = 'dg' }
+    'tainan'   = @{ Title = '台南歸寧宴'; Date = '2026.10.26'; Venue = '台南遠東香格里拉飯店'; Prefix = 'tn' }
 }
 
 # ---------- 找出 ffmpeg / ffprobe ----------
@@ -67,6 +71,31 @@ $null = New-Item -ItemType Directory -Path $photosRoot -Force
 $groupDirs = Get-ChildItem -LiteralPath $Source -Directory | Sort-Object Name
 if (-not $groupDirs) { throw "在 $Source 底下找不到任何分組子資料夾。" }
 
+# ---------- 載入編號對照表 ----------
+# 編號一旦指派就固定下來，不隨檔名排序位置改變。
+# 少了這張表，日後插入一張排序在前的照片會讓後面所有編號位移，
+# 而既有的 .webp 檔名不變 —— 清單與實際圖片就會錯位。
+$idMapData = @{}
+if (Test-Path -LiteralPath $IdMap) {
+    try {
+        $raw = [System.IO.File]::ReadAllText($IdMap, [System.Text.Encoding]::UTF8) | ConvertFrom-Json
+        foreach ($grpProp in $raw.PSObject.Properties) {
+            $inner = @{}
+            foreach ($fileProp in $grpProp.Value.PSObject.Properties) {
+                $inner[$fileProp.Name] = @{
+                    n   = [int]$fileProp.Value.n
+                    sig = [string]$fileProp.Value.sig
+                }
+            }
+            $idMapData[$grpProp.Name] = $inner
+        }
+        Write-Host "已載入編號對照表：$IdMap" -ForegroundColor DarkGray
+    } catch {
+        throw "編號對照表讀取失敗（$IdMap）：$($_.Exception.Message)`n請修正或刪除該檔後重試。刪除會導致所有編號重新指派。"
+    }
+}
+$newlyAssigned = 0
+
 $version   = Get-Date -Format 'yyyyMMddHHmm'
 $exts      = @('.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG')
 $groupsOut = New-Object System.Collections.ArrayList
@@ -81,6 +110,15 @@ function Invoke-Ffmpeg {
     & ffmpeg -hide_banner -loglevel error -y -i $In -vf $filter `
              -c:v libwebp -quality $Quality -compression_level 6 $Out 2>&1 | Out-Null
     return ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $Out))
+}
+
+# 來源檔的內容指紋，用來判斷照片是否被換掉。
+# 不用修改時間判斷 —— 複製檔案通常會保留原始時間戳，
+# 從相機或攝影師拿到的檔案時間甚至可能早於上次建置，會被誤判為沒變。
+function Get-FileSig {
+    param([System.IO.FileInfo]$File)
+    $h = (Get-FileHash -LiteralPath $File.FullName -Algorithm SHA1).Hash
+    return "$($File.Length)-$($h.Substring(0, 16))"
 }
 
 function Get-ImageSize {
@@ -121,14 +159,39 @@ foreach ($g in $groupDirs) {
     $items = New-Object System.Collections.ArrayList
     $i = 0
 
+    # 取出本分組的編號對照，並找出目前用到的最大編號
+    if (-not $idMapData.ContainsKey($groupId)) { $idMapData[$groupId] = @{} }
+    $groupMap = $idMapData[$groupId]
+    $maxNum = 0
+    foreach ($e in $groupMap.Values) { if ($e.n -gt $maxNum) { $maxNum = $e.n } }
+
     foreach ($f in $files) {
         $i++
-        $id        = '{0}{1:d4}' -f $prefix, $i
+        $sig = Get-FileSig -File $f
+
+        # 已登記過的檔案沿用原編號；新檔案接在最大編號之後。
+        # 陣列順序仍依檔名排序（維持拍攝時序），編號只是穩定的識別碼。
+        if ($groupMap.ContainsKey($f.Name)) {
+            $num     = $groupMap[$f.Name].n
+            $sigSame = ($groupMap[$f.Name].sig -eq $sig)
+            $groupMap[$f.Name].sig = $sig
+        } else {
+            $maxNum++
+            $num     = $maxNum
+            $sigSame = $false
+            $groupMap[$f.Name] = @{ n = $num; sig = $sig }
+            $newlyAssigned++
+        }
+
+        $id        = '{0}{1:d4}' -f $prefix, $num
         $fullPath  = Join-Path $fullDir  "$id.webp"
         $thumbPath = Join-Path $thumbDir "$id.webp"
         $srcBytes += $f.Length
 
-        if ((-not $Force) -and (Test-Path -LiteralPath $fullPath) -and (Test-Path -LiteralPath $thumbPath)) {
+        # 續跑：輸出已存在、且來源內容指紋沒變，就跳過不重壓。
+        # 指紋一旦不同（照片被換掉）就會自動重新壓縮，不需要加 -Force。
+        if ((-not $Force) -and $sigSame -and
+            (Test-Path -LiteralPath $fullPath) -and (Test-Path -LiteralPath $thumbPath)) {
             $sz = Get-ImageSize $thumbPath
             if ($sz) {
                 $null = $items.Add([pscustomobject]@{ Id = $id; W = $sz.W; H = $sz.H })
@@ -232,13 +295,19 @@ foreach ($grp in $groupsOut) {
 $photosJs = Join-Path $Dist 'photos.js'
 [System.IO.File]::WriteAllText($photosJs, $sb.ToString(), (New-Object System.Text.UTF8Encoding $false))
 
+# ---------- 存回編號對照表 ----------
+$null = New-Item -ItemType Directory -Path (Split-Path -Path $IdMap -Parent) -Force
+[System.IO.File]::WriteAllText($IdMap,
+    ($idMapData | ConvertTo-Json -Depth 4),
+    (New-Object System.Text.UTF8Encoding $false))
+
 # ---------- 統計 ----------
 $allFiles   = Get-ChildItem -LiteralPath $photosRoot -Recurse -File
 $totalBytes = ($allFiles | Measure-Object Length -Sum).Sum
 
 Write-Host ""
 Write-Host "================ 完成 ================" -ForegroundColor Green
-Write-Host ("成功 {0} 張，失敗 {1} 張" -f $okCount, $failed.Count)
+Write-Host ("成功 {0} 張，失敗 {1} 張（其中 {2} 張是本次新增)" -f $okCount, $failed.Count, $newlyAssigned)
 Write-Host ""
 
 foreach ($grp in $groupsOut) {
@@ -263,6 +332,32 @@ Write-Host "接下來：" -ForegroundColor Yellow
 Write-Host ("  1. 用 FTP 把整個 {0} 資料夾上傳到網站根目錄" -f $photosRoot)
 Write-Host ("     （記得一併上傳裡面的 .htaccess，FTP 軟體預設常隱藏點開頭的檔案）")
 Write-Host ("  2. 把 {0} 複製到網站根目錄，與 throwback.html 同層" -f $photosJs)
+
+# ---------- 孤兒檔案檢查 ----------
+# 來源照片被刪掉後，輸出目錄裡的 .webp 不會自動消失。
+# 它們不在 photos.js 裡所以網頁看不到，但會白佔主機空間。
+# 這裡只列出來，不自動刪除 —— 刪檔的決定留給你。
+$orphans = New-Object System.Collections.ArrayList
+foreach ($grp in $groupsOut) {
+    $validIds = @{}
+    foreach ($it in $grp.Items) { $validIds[$it.Id] = $true }
+    foreach ($sub in @('full', 'thumbs')) {
+        $dir = Join-Path $grp.Root $sub
+        if (-not (Test-Path -LiteralPath $dir)) { continue }
+        Get-ChildItem -LiteralPath $dir -File -Filter '*.webp' | ForEach-Object {
+            if (-not $validIds.ContainsKey($_.BaseName)) {
+                $null = $orphans.Add("$($grp.Id)/$sub/$($_.Name)")
+            }
+        }
+    }
+}
+
+if ($orphans.Count -gt 0) {
+    Write-Host ""
+    Write-Host ("發現 {0} 個孤兒檔案（來源已刪除，輸出還留著）：" -f $orphans.Count) -ForegroundColor Yellow
+    $orphans | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+    Write-Host "  這些檔案不會顯示在網頁上，可自行從輸出目錄與主機上刪除。" -ForegroundColor Yellow
+}
 
 if ($warnings.Count -gt 0) {
     Write-Host ""
