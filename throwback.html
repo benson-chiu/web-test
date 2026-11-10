@@ -163,11 +163,26 @@
 
           只有最新那一則的 <article> 該加 is-new（標題後會出現閃爍的 NEW）；
           發佈新公告時記得把舊的 is-new 移除，否則會同時閃好幾個。
-
-          區塊高度固定，公告變多時只會在框內捲動，不會把整頁拉長。
         -->
         <div class="tb-news-scroll" tabindex="0" role="region" aria-label="最新消息列表，可捲動">
 
+          <article class="tb-news-item is-new">
+            <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-11-10">2026.11.10</time>
+              <span class="tb-news-tag tag-notice">公告</span>
+            </div>
+            <h3 class="tb-news-heading">關於使用手機觀看照片牆</h3>
+            <p class="tb-news-text">
+              新郎官用手機看婚禮相片區時<br>
+              發現手機板Chrome瀏覽器有些限制<br>
+              它會防止短時間內大量資料請求次數<br>
+              導致瀏覽照片時會有些縮圖不會即時出現<br>
+              因此大家如果遇到這種情況<br>
+              麻煩稍等個幾秒鐘就會正常顯示了<br>
+              敬請見諒~
+            </p>
+          </article>
+          
           <article class="tb-news-item is-new">
             <div class="tb-news-meta">
               <time class="tb-news-date" datetime="2026-11-09">2026.11.09</time>
@@ -176,7 +191,6 @@
             <h3 class="tb-news-heading">相片區已更新婚禮照片囉！</h3>
             <p class="tb-news-text">
               前一天已從婚宴攝影老師那邊拿到照片電子檔<br>
-              兩場婚宴各759張，共1518張<br>
               由於照片數量眾多怕會把網站伺服器流量塞爆<br>
               因此新郎官這邊花了點時間<br>
               將所有照片進行壓縮但畫質不失真的處理<br>
