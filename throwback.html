@@ -39,7 +39,7 @@
       justify-content: center;
     }
   </style>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20261028-11" />
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
   <!-- 引入 Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -100,6 +100,10 @@
     <a href="#gallery" onclick="toggleMenu()">
       <span class="icon noto-emoji">📷</span>
       <span>婚禮相片</span>
+    </a>
+    <a href="#recording" onclick="toggleMenu()">
+      <span class="icon noto-emoji">🎥</span>
+      <span>婚禮錄影</span>
     </a>
   </div>
 </nav>
@@ -165,6 +169,23 @@
         <div class="tb-news-scroll" tabindex="0" role="region" aria-label="最新消息列表，可捲動">
 
           <article class="tb-news-item is-new">
+            <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-11-09">2026.11.09</time>
+              <span class="tb-news-tag tag-update">更新</span>
+            </div>
+            <h3 class="tb-news-heading">相片區已更新婚禮照片囉！</h3>
+            <p class="tb-news-text">
+              前一天已從婚宴攝影老師那邊拿到照片電子檔<br>
+              兩場婚宴各759張，共1518張<br>
+              由於照片數量眾多怕會把網站伺服器流量塞爆<br>
+              因此新郎官這邊花了點時間<br>
+              將所有照片進行壓縮但畫質不失真的處理<br>
+              在相片區點擊婚禮場次即可顯示該場的照片<br>
+              歡迎大家下載自己喜歡的照片~
+            </p>
+          </article>
+          
+          <article class="tb-news-item">
             <div class="tb-news-meta">
               <time class="tb-news-date" datetime="2026-11-01">2026.11.01</time>
               <span class="tb-news-tag tag-notice">公告</span>
@@ -326,7 +347,6 @@
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </section>
@@ -345,6 +365,75 @@
 
     <!-- 分組與縮圖網格由 script.js 依 photos.js 的內容動態產生 -->
     <div class="tb-gallery-groups" id="galleryGroups"></div>
+  </div>
+</section>
+
+<!-- 婚禮錄影區 -->
+<section id="recording" class="tb-video-section">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <span class="corner-tl-deco">✦</span>
+      <span class="corner-tr-deco">✦</span>
+      <span class="corner-bl-deco">✦</span>
+      <span class="corner-br-deco">✦</span>
+      <h2 class="section-title">Wedding Films</h2>
+      <p class="section-subtitle">婚禮錄影</p>
+    </div>
+
+    <div class="tb-video-list">
+
+      <!--
+        ▼ 影片上線後，把每張卡的兩處 PENDING 換成實際的 YouTube 影片 ID：
+            1. data-youtube-id="PENDING"
+            2. img 的 src="https://i.ytimg.com/vi/PENDING/maxresdefault.jpg"
+        換完重新載入就會變成可點擊播放的封面卡，不需要改 JS 或 CSS。
+        在那之前會顯示「影片準備中」，不會出現破圖。
+      -->
+      <div class="tb-video-card" data-aos="fade-up" data-aos-duration="1000">
+        <div class="tb-video-card-inner">
+          <h3 class="tb-video-title">東港婚宴</h3>
+          <button
+            class="tb-video-embed tb-video-poster tb-video-facade"
+            type="button"
+            data-youtube-id="PENDING"
+            data-video-title="東港婚宴 婚禮錄影"
+            aria-label="播放影片：東港婚宴 婚禮錄影"
+          >
+            <img
+              class="tb-facade-thumb"
+              src="https://i.ytimg.com/vi/PENDING/maxresdefault.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="tb-facade-play" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tb-video-card" data-aos="fade-up" data-aos-duration="1000" data-aos-delay="100">
+        <div class="tb-video-card-inner">
+          <h3 class="tb-video-title">台南歸寧宴</h3>
+          <button
+            class="tb-video-embed tb-video-poster tb-video-facade"
+            type="button"
+            data-youtube-id="PENDING"
+            data-video-title="台南歸寧宴 婚禮錄影"
+            aria-label="播放影片：台南歸寧宴 婚禮錄影"
+          >
+            <img
+              class="tb-facade-thumb"
+              src="https://i.ytimg.com/vi/PENDING/maxresdefault.jpg"
+              alt=""
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="tb-facade-play" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 
@@ -395,6 +484,6 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <!-- 相片清單：必須在 script.js 之前載入 -->
 <script src="photos.js"></script>
-<script src="script.js"></script>
+<script src="script.js?v=20261028-11"></script>
 </body>
 </html>

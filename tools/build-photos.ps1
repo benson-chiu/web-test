@@ -40,7 +40,11 @@ param(
     [int]    $FullQuality  = 80,
     [int]    $ThumbSize    = 400,
     [int]    $ThumbQuality = 75,
-    [switch] $Force
+    [switch] $Force,
+
+    # 強制換新的 PHOTO_VERSION。平常不需要 —— 腳本會在「真的有照片
+    # 重新編碼」時自動換。詳見下方關於版本號的說明。
+    [switch] $BumpVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -96,7 +100,44 @@ if (Test-Path -LiteralPath $IdMap) {
 }
 $newlyAssigned = 0
 
-$version   = Get-Date -Format 'yyyyMMddHHmm'
+# ---------- 讀回現有的版本號 ----------
+# PHOTO_VERSION 會出現在「每一張」縮圖與大圖的網址裡（?v=...），
+# 所以一換新的，就等於要求所有賓客重新下載全部 1,518 張縮圖和看過的大圖。
+# 以前每次執行都無條件換新的，代表「只刪掉幾張照片」也會把全站快取清光。
+#
+# 編號由 photo-ids.json 固定，同一個編號的內容也不會變，
+# 因此只有「真的有照片被重新編碼」時才需要換版本號 —— 那才是
+# 同一個網址的內容真的不一樣了，非得讓瀏覽器重抓不可。
+# 單純刪除照片不需要換，沿用舊版本號可以保住所有賓客的快取。
+$existingVersion = $null
+$knownSize = @{}   # id -> @{ W; H }，沿用既有縮圖尺寸，避免重複呼叫 ffprobe
+foreach ($candidate in @((Join-Path $Dist 'photos.js'),
+                         (Join-Path (Split-Path $PSScriptRoot -Parent) 'photos.js'))) {
+    if (-not (Test-Path -LiteralPath $candidate)) { continue }
+    $txt = [System.IO.File]::ReadAllText($candidate, [System.Text.Encoding]::UTF8)
+    $m = [regex]::Match($txt, "PHOTO_VERSION\s*=\s*'([^']+)'")
+    if ($m.Success) {
+        $existingVersion = $m.Groups[1].Value
+        Write-Host "讀到現有版本號 $existingVersion（來自 $candidate）" -ForegroundColor DarkGray
+
+        # 順便把既有的縮圖長寬讀進來。
+        # 這些數字原本是靠「每張呼叫一次 ffprobe」取得的，但 ffprobe 執行檔有 217 MB、
+        # 每次啟動都被防毒掃描，實測單次約 2 秒 —— 1,500 張就要 50 分鐘，
+        # 即使那些照片根本沒變、不需要重新編碼。
+        # 縮圖檔沒換，長寬當然也沒變，直接沿用現有 photos.js 裡的值即可。
+        foreach ($e in [regex]::Matches($txt, "\['([^']+)',(\d+),(\d+)\]")) {
+            $knownSize[$e.Groups[1].Value] = @{
+                W = [int]$e.Groups[2].Value
+                H = [int]$e.Groups[3].Value
+            }
+        }
+        Write-Host "  沿用其中 $($knownSize.Count) 筆縮圖尺寸，省去逐張呼叫 ffprobe" -ForegroundColor DarkGray
+        break
+    }
+}
+
+$reEncoded = 0   # 本次實際重新編碼了幾張（決定要不要換版本號）
+$skipped   = 0   # 本次跳過幾張（內容沒變）
 $exts      = @('.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG')
 $groupsOut = New-Object System.Collections.ArrayList
 $failed    = New-Object System.Collections.ArrayList
@@ -104,12 +145,25 @@ $warnings  = New-Object System.Collections.ArrayList
 $srcBytes  = 0L
 $okCount   = 0
 
-function Invoke-Ffmpeg {
-    param([string]$In, [string]$Out, [int]$Box, [int]$Quality)
-    $filter = "scale=w=${Box}:h=${Box}:force_original_aspect_ratio=decrease"
-    & ffmpeg -hide_banner -loglevel error -y -i $In -vf $filter `
-             -c:v libwebp -quality $Quality -compression_level 6 $Out 2>&1 | Out-Null
-    return ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $Out))
+# 一次 ffmpeg 呼叫同時產出大圖與縮圖。
+# 用 split 濾鏡把解碼後的畫面複製成兩路，各自縮放後輸出，
+# 來源只解碼一次、ffmpeg 只啟動一次。
+# 實測比分兩次呼叫快約一半（3.1 秒 vs 6.4 秒／張），輸出大小完全相同 ——
+# 省下的主要是程序啟動成本（ffmpeg.exe 有 217 MB，每次啟動都會被防毒掃描）。
+function Invoke-FfmpegBoth {
+    param([string]$In, [string]$FullOut, [string]$ThumbOut)
+
+    $fc = "[0:v]split=2[a][b];" +
+          "[a]scale=w=${FullSize}:h=${FullSize}:force_original_aspect_ratio=decrease[f];" +
+          "[b]scale=w=${ThumbSize}:h=${ThumbSize}:force_original_aspect_ratio=decrease[t]"
+
+    & ffmpeg -hide_banner -loglevel error -y -i $In -filter_complex $fc `
+             -map "[f]" -c:v libwebp -quality $FullQuality  -compression_level 6 $FullOut `
+             -map "[t]" -c:v libwebp -quality $ThumbQuality -compression_level 6 $ThumbOut 2>&1 | Out-Null
+
+    return ($LASTEXITCODE -eq 0 -and
+            (Test-Path -LiteralPath $FullOut) -and
+            (Test-Path -LiteralPath $ThumbOut))
 }
 
 # 來源檔的內容指紋，用來判斷照片是否被換掉。
@@ -192,18 +246,26 @@ foreach ($g in $groupDirs) {
         # 指紋一旦不同（照片被換掉）就會自動重新壓縮，不需要加 -Force。
         if ((-not $Force) -and $sigSame -and
             (Test-Path -LiteralPath $fullPath) -and (Test-Path -LiteralPath $thumbPath)) {
-            $sz = Get-ImageSize $thumbPath
+
+            # 長寬優先沿用現有 photos.js 的值，只有查不到才退回 ffprobe。
+            # 縮圖檔沒重新產生、長寬自然沒變，不必為此啟動一個 217 MB 的執行檔。
+            # （若你改了 -ThumbSize，請一併加 -Force，否則縮圖本來也不會重新產生）
+            $sz = $knownSize[$id]
+            if (-not $sz) { $sz = Get-ImageSize $thumbPath }
+
             if ($sz) {
                 $null = $items.Add([pscustomobject]@{ Id = $id; W = $sz.W; H = $sz.H })
                 $okCount++
+                $skipped++
+                if ($i % 100 -eq 0) {
+                    Write-Host ("  ...已檢查 {0} / {1}（跳過 {2}、重新編碼 {3}）" -f `
+                        $i, $files.Count, $skipped, $reEncoded)
+                }
                 continue
             }
         }
 
-        $okFull  = Invoke-Ffmpeg -In $f.FullName -Out $fullPath  -Box $FullSize  -Quality $FullQuality
-        $okThumb = Invoke-Ffmpeg -In $f.FullName -Out $thumbPath -Box $ThumbSize -Quality $ThumbQuality
-
-        if (-not ($okFull -and $okThumb)) {
+        if (-not (Invoke-FfmpegBoth -In $f.FullName -FullOut $fullPath -ThumbOut $thumbPath)) {
             $null = $failed.Add($f.FullName)
             Write-Host "  [失敗] $($f.Name)" -ForegroundColor Red
             continue
@@ -216,10 +278,16 @@ foreach ($g in $groupDirs) {
             continue
         }
 
+        # 走到這裡表示真的跑過 ffmpeg，同一個網址的內容變了 -> 需要換版本號
+        $reEncoded++
+
         $null = $items.Add([pscustomobject]@{ Id = $id; W = $sz.W; H = $sz.H })
         $okCount++
 
-        if ($i % 25 -eq 0) { Write-Host "  ...已處理 $i / $($files.Count)" }
+        if ($i % 25 -eq 0) {
+            Write-Host ("  ...已檢查 {0} / {1}（跳過 {2}、重新編碼 {3}）" -f `
+                $i, $files.Count, $skipped, $reEncoded)
+        }
     }
 
     $null = $groupsOut.Add([pscustomobject]@{
@@ -265,6 +333,22 @@ Options -Indexes
 [System.IO.File]::WriteAllText((Join-Path $photosRoot '.htaccess'), $htaccess,
     (New-Object System.Text.UTF8Encoding $false))
 
+# ---------- 決定版本號 ----------
+# 必須等處理完才能判斷 —— 要先知道這一輪到底有沒有照片被重新編碼。
+if ($BumpVersion) {
+    $version       = Get-Date -Format 'yyyyMMddHHmm'
+    $versionReason = '你指定了 -BumpVersion'
+} elseif ($reEncoded -gt 0) {
+    $version       = Get-Date -Format 'yyyyMMddHHmm'
+    $versionReason = "有 $reEncoded 張照片重新編碼，同網址內容已變，必須讓瀏覽器重抓"
+} elseif (-not $existingVersion) {
+    $version       = Get-Date -Format 'yyyyMMddHHmm'
+    $versionReason = '找不到現有版本號（首次建置）'
+} else {
+    $version       = $existingVersion
+    $versionReason = '沒有照片內容變動，沿用舊版本號以保住賓客的快取'
+}
+
 # ---------- 產生 photos.js ----------
 # 寫在 $Dist 根目錄（photos 資料夾之外），因為它要放到網站根目錄。
 $sb = New-Object System.Text.StringBuilder
@@ -308,6 +392,18 @@ $totalBytes = ($allFiles | Measure-Object Length -Sum).Sum
 Write-Host ""
 Write-Host "================ 完成 ================" -ForegroundColor Green
 Write-Host ("成功 {0} 張，失敗 {1} 張（其中 {2} 張是本次新增)" -f $okCount, $failed.Count, $newlyAssigned)
+Write-Host ("本次重新編碼 {0} 張，跳過 {1} 張（內容未變）" -f $reEncoded, $skipped)
+Write-Host ""
+if ($version -eq $existingVersion) {
+    Write-Host ("PHOTO_VERSION = {0}（未變更）" -f $version) -ForegroundColor Green
+    Write-Host ("  原因：{0}" -f $versionReason) -ForegroundColor DarkGray
+    Write-Host "  賓客已下載的縮圖與大圖仍然命中快取，不必重新下載。" -ForegroundColor DarkGray
+} else {
+    Write-Host ("PHOTO_VERSION = {0}（已換新，舊值 {1}）" -f $version,
+        $(if ($existingVersion) { $existingVersion } else { '無' })) -ForegroundColor Yellow
+    Write-Host ("  原因：{0}" -f $versionReason) -ForegroundColor DarkGray
+    Write-Host "  注意：所有相片網址都會改變，賓客會重新下載全部縮圖。" -ForegroundColor Yellow
+}
 Write-Host ""
 
 foreach ($grp in $groupsOut) {
@@ -353,10 +449,31 @@ foreach ($grp in $groupsOut) {
 }
 
 if ($orphans.Count -gt 0) {
+    # 清單一併寫成檔案。照片「下架」時這張清單很重要：
+    # photos.js 不再列出它們，網頁上看不到了，但主機上的檔案還在 ——
+    # 知道網址的人仍然能直接開啟。要真正下架，必須照這張清單把檔案刪掉。
+    $orphanFile = Join-Path $Dist 'orphans.txt'
+    $orphanText = @(
+        "# 孤兒檔案清單（由 tools/build-photos.ps1 於 $(Get-Date -Format 'yyyy-MM-dd HH:mm') 產生）",
+        "#",
+        "# 這些檔案的來源相片已經從 Source 移除，photos.js 不再列出它們，",
+        "# 網頁上看不到 —— 但主機上的檔案還在，直接開網址仍然看得到。",
+        "# 要真正下架，請照這張清單從主機的 photos/ 底下刪除對應檔案。",
+        "# 路徑相對於網站的 photos/ 目錄。",
+        ""
+    ) + $orphans
+    [System.IO.File]::WriteAllLines($orphanFile, $orphanText,
+        (New-Object System.Text.UTF8Encoding $false))
+
     Write-Host ""
-    Write-Host ("發現 {0} 個孤兒檔案（來源已刪除，輸出還留著）：" -f $orphans.Count) -ForegroundColor Yellow
-    $orphans | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
-    Write-Host "  這些檔案不會顯示在網頁上，可自行從輸出目錄與主機上刪除。" -ForegroundColor Yellow
+    Write-Host ("發現 {0} 個孤兒檔案（來源已刪除，輸出還留著）" -f $orphans.Count) -ForegroundColor Yellow
+    $orphans | Select-Object -First 10 | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+    if ($orphans.Count -gt 10) {
+        Write-Host ("  ...其餘 {0} 個見清單檔" -f ($orphans.Count - 10)) -ForegroundColor Yellow
+    }
+    Write-Host ("  完整清單：{0}" -f $orphanFile) -ForegroundColor Yellow
+    Write-Host "  網頁上已經看不到它們，但檔案還在主機上 ——" -ForegroundColor Yellow
+    Write-Host "  知道網址的人仍然能直接開啟。要真正下架請照清單刪除。" -ForegroundColor Yellow
 }
 
 if ($warnings.Count -gt 0) {

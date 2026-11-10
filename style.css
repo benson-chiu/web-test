@@ -3058,6 +3058,42 @@ footer {
     outline-offset: 3px;
 }
 
+/* ---------- 尚未填入影片 ID 的變體 ---------- */
+/* 顯示淡色底 + 「影片準備中」字樣，取代會 404 的 YouTube 縮圖 */
+.tb-video-pending {
+    cursor: default;
+    background: linear-gradient(135deg, var(--accent), #f0f5ff);
+    box-shadow:
+        0 0 0 2px rgba(197, 164, 248, 0.3),
+        0 12px 35px rgba(197, 164, 248, 0.18);
+}
+
+/* 沿用 .tb-video-poster 的 ::after，把暗角換成文字 */
+.tb-video-pending::after {
+    content: '影片準備中';
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 13%;
+    color: var(--mid);
+    font-size: clamp(0.95rem, 3vw, 1.1rem);
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+/* 播放鈕改成淡色、不可互動的示意 */
+.tb-video-pending .tb-facade-play {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(197, 164, 248, 0.45);
+    box-shadow: 0 4px 14px rgba(197, 164, 248, 0.25);
+    transform: translate(-50%, -62%);
+}
+
+.tb-video-pending .tb-facade-play::before {
+    border-left-color: rgba(187, 142, 255, 0.55);
+}
+
 /* ---------- 外連 YouTube 的變體 ---------- */
 /* 右下角標示「在 YouTube 上觀看」，讓賓客知道會離開本頁 */
 .tb-facade-note {
@@ -3417,9 +3453,14 @@ footer {
     background: rgba(197, 164, 248, 0.16);
     box-shadow: 0 4px 14px rgba(197, 164, 248, 0.2);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    /* 讓瀏覽器跳過畫面外格子的繪製，長網格才不會拖累捲動 */
-    content-visibility: auto;
-    contain-intrinsic-size: 170px;
+
+    /* 這裡曾用 content-visibility: auto 跳過畫面外格子的繪製，但它是手機空白格子的主因：
+       該屬性會連帶套用 size containment，格子「排版成空的」，繪製要等瀏覽器有空才補。
+       主執行緒一忙（例如正在解大圖），補繪就被延後，格子只剩 contain-intrinsic-size
+       撐出的空框 —— 等主執行緒空下來才一次全部冒出來，正是實機看到的現象。
+       改用 contain：同樣有排版／繪製隔離的好處，但不會跳過繪製。
+       畫面外縮圖的記憶體已由 script.js 的 IntersectionObserver 卸載機制負責。 */
+    contain: layout paint style;
 }
 
 .tb-photo-cell img {
@@ -3446,6 +3487,96 @@ footer {
 .tb-photo-cell:focus-visible {
     outline: 3px solid var(--primary);
     outline-offset: 2px;
+}
+
+/* ---------- 載入中 ---------- */
+/* 縮圖還沒到的格子跑一道掠過的光澤，讓等待看起來是「在載入」而不是「壞掉」。
+   只動 transform，不動 width / background-position —— transform 由合成器處理，
+   不會觸發重新繪製。這點在這個頁面上特別重要：我們正在對付的就是
+   手機繪製能力不足，動畫本身不能再去搶同一份資源。
+   套用範圍由 script.js 控制，只有佇列中或正在下載的格子（數十個），
+   不是全部 1,518 格。 */
+/* 等待中的底色比一般格子深一些 —— 讓它看起來是個「預留的位置」，
+   同時給下面那道白色光澤足夠的對比，否則在極淺的底色上幾乎看不出來。 */
+.tb-photo-cell.cell-loading {
+    background: linear-gradient(135deg,
+            rgba(197, 164, 248, 0.38),
+            rgba(197, 164, 248, 0.2));
+}
+
+.tb-photo-cell.cell-loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* 這個 0.4 就是光澤的濃淡，想再調整只改這一個數字即可。
+       0.25 幾乎看不見、0.4 目前值、0.78 原本偏亮的版本。 */
+    background: linear-gradient(100deg,
+            rgba(255, 255, 255, 0) 25%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 75%);
+    transform: translateX(-100%);
+    animation: cellShimmer 1.3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* 錯開每一格的起跑時間，整片網格會像波浪依序掠過，
+   而不是所有格子同時閃一下（那看起來像畫面在抽動）。
+   用 5 的週期而不是 3 或 4 —— 避免剛好對上欄數而形成整齊的直條。 */
+.tb-photo-cell.cell-loading:nth-child(5n+2)::before { animation-delay: 0.13s; }
+.tb-photo-cell.cell-loading:nth-child(5n+3)::before { animation-delay: 0.26s; }
+.tb-photo-cell.cell-loading:nth-child(5n+4)::before { animation-delay: 0.39s; }
+.tb-photo-cell.cell-loading:nth-child(5n)::before   { animation-delay: 0.52s; }
+
+/* 縮圖淡入後要蓋在光澤之上，否則會看到白色薄膜殘留 */
+.tb-photo-cell img {
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes cellShimmer {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* 重試中：換成暖一點的底色，和單純排隊等待區分開來。
+   動畫交給上面的 cell-loading 光澤，這裡不再另外跑一組，
+   免得同一格同時有兩個動畫在動。 */
+.tb-photo-cell.cell-retrying {
+    background: linear-gradient(135deg, var(--accent), #f0f5ff);
+}
+
+/* 重試用完：顯示可點擊重試的提示 */
+.tb-photo-cell.cell-error {
+    background: linear-gradient(135deg, #f5e6e6, #f0e8ff);
+    animation: none;
+}
+
+.tb-photo-cell.cell-error::after {
+    content: '↻';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.4rem, 5vw, 1.9rem);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.tb-photo-cell.cell-error img {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* 使用者要求減少動態效果：不掠過，改用固定的淡白薄膜表示還在載入。
+       仍然看得出「這一格和已載好的不一樣」，但畫面是靜止的。 */
+    .tb-photo-cell.cell-loading::before {
+        animation: none;
+        transform: none;
+        background: rgba(255, 255, 255, 0.2);
+    }
 }
 
 /* 載入更多 */
@@ -3706,10 +3837,6 @@ footer {
         gap: 8px;
     }
 
-    .tb-photo-cell {
-        contain-intrinsic-size: 130px;
-    }
-
     .tb-group-header {
         padding: 15px 20px;
         gap: 10px;
@@ -3733,7 +3860,6 @@ footer {
 
     .tb-photo-cell {
         border-radius: 10px;
-        contain-intrinsic-size: 110px;
     }
 
     .tb-group-header {
