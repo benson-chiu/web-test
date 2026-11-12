@@ -2784,15 +2784,68 @@ footer {
     animation: borderShimmer 4s ease infinite;
 }
 
+/* 封面標題：名字是主體，「婚禮回顧」是說明標籤，刻意做成不同層級。
+   差異走「字重／大小／字距」而不是再疊一層漸層 —— 正上方的 tb-cover-main
+   已經有金紫流光漸層，名字若也用漸層會互相打架；而且漸層填字是靠
+   background-clip 顯色、文字本身透明，沒辦法同時保留下面那層白色外光暈，
+   實際渲染出來反而比純色更不突出。
+   Chiron GoRound TC 是 200..900 的可變字重字型，用字重這個維度不必多載字型。 */
 .tb-cover-title {
+    margin: 0;
+}
+
+.tb-cover-names {
+    display: block;
     font-family: 'Chiron GoRound TC', serif;
-    font-size: clamp(1.7rem, 5.5vw, 2.4rem);
-    font-weight: 700;
+    font-size: clamp(2rem, 7vw, 2.9rem);
+    font-weight: 600;
     color: var(--dark);
-    letter-spacing: 6px;
+    letter-spacing: 4px;
+    line-height: 1.25;
     text-shadow:
         0 0 16px rgba(255, 255, 255, 1),
         0 0 32px rgba(255, 255, 255, 0.8);
+}
+
+/* 金色細體的 & —— 當兩個名字之間的連接符，
+   呼應卡片金紫邊框與主標題漸層裡本來就有的金色，但不搶名字的注意力。
+   text-shadow 歸零：細筆畫疊上白光暈會糊成一團。 */
+.tb-cover-amp {
+    font-weight: 400;
+    font-size: 0.78em;
+    color: var(--gold);
+    margin: 0 0.12em;
+    vertical-align: 0.04em;
+    text-shadow: none;
+}
+
+.tb-cover-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+    font-family: 'Chiron GoRound TC', serif;
+    font-size: clamp(0.95rem, 3vw, 1.15rem);
+    font-weight: 400;
+    color: var(--mid);
+    letter-spacing: 10px;
+    /* letter-spacing 會在最後一個字後面也加上間距，造成整體視覺偏左，
+       用等量的 text-indent 推回來才是真正居中 */
+    text-indent: 10px;
+}
+
+.tb-cover-label::before,
+.tb-cover-label::after {
+    content: '';
+    flex: none;
+    width: clamp(26px, 8vw, 40px);
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+}
+
+.tb-cover-label::after {
+    background: linear-gradient(to left, transparent, var(--gold));
 }
 
 /* 封面副標題
