@@ -3915,18 +3915,39 @@ footer {
         border-radius: 10px;
     }
 
+    /* 標題列在窄螢幕一律維持一行。
+       原本是 flex-wrap: wrap，寬度不足時箭頭會被擠到第二行；
+       根因是上面幾個 clamp() 的「下限」讓字級在 480px 以下完全不再縮小，
+       四個元素的總寬度遲早超過容器（iPhone 7 的 375px 就已經超出）。
+       所以這裡改成不換行，並把字級換成 min()，讓它真的隨視窗寬度縮放。 */
     .tb-group-header {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         border-radius: 24px;
-        padding: 14px 18px;
+        padding: 14px 16px;
+        gap: 8px;
+    }
+
+    /* 標題是唯一允許收縮的元素。極窄螢幕（約 300px 以下）寧可標題截字，
+       也不要讓箭頭掉到第二行 —— 這是保底，正常手機寬度不會觸發。 */
+    .tb-group-title {
+        font-size: min(1.15rem, 4.6vw);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* 日期與數量不必特別設 flex-shrink：它們是 nowrap 文字，
+       min-width: auto 的自動最小尺寸就等於整串字寬，本來就縮不下去。
+       數量膠囊也不再把基礎樣式的 margin-left: auto 蓋成 0，
+       靠它把膠囊與箭頭推到最右側。 */
+    .tb-group-date {
+        font-size: min(0.82rem, 3.3vw);
     }
 
     .tb-group-count {
-        margin-left: 0;
-    }
-
-    .tb-group-caret {
-        margin-left: auto;
+        font-size: min(0.74rem, 3vw);
+        padding: 3px 10px;
     }
 
     .tb-lightbox-nav {
@@ -3949,6 +3970,20 @@ footer {
         gap: 6px;
         font-size: 0.84rem;
         letter-spacing: 0;
+    }
+}
+
+@media (max-width: 360px) {
+    /* 這一段最吃緊：左右 padding 與箭頭是固定成本，不隨 vw 一起縮，
+       320px 時標題列只剩個位數的餘裕。再讓出一點空間，
+       讓標題在真實內容下都不必動用 ellipsis 保底。 */
+    .tb-group-header {
+        padding: 13px;
+        gap: 6px;
+    }
+
+    .tb-group-caret {
+        font-size: 20px;
     }
 }
 
