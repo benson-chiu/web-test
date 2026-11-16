@@ -39,7 +39,7 @@
       justify-content: center;
     }
   </style>
-  <link rel="stylesheet" href="style.css?v=20261028-12" />
+  <link rel="stylesheet" href="style.css?v=20261028-18" />
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
   <!-- 引入 Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -171,6 +171,21 @@
 
           <article class="tb-news-item is-new">
             <div class="tb-news-meta">
+              <time class="tb-news-date" datetime="2026-11-16">2026.11.16</time>
+              <span class="tb-news-tag tag-notice">公告</span>
+            </div>
+            <h3 class="tb-news-heading">改善觀看照片大圖的體驗</h3>
+            <p class="tb-news-text">
+              近期收到大家回饋<br>
+              觀看照片大圖時用手指進行放大縮小<br>
+              會很容易觸發切換上/下一張照片的動作<br>
+              影響操作和觀看體驗<br>
+              新郎官這邊已經修好囉~(ゝ∀・)b
+            </p>
+          </article>
+          
+          <article class="tb-news-item">
+            <div class="tb-news-meta">
               <time class="tb-news-date" datetime="2026-11-10">2026.11.10</time>
               <span class="tb-news-tag tag-notice">公告</span>
             </div>
@@ -186,7 +201,7 @@
             </p>
           </article>
           
-          <article class="tb-news-item is-new">
+          <article class="tb-news-item">
             <div class="tb-news-meta">
               <time class="tb-news-date" datetime="2026-11-09">2026.11.09</time>
               <span class="tb-news-tag tag-update">更新</span>
@@ -487,6 +502,23 @@
       <span>下載照片</span>
     </button>
   </div>
+
+  <!--
+    保底儲存層（只在 iOS 的分享表單打不開時才出現）。
+    iOS 無法用網頁 API 直接寫入「照片」App，分享表單又可能被系統拒絕；
+    這時改讓使用者長按圖片選「加入照片」—— 那是 iOS 原生行為，不需要任何權限。
+    圖片是已經轉好的 JPEG，長按才存得進相簿（WebP 不一定可以）。
+  -->
+  <div class="tb-save-hint" id="lightboxSaveHint" hidden>
+    <div class="tb-save-hint-inner">
+      <p class="tb-save-hint-title">長按下方照片 → 選「加入照片」</p>
+      <img class="tb-save-hint-img" id="lightboxSaveImg" alt="長按以儲存的照片" />
+      <p class="tb-save-hint-note">iOS 不允許網頁直接存入相簿，長按儲存是唯一的方式</p>
+      <button class="tb-lightbox-btn" type="button" id="lightboxSaveHintClose">
+        <span>關閉</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- 頁尾 -->
@@ -501,6 +533,6 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <!-- 相片清單：必須在 script.js 之前載入 -->
 <script src="photos.js"></script>
-<script src="script.js?v=20261028-12"></script>
+<script src="script.js?v=20261028-18"></script>
 </body>
 </html>

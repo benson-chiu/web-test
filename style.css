@@ -3951,3 +3951,60 @@ footer {
         letter-spacing: 0;
     }
 }
+
+/* ==================== 保底儲存層（iOS 長按儲存） ==================== */
+/* 只在 iOS 的分享表單被系統拒絕時才顯示。
+   iOS 沒有任何網頁 API 能直接寫入「照片」App，長按圖片選「加入照片」
+   是不需要權限、也不會被擋的原生途徑。 */
+.tb-save-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(28, 22, 42, 0.92);
+    backdrop-filter: blur(6px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.tb-save-hint[hidden] {
+    display: none;
+}
+
+.tb-save-hint-inner {
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+}
+
+.tb-save-hint-title {
+    margin: 0 0 14px;
+    color: #fff;
+    font-size: clamp(1rem, 3.4vw, 1.2rem);
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* 這張圖就是要被長按的對象，所以必須允許原生選單 ——
+   不能設 pointer-events:none、user-select:none 或 -webkit-touch-callout:none，
+   那些都會讓「加入照片」選單出不來。 */
+.tb-save-hint-img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 62vh;
+    object-fit: contain;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-touch-callout: default;
+}
+
+.tb-save-hint-note {
+    margin: 14px 0 18px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: clamp(0.82rem, 2.8vw, 0.92rem);
+    line-height: 1.6;
+}

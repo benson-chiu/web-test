@@ -1059,16 +1059,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
 const PHOTO_BATCH = 150; // 每次渲染的格數，避免一次塞進上千個 DOM 節點
 
+// 滑動換頁的判定門檻
+const SWIPE_MIN_PX = 60;    // 水平位移至少要這麼多才算滑動
+const SWIPE_MAX_MS = 600;   // 超過這個時間就不是滑動，是慢慢拖
+const SWIPE_RATIO  = 1.5;   // 水平位移要是垂直位移的這麼多倍，才算「夠水平」
+
+// 使用者是否放大了頁面。放大之後拖曳的意圖是平移照片，不是換頁。
+// visualViewport 在 iOS Safari 上會隨雙指縮放更新，是最可靠的判斷依據。
+function isPageZoomed() {
+  const vv = window.visualViewport;
+  return !!vv && vv.scale > 1.05;   // 留一點餘裕，避免浮點誤差誤判
+}
+
 // 燈箱狀態
 let lbGroup = 0;
 let lbIndex = 0;
 let lbOpen = false;
-let lbCancelled = 0;    // 開燈箱時取消掉幾個縮圖請求（診斷用）
 let lbPreloadTimer = null;
 
-// 網址帶 ?debug=1 才顯示診斷資訊（大圖耗時拆解 + 相片網格狀態）。
-// 婚宴當天訪客看到的是乾淨頁面，不會有這些黑框。
-const DEBUG_MODE = /[?&]debug=1(?:&|$)/.test(location.search);
+
 
 // 讓 AOS 重新掃描 DOM。
 // 相片區的分組是 JS 動態產生的，而 AOS.init() 在那之前就跑完了，
@@ -1167,7 +1176,6 @@ let lastScrollY = 0;
 let lastScrollT = 0;
 let scrollSpeed = 0;              // px/ms，指數平滑後的值
 let flingTimer = null;
-let flingSkipped = 0;             // 因為甩動而延後的次數（診斷用）
 
 function ensureScrollTracking() {
   if (scrollTracking) return;
@@ -1245,7 +1253,6 @@ function pumpThumbQueue() {
   // 甩動一定會結束（捲動是有限的），所以不會永久停住；
   // 加上下面的 watchdog 當第二道保險。
   if (thumbPending.size > 0 && isFlinging()) {
-    flingSkipped++;
     if (!flingTimer) {
       flingTimer = setTimeout(function () {
         flingTimer = null;
@@ -1325,7 +1332,6 @@ const THUMB_PREFETCH_IDLE     = 400;  // 「停止動作後」要等多久才開
 
 const prefetchInFlight = new Map();   // 臨時 Image -> 對應格子的 img
 let prefetchTimer = null;
-let prefetchDone  = 0;                // 累計預抓成功張數（診斷用）
 
 function schedulePrefetch() {
   if (prefetchTimer) return;
@@ -1402,7 +1408,6 @@ function prefetchOne(img) {
   const finish = function () {
     pre.onload = pre.onerror = null;
     prefetchInFlight.delete(pre);
-    prefetchDone++;
 
     // 空出位子就立刻補下一張，不要再等 THUMB_PREFETCH_IDLE。
     // 那個延遲的用意是「確認使用者真的停下來了」，只該用在開始之前；
@@ -1737,11 +1742,6 @@ function initPhotoGallery() {
 
         // src 交給 IntersectionObserver 管：接近畫面才載入、離遠就卸載。
         // 這樣即使整組 759 張都展開，解碼記憶體也只會維持在畫面附近那些。
-        if (DEBUG_MODE) {
-          const dbg = getGridDebugObserver();
-          if (dbg) dbg.observe(cell);
-        }
-
         const obs = getThumbObserver();
         if (obs) {
           img.dataset.unloaded = '1';
@@ -1810,8 +1810,6 @@ function initPhotoGallery() {
   // 分組都加好之後才讓 AOS 重新掃描，否則新元素會卡在 opacity:0
   refreshScrollAnimations();
 
-  startGridDebug();
-
   console.log('📷 相片區初始化完成');
 }
 
@@ -1826,7 +1824,17 @@ function initLightbox() {
 
   document.getElementById('lightboxPrev').addEventListener('click', function () { stepLightbox(-1); });
   document.getElementById('lightboxNext').addEventListener('click', function () { stepLightbox(1); });
-  document.getElementById('lightboxDownload').addEventListener('click', downloadCurrentPhoto);
+  const dlBtn = document.getElementById('lightboxDownload');
+  dlBtn.addEventListener('click', downloadCurrentPhoto);
+
+  // 把按鈕原始文字記在元素上。
+  // 「處理中…」和「分享失敗：…」都會覆寫它，若每次都從當下的文字備份，
+  // 連續操作時就會把暫時性訊息誤存成原始文字。
+  const dlLabel = dlBtn.querySelector('span:last-child');
+  if (dlLabel) dlLabel.dataset.original = dlLabel.textContent;
+
+  const hintClose = document.getElementById('lightboxSaveHintClose');
+  if (hintClose) hintClose.addEventListener('click', hideLongPressSave);
 
   document.addEventListener('keydown', function (e) {
     if (!lbOpen) return;
@@ -1835,15 +1843,75 @@ function initLightbox() {
     else if (e.key === 'ArrowRight') stepLightbox(1);
   });
 
-  // 手機滑動切換
-  let touchX = 0;
-  const stage = document.getElementById('lightboxStage');
-  lb.addEventListener('touchstart', function (e) { touchX = e.changedTouches[0].clientX; }, { passive: true });
-  lb.addEventListener('touchend', function (e) {
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 50) stepLightbox(dx > 0 ? -1 : 1);
+  // ---------- 手機滑動切換上一張／下一張 ----------
+  //
+  // 舊版只記 changedTouches[0].clientX，而且完全不看手指數量，
+  // 結果雙指縮放幾乎必定誤觸換頁。四個問題：
+  //
+  //   1. 第二指落下時 touchstart 會「覆蓋」起始座標，之後任一指放開，
+  //      比較到的是兩指之間的水平距離而不是滑動距離 —— 捏放時輕易超過門檻。
+  //      這是縮放誤觸的根因。
+  //   2. 完全不看垂直位移，斜向甚至接近垂直的拖曳也會換頁。
+  //   3. 沒有時間上限，慢慢拖兩秒也被當成一次滑動。
+  //   4. 頁面放大之後，使用者的拖曳意圖是平移照片，不是換頁。
+  //
+  // 作法：只有「全程單指、夠快、夠水平、且頁面未放大」才算滑動。
+  // 一旦出現第二指就讓這一輪手勢作廢，直到所有手指離開才重新開始。
+  let swipeStartX = 0;
+  let swipeStartY = 0;
+  let swipeStartT = 0;
+  let swipeValid  = false;
+
+  lb.addEventListener('touchstart', function (e) {
+    if (e.touches.length > 1) {      // 第二指落下 -> 這是縮放，不是滑動
+      swipeValid = false;
+      return;
+    }
+    swipeStartX = e.touches[0].clientX;
+    swipeStartY = e.touches[0].clientY;
+    swipeStartT = Date.now();
+    swipeValid  = !isPageZoomed();
   }, { passive: true });
-  if (stage) stage.style.touchAction = 'pan-y';
+
+  lb.addEventListener('touchmove', function (e) {
+    if (e.touches.length > 1) swipeValid = false;   // 中途才加入第二指也要作廢
+  }, { passive: true });
+
+  lb.addEventListener('touchend', function (e) {
+    // 還有手指留在螢幕上，表示多指手勢仍在進行中，不判定
+    if (e.touches.length > 0) {
+      swipeValid = false;
+      return;
+    }
+    if (!swipeValid) return;
+    swipeValid = false;
+
+    if (isPageZoomed()) return;      // 放大狀態下讓使用者平移，不換頁
+
+    const t  = e.changedTouches[0];
+    const dx = t.clientX - swipeStartX;
+    const dy = t.clientY - swipeStartY;
+
+    if (Date.now() - swipeStartT > SWIPE_MAX_MS) return;        // 太慢
+    if (Math.abs(dx) < SWIPE_MIN_PX) return;                    // 位移太小
+    if (Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;      // 不夠水平
+
+    stepLightbox(dx > 0 ? -1 : 1);
+  }, { passive: true });
+
+  lb.addEventListener('touchcancel', function () { swipeValid = false; }, { passive: true });
+
+  // 把所有原生手勢都交還給瀏覽器：雙指縮放、放大後平移、雙擊放大。
+  //
+  // 舊值是 'pan-y'，那會禁止 pinch-zoom —— 與「讓使用者放大看照片」正好相反。
+  // 也不要寫 'pan-x pan-y pinch-zoom'：那在規格上等同 'manipulation'
+  // （Chrome 的計算值就會正規化成 manipulation），而 manipulation 會停用
+  // 雙擊放大，看照片時少掉一個很自然的手勢。
+  //
+  // 上面的滑動判定全部用 passive 監聽、只「讀取」手勢不攔截，
+  // 所以放寬 touch-action 不會干擾換頁判定。
+  const stage = document.getElementById('lightboxStage');
+  if (stage) stage.style.touchAction = 'auto';
 }
 
 function openLightbox(gi, idx) {
@@ -1863,7 +1931,7 @@ function openLightbox(gi, idx) {
   requestAnimationFrame(function () { lb.classList.add('show'); });
 
   // 先清出連線，再發大圖請求 —— 順序很重要，反過來就沒有意義了
-  lbCancelled = suspendThumbLoads();
+  suspendThumbLoads();
 
   showLightboxPhoto();
 }
@@ -1890,6 +1958,9 @@ function closeLightbox() {
     img.onerror = null;
     img.src = BLANK_PIXEL;   // 釋放大圖記憶體（用 '' 會觸發 onerror）
     img.classList.remove('loaded');
+    lbJpeg = null;           // 預轉的 JPEG 也一起放掉
+    hideLongPressSave();
+    destroyShareFrames();    // 分享用的 iframe 到這裡才安全回收
 
     // 順序：先讓大圖請求中止、連線空出來，才把縮圖接回去。
     // 若在這之前就 resume，使用者關掉後還沒下載完的大圖
@@ -1924,6 +1995,10 @@ function showLightboxPhoto() {
 
   caption.textContent = group.title + '　' + (lbIndex + 1) + ' / ' + group.photos.length;
 
+  // 換照片時：關掉長按儲存層，並重新評估下載按鈕是否可按
+  hideLongPressSave();
+  updateDownloadButton();
+
   // 用縮圖的長寬比先把版面撐住，大圖載入時畫面才不會跳動
   if (w && h) stage.style.aspectRatio = w + ' / ' + h;
 
@@ -1937,8 +2012,8 @@ function showLightboxPhoto() {
     spinner.hidden = true;
     img.classList.add('loaded');
     stage.style.aspectRatio = '';   // 載入完成後交給圖片自己的尺寸
-    reportLightboxTiming(img.currentSrc || img.src);
     schedulePreload(group, shownIndex);
+    prepareIOSJpeg(group, shownIndex, img);   // iOS：先把 JPEG 轉好備著
   };
   img.onerror = function () {
     spinner.hidden = true;
@@ -1947,12 +2022,6 @@ function showLightboxPhoto() {
 
   // 使用者正在盯著的這一張，優先權最高
   img.setAttribute('fetchpriority', 'high');
-
-  // debug 模式下先清空 Resource Timing 緩衝區。
-  // 預設只保留 250 筆，上千張縮圖早就把它灌滿，大圖那筆會被丟掉量不到。
-  if (DEBUG_MODE && window.performance && performance.clearResourceTimings) {
-    performance.clearResourceTimings();
-  }
 
   img.src = photoFullUrl(group, id);
   img.alt = group.title + ' 第 ' + (lbIndex + 1) + ' 張';
@@ -1979,150 +2048,6 @@ function schedulePreload(group, idx) {
       pre.src = photoFullUrl(group, group.photos[i][0]);
     });
   }, 300);
-}
-
-// 用 Resource Timing 把大圖那一次請求拆開，直接在手機畫面上顯示。
-//
-// 這是分辨「排隊等連線」和「下載本身慢」的唯一客觀依據：
-//   排隊/連線 = requestStart - startTime
-//       瀏覽器決定要抓，到請求真正送出之間的空窗。
-//       同網域、連線可重用的情況下，這段幾乎等於純粹在等連線位子。
-//       如果十秒大部分落在這裡，排隊阻塞就成立，該做的是開 HTTP/2。
-//   等首位元組 = responseStart - requestStart   （伺服器處理 + 一趟 RTT）
-//   下載       = responseEnd - responseStart    （純傳輸，受頻寬影響）
-function reportLightboxTiming(url) {
-  if (!DEBUG_MODE || !window.performance || !performance.getEntriesByType) return;
-
-  let tries = 0;
-
-  // Resource Timing 那筆紀錄偶爾會比 load 事件晚一點才進緩衝區，找不到就再等等
-  (function look() {
-    const hit = performance.getEntriesByType('resource').filter(function (e) {
-      return e.name === url;
-    }).pop();
-
-    if (!hit) {
-      if (tries++ < 5) setTimeout(look, 200);
-      return;
-    }
-
-    const ms = function (v) { return Math.round(v) + ' ms'; };
-    const kb = hit.encodedBodySize ? Math.round(hit.encodedBodySize / 1024) + ' KB' : '未提供';
-
-    const lines = [
-      '排隊/連線 ' + ms(hit.requestStart - hit.startTime),
-      '等首位元組 ' + ms(hit.responseStart - hit.requestStart),
-      '下載 ' + ms(hit.responseEnd - hit.responseStart),
-      '總計 ' + ms(hit.responseEnd - hit.startTime) + '　大小 ' + kb,
-      '開燈箱時取消了 ' + lbCancelled + ' 個縮圖請求'
-    ];
-
-    const box = lbDebugBox();
-    if (box) box.textContent = lines.join('\n');
-    console.log('🔍 大圖耗時\n' + lines.join('\n'), hit);
-  })();
-}
-
-// ==================== 相片網格的即時診斷（?debug=1） ====================
-//
-// 為什麼需要這個：我在模擬手機環境試了三種量測設計，全部失敗 ——
-// 本機太快量不到空白、連續捲動時供給速度跟不上導致兩種模式都飢餓、
-// 停止捲動時畫面其實已經填滿。同一組設定重跑的變異量甚至大於模式差異。
-// 唯一真正解決過問題的量測，是在實機上用 ?debug=1 讀到的數字。
-// 所以這裡把網格狀態也搬到實機上直接讀。
-//
-// 捲動時沒人讀得到瞬間數字，因此同時顯示「當下」和「尖峰」：
-// 捲一段、停下來，再看尖峰值。輕觸黑框可將尖峰歸零。
-
-// 用一個 rootMargin 為 0 的獨立 observer 維護「真正在畫面內」的集合。
-// 不逐格呼叫 getBoundingClientRect —— 上千格每秒掃好幾次，
-// 量測本身就會造成卡頓與空白，反而汙染結果。
-// 交集判定由瀏覽器負責，這裡只需讀集合大小，成本是 O(可見格數) 約 24。
-let gridDebugVisible = new Set();
-let gridDebugObserver = null;
-let gridDebugTimer = null;
-let gridPeakBlank = 0;
-let gridPeakQueue = 0;
-
-function getGridDebugObserver() {
-  if (gridDebugObserver || !('IntersectionObserver' in window)) return gridDebugObserver;
-
-  gridDebugObserver = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) gridDebugVisible.add(e.target);
-      else gridDebugVisible.delete(e.target);
-    });
-  }, { rootMargin: '0px', threshold: 0 });
-
-  return gridDebugObserver;
-}
-
-function startGridDebug() {
-  if (!DEBUG_MODE || gridDebugTimer) return;
-
-  const box = document.createElement('div');
-  box.id = 'gridDebug';
-  box.style.cssText =
-    'position:fixed;left:8px;right:8px;top:8px;z-index:99998;' +
-    'font:12px/1.6 monospace;white-space:pre-wrap;color:#fff;' +
-    'background:rgba(0,0,0,.82);padding:8px 10px;border-radius:8px;';
-  box.addEventListener('click', function () {
-    gridPeakBlank = 0;
-    gridPeakQueue = 0;
-  });
-  document.body.appendChild(box);
-
-  gridDebugTimer = setInterval(function () {
-    // 燈箱開著時讓位給大圖耗時那個框，也別擋住關閉鈕
-    box.style.display = lbOpen ? 'none' : '';
-    if (lbOpen) return;
-
-    // blank   ：縮圖還沒到的格子
-    // showing ：其中有多少正在跑「載入中」動畫（理想狀況下兩者相等 ——
-    //           代表每個還沒載好的格子都有在告訴使用者它在忙）
-    let blank = 0;
-    let showing = 0;
-
-    gridDebugVisible.forEach(function (cell) {
-      const img = cell.querySelector('img');
-      if (img && img.classList.contains('loaded')) return;
-      blank++;
-      if (cell.classList.contains(CELL_LOADING) ||
-          cell.classList.contains('cell-error')) showing++;
-    });
-
-    if (blank > gridPeakBlank) gridPeakBlank = blank;
-    if (thumbPending.size > gridPeakQueue) gridPeakQueue = thumbPending.size;
-
-    box.textContent =
-      '可見 ' + gridDebugVisible.size + ' 格　空白 ' + blank
-        + ' 格（尖峰 ' + gridPeakBlank + '）\n'
-      + '其中有載入動畫 ' + showing + ' / ' + blank + '　← 兩數應相等\n'
-      + '佇列 ' + thumbPending.size + '（尖峰 ' + gridPeakQueue + '）'
-        + '　在跑 ' + thumbActive + '/' + THUMB_CONCURRENCY + '\n'
-      + '捲動 ' + scrollSpeed.toFixed(1) + ' px/ms'
-        + (isFlinging() ? '　甩動中：暫緩發送' : '')
-        + '　已延後 ' + flingSkipped + ' 次\n'
-      + '預抓 ' + prefetchDone + ' 張（進行中 ' + prefetchInFlight.size + '）\n'
-      + '輕觸此框可將尖峰歸零';
-  }, 250);
-}
-
-function lbDebugBox() {
-  let el = document.getElementById('lbDebug');
-  if (el) return el;
-
-  const lb = document.getElementById('lightbox');
-  if (!lb) return null;
-
-  el = document.createElement('div');
-  el.id = 'lbDebug';
-  el.style.cssText =
-    'position:absolute;left:8px;right:8px;bottom:8px;z-index:99;pointer-events:none;' +
-    'font:12px/1.6 monospace;white-space:pre-wrap;color:#fff;' +
-    'background:rgba(0,0,0,.8);padding:8px 10px;border-radius:8px;';
-  lb.appendChild(el);
-  return el;
 }
 
 // ==================== 下載 ====================
@@ -2154,51 +2079,395 @@ function saveBlob(blob, name) {
   setTimeout(function () { URL.revokeObjectURL(objUrl); }, 10000);
 }
 
-// 把圖片轉成指定格式。必須在設定 src 之前先設 crossOrigin，
-// 否則 canvas 會被標記為 tainted，toBlob 會丟 SecurityError。
+// 是否為 iOS 裝置。
+//
+// 只有 iOS 需要走分享表單，所以必須明確判斷，不能只看 navigator.canShare ——
+// Android Chrome 和桌機 Chrome 也都支援 canShare(files)，若一併走分享表單，
+// 那些裝置就失去「直接下載 JPG」的行為了。
+//
+// iPadOS 13 以後在桌面模式下 UA 會偽裝成 Macintosh，光比對 UA 會漏判，
+// 所以補一條「Mac + 有多點觸控」的判斷。
+function isIOS() {
+  const ua = navigator.userAgent || '';
+  if (/iPhone|iPad|iPod/.test(ua)) return true;
+  return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+}
+
+// 已發動過幾次分享。這不是診斷用的 —— 下面的分流靠它決定
+// 「第一次用頂層環境、第二次以後換 iframe」，不能移除。
+let shareAttempts = 0;
+
+// 分享失敗只寫 console，不碰畫面。
+//
+// 這裡曾經把錯誤名稱寫進按鈕文字來做實機診斷（找出 Safari 的
+// 「分享進行中」狀態卡住問題），但那是給開發看的 ——
+// 賓客遇到失敗時只會看到一串看不懂的英文錯誤名稱。
+// 失敗時真正該給使用者的是下面那層長按儲存的指引，而不是錯誤代碼。
+function reportShareFailure(err, pathLabel) {
+  console.log('分享失敗:', (err && err.name) || '未知錯誤',
+              pathLabel, '第' + shareAttempts + '次', err);
+}
+
+// 保底儲存：顯示已轉好的 JPEG，請使用者長按選「加入照片」。
+//
+// iOS 沒有任何網頁 API 能直接寫入相簿，分享表單又可能被系統拒絕。
+// 長按圖片選「加入照片」是 iOS 原生行為、不需權限、也不會被擋，
+// 是分享表單失效後唯一還能把照片送進相簿的方式。
+// 比退回 <a download>（只會進「檔案」App）更符合使用者真正想要的結果。
+function showLongPressSave(blob, name) {
+  const layer = document.getElementById('lightboxSaveHint');
+  const img   = document.getElementById('lightboxSaveImg');
+  if (!layer || !img) {
+    saveBlob(blob, name);   // 沒有這個層就退回下載，至少讓使用者拿到檔案
+    return;
+  }
+
+  if (img.dataset.objUrl) URL.revokeObjectURL(img.dataset.objUrl);
+  const objUrl = URL.createObjectURL(blob);
+  img.dataset.objUrl = objUrl;
+  img.src = objUrl;
+  layer.hidden = false;
+}
+
+function hideLongPressSave() {
+  const layer = document.getElementById('lightboxSaveHint');
+  const img   = document.getElementById('lightboxSaveImg');
+  if (layer) layer.hidden = true;
+  if (img && img.dataset.objUrl) {
+    URL.revokeObjectURL(img.dataset.objUrl);
+    delete img.dataset.objUrl;
+    img.removeAttribute('src');
+  }
+}
+
+// 嘗試用系統分享表單保存，成功發動就回傳 true。
+//
+// iPhone 的問題：<a download> 在 iOS 上只會存到「檔案」App，不會進「照片」App，
+// 而網頁端沒有任何 API 可以直接寫入相簿。唯一的途徑是系統分享表單 ——
+// navigator.share 帶 files 開出來的表單裡才有「儲存影像」。
+//
+// 四個實作細節：
+//   1. 只在 iOS 走這條路。其他平台 <a download> 本來就能直接存成 JPG，
+//      硬開分享表單只是多一道手續。
+//   2. 只帶 files，不要同時帶 text 或 url —— iOS 在有文字時可能不顯示「儲存影像」。
+//   3. 絕對不要 await navigator.share()。部分 iOS 版本（實測 iPhone 7）在
+//      分享表單關閉後 promise 永遠不會 settle，await 就會讓按鈕永久卡在「處理中」。
+//      改成「發動後立刻返回」，UI 狀態完全不依賴那個 promise。
+//   4. 使用者按取消會丟 AbortError，那是正常操作，不能退回下載，
+//      否則取消之後反而多存了一份檔案。
+function tryShareNow(blob, name, pathLabel) {
+  if (!isIOS() || !navigator.canShare) return false;
+
+  const file = new File([blob], name, { type: blob.type || 'image/jpeg' });
+  if (!navigator.canShare({ files: [file] })) return false;
+
+  shareAttempts++;
+
+  let p;
+  try {
+    p = navigator.share({ files: [file] });
+  } catch (err) {
+    reportShareFailure(err, pathLabel);
+    showLongPressSave(blob, name);   // 同步就被拒 -> 直接給長按儲存
+    return true;                     // 已經處理掉了，呼叫端不要再下載
+  }
+
+  if (p && typeof p.then === 'function') {
+    p.then(null, function (err) {
+      if (err && err.name === 'AbortError') return;   // 使用者取消，正常
+      reportShareFailure(err, pathLabel);
+      // 不退回 <a download> —— 那只會進「檔案」App，正是使用者不要的結果。
+      // 改成長按儲存，那條路才進得了「照片」App。
+      showLongPressSave(blob, name);
+    });
+  }
+  return true;
+}
+
+// 把照片交給使用者保存
+function savePhoto(blob, name, pathLabel) {
+  if (tryShareNow(blob, name, pathLabel || '非同步')) return 'shared';
+  saveBlob(blob, name);
+  return 'downloaded';
+}
+
+// 把一個已經載好的 <img> 畫成指定格式。
+function imageToBlob(img, mime, quality) {
+  return new Promise(function (resolve, reject) {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      // JPG 沒有透明通道，先鋪白底，避免透明區域轉出來變黑
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob(function (blob) {
+        if (blob) resolve(blob); else reject(new Error('toBlob 回傳空值'));
+      }, mime, quality);
+    } catch (err) {
+      reject(err);   // 同源以外的圖片會讓 canvas 被標記為 tainted
+    }
+  });
+}
+
+// 把圖片轉成指定格式。
+//
+// crossOrigin 是「有需要才設」，不是無條件設 —— 這一點直接影響 iOS 能不能
+// 存到照片。瀏覽器的圖片快取會依 CORS 模式分開存放，而燈箱顯示用的 <img>
+// 並沒有設 crossOrigin。若這裡無條件設成 anonymous，就會變成不同的快取鍵，
+// 等於整張大圖重新下載一次（多花數百毫秒）。
+// 那段等待會吃掉 navigator.share 需要的「使用者手勢授權」，
+// 導致 iOS 的分享表單打不開、退回只能存到檔案 App。
+// 相片目前都是同源（photos/... 相對路徑），不設 crossOrigin 才能命中
+// 與燈箱相同的快取；真的跨來源時才需要它。
 function convertPhoto(url, mime, quality) {
   return new Promise(function (resolve, reject) {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+
+    let crossOrigin = false;
+    try {
+      crossOrigin = new URL(url, location.href).origin !== location.origin;
+    } catch (e) { /* 網址解析失敗就當同源處理 */ }
+    if (crossOrigin) img.crossOrigin = 'anonymous';
+
     img.onload = function () {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width  = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        // JPG 沒有透明通道，先鋪白底，避免透明區域轉出來變黑
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(function (blob) {
-          if (blob) resolve(blob); else reject(new Error('toBlob 回傳空值'));
-        }, mime, quality);
-      } catch (err) {
-        reject(err);
-      }
+      imageToBlob(img, mime, quality).then(resolve, reject);
     };
     img.onerror = function () { reject(new Error('圖片載入失敗（可能是 CORS 未開啟）')); };
     img.src = url;
   });
 }
 
-async function downloadCurrentPhoto() {
+// ==================== 分享用的獨立瀏覽環境 ====================
+//
+// Safari 的行為（實機確認）：頁面載入後只有「第一次」navigator.share 會成功，
+// 之後每次都被拒絕，重新整理才會恢復。原因是第一次的 promise 永遠不會 settle，
+// Safari 內部的「分享進行中」狀態就一直沒清掉。
+// 錯誤名稱回報成 NotAllowedError，但診斷顯示是「同步・第2次」——
+// 證明與使用者手勢授權無關，純粹是那個卡住的狀態。
+//
+// 那個狀態是綁在「瀏覽環境」上的，而 iframe 有自己獨立的環境。
+// 所以每次分享都用一個全新的 iframe，就等於每次都拿到乾淨的狀態，
+// 不必真的重新整理頁面。
+//
+// 兩個實作要點：
+//   1. iframe 必須「事先備好」。現場建立要等它載入，那段等待會吃掉手勢授權，
+//      反而製造出真正的 NotAllowedError。
+//   2. 用過的 iframe 不能立刻移除 —— 分享表單可能還開著，
+//      移除它的來源環境會讓表單被取消。改成延後回收。
+const SHARE_FRAME_KEEP = 3;   // 最多保留幾個用過的 iframe 再回收
+
+let shareFrame = null;        // 待用的乾淨環境
+let shareFrameReady = false;
+let usedShareFrames = [];
+
+function createShareFrame() {
+  if (!isIOS() || shareFrame) return;
+
+  const f = document.createElement('iframe');
+  // allow 必須在插入 DOM 之前設定，否則權限委派不會生效
+  f.setAttribute('allow', 'web-share');
+  f.setAttribute('aria-hidden', 'true');
+  f.setAttribute('tabindex', '-1');
+  f.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;' +
+                    'border:0;opacity:0;pointer-events:none;';
+  // srcdoc 的 iframe 繼承父頁面的來源，不必另外放一個檔案
+  f.srcdoc = '<!DOCTYPE html><meta charset="utf-8"><title>share</title>';
+  f.addEventListener('load', function () { shareFrameReady = true; });
+
+  document.body.appendChild(f);
+  shareFrame = f;
+}
+
+// 把用過的環境換掉，並立刻備好下一個（srcdoc 不需要網路，很快）
+function cycleShareFrame() {
+  if (shareFrame) usedShareFrames.push(shareFrame);
+  shareFrame = null;
+  shareFrameReady = false;
+
+  while (usedShareFrames.length > SHARE_FRAME_KEEP) {
+    const old = usedShareFrames.shift();
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+  }
+  createShareFrame();
+}
+
+function destroyShareFrames() {
+  usedShareFrames.forEach(function (f) {
+    if (f && f.parentNode) f.parentNode.removeChild(f);
+  });
+  usedShareFrames = [];
+  if (shareFrame && shareFrame.parentNode) shareFrame.parentNode.removeChild(shareFrame);
+  shareFrame = null;
+  shareFrameReady = false;
+}
+
+// 在備好的 iframe 環境裡發動分享。成功發動回傳 true。
+function tryShareViaFrame(blob, name) {
+  if (!shareFrame || !shareFrameReady) return false;
+
+  const w = shareFrame.contentWindow;
+  if (!w || !w.navigator || !w.navigator.canShare) return false;
+
+  // File 要用 iframe 自己的建構子建立 —— 跨 realm 的物件可能通不過
+  // canShare 的型別檢查
+  let file;
+  try {
+    file = new w.File([blob], name, { type: blob.type || 'image/jpeg' });
+  } catch (e) {
+    return false;
+  }
+  if (!w.navigator.canShare({ files: [file] })) return false;
+
+  shareAttempts++;
+
+  let p;
+  try {
+    p = w.navigator.share({ files: [file] });
+  } catch (err) {
+    reportShareFailure(err, 'iframe');
+    showLongPressSave(blob, name);
+    cycleShareFrame();
+    return true;
+  }
+
+  if (p && typeof p.then === 'function') {
+    p.then(null, function (err) {
+      if (err && err.name === 'AbortError') return;
+      reportShareFailure(err, 'iframe');
+      showLongPressSave(blob, name);
+    });
+  }
+
+  cycleShareFrame();   // 這個環境用掉了，換下一個備著
+  return true;
+}
+
+// iOS 專用的 JPEG 預轉結果，只保留當前這一張（約 280 KB）
+let lbJpeg = null;
+
+// 大圖一顯示完就先在背景轉好 JPEG。
+//
+// 為什麼要預轉：navigator.share 必須在「使用者手勢授權」仍有效時呼叫，
+// 而「轉 JPEG」在手機上要數百毫秒到一秒多。那段等待正是分享表單
+// 打不開（NotAllowedError）最可能的原因 —— 也最符合你看到的
+// 「第一次成功、第二次變成下載檔案」：第二次若那張還沒轉完就得現場轉，
+// 等待變長，授權就過期了。
+//
+// 預轉好之後，點「下載照片」就能同步呼叫 share，中間零等待。
+// 只在 iOS 做 —— 其他平台走 <a download>，不必先付這個 CPU 成本。
+function prepareIOSJpeg(group, index, img) {
+  if (!isIOS()) return;
+
+  const url = photoFullUrl(group, group.photos[index][0]);
+  if (lbJpeg && lbJpeg.url === url) { updateDownloadButton(); return; }
+
+  createShareFrame();              // 順便把下一次分享要用的乾淨環境備好
+
+  lbJpeg = null;
+  updateDownloadButton();          // 還沒好 -> 先把按鈕停用
+
+  imageToBlob(img, 'image/jpeg', 0.92).then(function (blob) {
+    // 轉檔期間可能已經翻頁或關掉燈箱，確認還是同一張才存起來
+    if (!lbOpen || lbIndex !== index) return;
+    lbJpeg = { url: url, blob: blob };
+    updateDownloadButton();
+  }, function (err) {
+    console.log('預轉 JPEG 失敗:', err);
+    if (!lbOpen || lbIndex !== index) return;
+    lbJpeg = { url: url, blob: null, failed: true };   // 失敗就放行，改走非同步路徑
+    updateDownloadButton();
+  });
+}
+
+// iOS 上：JPEG 還沒轉好就先停用下載按鈕。
+//
+// 這一步是為了「堵掉非同步路徑」。只要還有機會走到 downloadPhotoAsync，
+// 呼叫 navigator.share 之前就會有轉檔等待，而那正是 NotAllowedError
+// （手勢授權過期）的成因。按鈕只在預轉完成後才可按，share 就永遠是同步呼叫。
+//
+// 非 iOS 不受影響 —— 那邊走 <a download>，沒有授權問題。
+function updateDownloadButton() {
+  const btn = document.getElementById('lightboxDownload');
+  if (!btn) return;
+  const label = btn.querySelector('span:last-child');
+  if (!label) return;
+
+  const original = label.dataset.original || '下載照片';
+
+  if (!isIOS()) {
+    btn.disabled = false;
+    if (label.textContent === '準備中…') label.textContent = original;
+    return;
+  }
+
+  const group = PHOTO_GROUPS[lbGroup];
+  if (!group) return;
+  const url = photoFullUrl(group, group.photos[lbIndex][0]);
+  const ready = !!(lbJpeg && lbJpeg.url === url);
+
+  btn.disabled = !ready;
+  // 只覆寫「準備中…」與原始文字，不要蓋掉「分享失敗：…」的診斷訊息
+  if (!ready) {
+    if (label.textContent === original) label.textContent = '準備中…';
+  } else if (label.textContent === '準備中…') {
+    label.textContent = original;
+  }
+}
+
+function downloadCurrentPhoto() {
   const group = PHOTO_GROUPS[lbGroup];
   if (!group) return;
 
-  const id  = group.photos[lbIndex][0];
-  const url = photoFullUrl(group, id);
+  const id   = group.photos[lbIndex][0];
+  const url  = photoFullUrl(group, id);
+  const name = photoFileName(group, lbIndex, 'jpg');
+
+  // 快速路徑：預轉好的 JPEG 已就緒。
+  // 這裡刻意「不 await 任何東西」就呼叫分享 —— 中間插入任何等待
+  // 都可能讓 iOS 以手勢授權過期為由拒絕 navigator.share。
+  if (lbJpeg && lbJpeg.url === url && lbJpeg.blob) {
+    const blob = lbJpeg.blob;
+
+    // 第一次用頂層環境 —— 在這台裝置上已實測可行，不冒險改動。
+    // 第二次以後頂層環境的「分享進行中」狀態已經卡住，必須換到
+    // 全新的 iframe 環境；iframe 不可用時仍退回頂層試一次。
+    const fired = (shareAttempts === 0)
+      ? tryShareNow(blob, name, '同步')
+      : (tryShareViaFrame(blob, name) || tryShareNow(blob, name, '同步'));
+
+    if (!fired) saveBlob(blob, name);
+    return;
+  }
+
+  downloadPhotoAsync(group, url, name);
+}
+
+// 沒有預轉結果時的流程：非 iOS 一律走這條，iOS 只在預轉還沒好時走。
+async function downloadPhotoAsync(group, url, name) {
   const btn = document.getElementById('lightboxDownload');
   const label = btn.querySelector('span:last-child');
-  const original = label.textContent;
+  const original = label.dataset.original || label.textContent;
 
   btn.disabled = true;
   label.textContent = '處理中…';
 
   try {
-    // 統一轉存為 JPG：相容性最好，而且不必在伺服器上多存一份檔案
-    const blob = await convertPhoto(url, 'image/jpeg', 0.92);
-    saveBlob(blob, photoFileName(group, lbIndex, 'jpg'));
+    // 統一轉存為 JPG：相容性最好，而且 iOS 的「儲存影像」也只吃常見格式。
+    //
+    // 優先直接用「螢幕上這張已經解碼好的大圖」轉檔，不要重新 new Image()。
+    // 燈箱正顯示著它，像素就在記憶體裡，省掉一次載入與解碼。
+    const shown = document.getElementById('lightboxImg');
+    const samePhoto = shown && shown.complete && shown.naturalWidth > 1 &&
+                      shown.currentSrc === new URL(url, location.href).href;
+
+    const blob = samePhoto
+      ? await imageToBlob(shown, 'image/jpeg', 0.92)
+      : await convertPhoto(url, 'image/jpeg', 0.92);
+
+    savePhoto(blob, name, '非同步');
   } catch (err) {
     // 轉檔或網路失敗時退回開新視窗，使用者仍可長按另存
     console.log('下載失敗，改為開新視窗:', err);
